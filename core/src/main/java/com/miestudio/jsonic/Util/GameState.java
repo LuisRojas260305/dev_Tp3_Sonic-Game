@@ -1,29 +1,100 @@
 package com.miestudio.jsonic.Util;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Representa el estado completo del juego en un momento específico.
+ * Representa el estado completo del juego en un momento específico,
+ * incluyendo tanto el estado de los jugadores como el estado de la contaminación.
  * Esta clase es serializable para poder ser enviada desde el servidor a los clientes.
- * Contiene una lista de los estados de todos los jugadores.
  */
 public class GameState implements Serializable {
 
     /**
-     * Número de versión para la serialización. Ayuda a asegurar que el servidor y el cliente
-     * están usando la misma versión de la clase, evitando errores de incompatibilidad.
+     * Número de versión para la serialización. Incrementado a 2L debido a la adición
+     * del estado de contaminación. Esto asegura compatibilidad entre versiones.
      */
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
     /** La lista de los estados de cada jugador en la partida. */
     private List<PlayerState> players;
 
-    public GameState(List<PlayerState> players) {
+    /** La lista de los estados de contaminación en el mapa. */
+    private List<CorruptionState> corruptionStates;
+
+    /**
+     * Constructor para el estado del juego.
+     *
+     * @param players Lista de estados de los jugadores
+     * @param corruptionStates Lista de estados de contaminación (puede ser null)
+     */
+    public GameState(List<PlayerState> players, List<CorruptionState> corruptionStates) {
         this.players = players;
+        this.corruptionStates = corruptionStates;
+    }
+
+    /**
+     * Constructor para compatibilidad con versiones anteriores.
+     *
+     * @param players Lista de estados de los jugadores
+     */
+    public GameState(List<PlayerState> players) {
+        this(players, null);
     }
 
     public List<PlayerState> getPlayers() {
         return players;
+    }
+
+    public List<CorruptionState> getCorruptionStates() {
+        return corruptionStates;
+    }
+
+    public void setCorruptionStates(List<CorruptionState> corruptionStates) {
+        this.corruptionStates = corruptionStates;
+    }
+
+    /**
+     * Representa el estado de un punto de contaminación en el mapa.
+     */
+    public static class CorruptionState implements Serializable {
+        private int tileX;
+        private int tileY;
+        private int nivel;
+
+        public CorruptionState() {
+            // Constructor vacío necesario para serialización
+        }
+
+        public CorruptionState(int tileX, int tileY, int nivel) {
+            this.tileX = tileX;
+            this.tileY = tileY;
+            this.nivel = nivel;
+        }
+
+        public int getTileX() {
+            return tileX;
+        }
+
+        public void setTileX(int tileX) {
+            this.tileX = tileX;
+        }
+
+        public int getTileY() {
+            return tileY;
+        }
+
+        public void setTileY(int tileY) {
+            this.tileY = tileY;
+        }
+
+        public int getNivel() {
+            return nivel;
+        }
+
+        public void setNivel(int nivel) {
+            this.nivel = nivel;
+        }
     }
 }

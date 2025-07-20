@@ -32,6 +32,7 @@ import com.miestudio.jsonic.Util.Constantes;
 import com.miestudio.jsonic.Util.GameState;
 import com.miestudio.jsonic.Util.InputState;
 import com.miestudio.jsonic.Util.PlayerState;
+import com.miestudio.jsonic.Sistemas.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -60,7 +61,10 @@ public class GameScreen implements Screen {
     private OrthogonalTiledMapRenderer mapRenderer;
     private CollisionManager collisionManager;
 
-    private float mapWidth, mapHeight; // Dimensiones del mapa
+    private float mapWidth, mapHeight;
+
+    private PollutionSystem pollutionSystem;
+    private VisualPollutionSystem visualPollutionSystem;
 
     /**
      * Constructor de la pantalla de juego.
@@ -96,10 +100,14 @@ public class GameScreen implements Screen {
         collisionManager = new CollisionManager(map, "Colisiones", mapWidth, mapHeight);
         collisionManager.addTileCollisions(map, "Colisiones");
 
+        this.pollutionSystem = new PollutionSystem(map, "Capa1");
+        this.visualPollutionSystem = new VisualPollutionSystem();
+
         // Inicializar personajes
         initializeCharacters();
 
         if (isHost) {
+            pollutionSystem.generarContaminacionInicial();
             new Thread(this::serverGameLoop).start();
         }
     }
@@ -246,6 +254,10 @@ public class GameScreen implements Screen {
             }
         }
 
+        if (isHost){
+            pollutionSystem.update(delta);
+        }
+
         // Enviar estado actualizado a todos los clientes
         ArrayList<PlayerState> playerStates = new ArrayList<>();
         for (Personajes character : characters.values()) {
@@ -269,6 +281,16 @@ public class GameScreen implements Screen {
         synchronized (characters) {
             localPlayer = characters.get(localPlayerId);
         }
+
+        if (isHost) {
+            pollutionSystem.update(delta);
+
+            if (Math.random() < 0.1f){
+                pollutionSystem.propagarContaminacion();
+            }
+        }
+
+        visualPollutionSystem.dibujarEfectos(batch, pollutionSystem.getPuntosContaminacion());
 
         // Actualizar cámara
         if (localPlayer != null) {
@@ -463,6 +485,7 @@ public class GameScreen implements Screen {
         for (Personajes character : characters.values()) {
             character.dispose();
         }
+        visualPollutionSystem.dispose();
     }
 
     @Override public void show() {}
