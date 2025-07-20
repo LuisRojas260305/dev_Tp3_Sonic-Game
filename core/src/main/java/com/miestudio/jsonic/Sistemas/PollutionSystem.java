@@ -25,7 +25,7 @@ public class PollutionSystem {
     private final String capaBase;
 
     private float tiempoAcumuladoPropagacion = 0; // Renombrado para claridad
-    private final float intervaloPropagacion = 5f; // Reducido a 5 segundos para una propagación más gradual
+    private final float intervaloPropagacion = 10f; // Propagación cada 10 segundos
 
     private float tiempoAcumuladoActivacionOrigen = 0; // Nuevo temporizador
     private final float intervaloActivacionOrigen = 30f; // Cada 30 segundos se activa un nuevo origen
@@ -107,27 +107,40 @@ public class PollutionSystem {
     public void propagarContaminacion() {
         Array<PuntoContaminacion> puntosParaAgregar = new Array<>();
 
-        // Primero, determinar todos los puntos que *deberían* ser contaminados
-        for (PuntoContaminacion punto : puntosContaminacion) {
-            if (punto.nivel >= 2) {
-                int[][] direcciones = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+        // Iterar sobre una copia para evitar ConcurrentModificationException
+        Array<PuntoContaminacion> currentPuntos = new Array<>(puntosContaminacion);
 
-                for (int[] dir : direcciones) {
-                    int nx = punto.tileX + dir[0];
-                    int ny = punto.tileY + dir[1];
+        for (PuntoContaminacion punto : currentPuntos) {
+            // Los tiles de nivel 1 ya no propagan
+            if (punto.nivel <= 1) continue;
 
-                    // Comprobar si el tile es válido y contaminable
-                    if (esTileValido(nx, ny) && esTileContaminable(nx, ny)) {
-                        int nuevoNivel = Math.max(1, punto.nivel - 1);
-                        puntosParaAgregar.add(new PuntoContaminacion(nx, ny, nuevoNivel));
-                    }
+            Array<PuntoContaminacion> adyacentesContaminables = new Array<>();
+            int[][] direcciones = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+
+            for (int[] dir : direcciones) {
+                int nx = punto.tileX + dir[0];
+                int ny = punto.tileY + dir[1];
+
+                // Comprobar si el tile es válido, contaminable y NO está ya contaminado
+                if (esTileValido(nx, ny) && esTileContaminable(nx, ny) && !esTileContaminado(nx, ny)) {
+                    adyacentesContaminables.add(new PuntoContaminacion(nx, ny, punto.nivel - 1));
+                }
+            }
+
+            if (adyacentesContaminables.size > 0) {
+                // Elegir aleatoriamente entre 1 y todos los tiles adyacentes contaminables
+                int numToContaminate = random.nextInt(adyacentesContaminables.size) + 1;
+                for (int i = 0; i < numToContaminate; i++) {
+                    int randomIndex = random.nextInt(adyacentesContaminables.size);
+                    PuntoContaminacion nuevoPunto = adyacentesContaminables.removeIndex(randomIndex);
+                    puntosParaAgregar.add(nuevoPunto);
                 }
             }
         }
 
-        // Ahora, iterar a través de los puntos recolectados y añadirlos a puntosContaminacion
-        // solo si no están ya contaminados.
+        // Añadir los nuevos puntos de contaminación a la lista principal y aplicar visuales
         for (PuntoContaminacion nuevo : puntosParaAgregar) {
+            // Doble verificación para asegurar que no se contamine un tile ya contaminado
             if (!esTileContaminado(nuevo.tileX, nuevo.tileY)) {
                 puntosContaminacion.add(nuevo);
                 aplicarContaminacionVisual(nuevo.tileX, nuevo.tileY, nuevo.nivel);
