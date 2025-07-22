@@ -214,6 +214,47 @@ public class PollutionSystem {
         return puntosContaminacion;
     }
 
+    /**
+     * Limpia todos los puntos de contaminación actuales y restaura los tiles a su estado original.
+     */
+    public void clearPollution() {
+        // Crear una copia para evitar ConcurrentModificationException
+        Array<PuntoContaminacion> puntosToRemove = new Array<>(puntosContaminacion);
+        for (PuntoContaminacion punto : puntosToRemove) {
+            restaurarTileOriginal(punto.tileX, punto.tileY);
+        }
+        puntosContaminacion.clear();
+    }
+
+    /**
+     * Aplica un estado de corrupción a un tile específico.
+     * Este método es útil para sincronizar el estado de contaminación en el cliente
+     * con el GameState recibido del servidor.
+     * @param tileX Coordenada X del tile.
+     * @param tileY Coordenada Y del tile.
+     * @param nivel Nivel de contaminación a aplicar.
+     */
+    public void applyCorruptionState(int tileX, int tileY, int nivel) {
+        // Primero, asegúrate de que el tile no esté ya en la lista de puntosContaminacion
+        // o actualiza su nivel si ya existe.
+        boolean found = false;
+        for (PuntoContaminacion punto : puntosContaminacion) {
+            if (punto.tileX == tileX && punto.tileY == tileY) {
+                // Si ya existe, actualiza su nivel y aplica la visualización
+                // (aunque PuntoContaminacion es inmutable, podríamos recrearlo o manejarlo de otra forma)
+                // Por simplicidad, solo aplicamos la visualización de nuevo.
+                aplicarContaminacionVisual(tileX, tileY, nivel);
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            // Si no existe, añádelo como un nuevo punto de contaminación
+            puntosContaminacion.add(new PuntoContaminacion(tileX, tileY, nivel));
+            aplicarContaminacionVisual(tileX, tileY, nivel);
+        }
+    }
+
     public static class PuntoContaminacion {
         public final int tileX;
         public final int tileY;
