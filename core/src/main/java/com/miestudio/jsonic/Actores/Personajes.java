@@ -202,11 +202,7 @@ public abstract class Personajes extends Actor {
         }
     }
 
-    @Override
-    public void act(float delta) {
-        super.act(delta);
-        stateTime += delta;
-    }
+    
 
     /**
      * Establece la animación actual del personaje.

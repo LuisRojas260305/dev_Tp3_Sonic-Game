@@ -1,9 +1,1013 @@
-Exception in thread "main" com.badlogic.gdx.utils.GdxRuntimeException: Call prepare() before calling getPixmap()
-        at com.badlogic.gdx.graphics.glutils.FileTextureData.consumePixmap(FileTextureData.java:70)
-        at com.miestudio.jsonic.Util.TileModifier.tintTexture(TileModifier.java:49)
-        at com.miestudio.jsonic.Util.TileModifier.modificarTile(TileModifier.java:30)
-        at com.miestudio.jsonic.Sistemas.PollutionSystem.lambda$aplicarContaminacionVisual$0(PollutionSystem.java:184)
-        at com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application.loop(Lwjgl3Application.java:197)
-        at com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application.<init>(Lwjgl3Application.java:153)
-        at com.miestudio.jsonic.lwjgl3.Lwjgl3Launcher.createApplication(Lwjgl3Launcher.java:15)
-        at com.miestudio.jsonic.lwjgl3.Lwjgl3Launcher.main(Lwjgl3Launcher.java:11)
+   PC@DESKTOP-4BFTMQ0   Juego_Sonic  servidor   
+➜  .\gradlew lwjgl3:run
+MESA: error: ZINK: vkCreateInstance failed (VK_ERROR_INCOMPATIBLE_DRIVER)
+[Assets] Todos los TextureAtlas cargados correctamente.
+[MainScreen] Bot├│n Jugar presionado. Iniciando NetworkManager.
+[NetworkManager] Buscando servidor...
+[NetworkManager] No se encontr├│ servidor.
+[NetworkManager] Servidor iniciado en TCP y UDP en el puerto 7777
+[LobbyScreen] Host iniciando la partida...
+[GameScreen] Constructor llamado para localPlayerId: 0
+[GameScreen] Spawn encontrado para Knuckles en (672.0, 96.0)
+[GameScreen] Spawn encontrado para Tails en (832.0, 96.0)
+[GameScreen] Spawn encontrado para Sonic en (896.0, 96.0)
+[GameServer] Spawn encontrado para Knuckles en (672.0, 96.0)
+[GameServer] Spawn encontrado para Tails en (832.0, 96.0)
+[GameServer] Spawn encontrado para Sonic en (896.0, 96.0)
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, true, false, false, false
+[GameServer] Processing input for player 0: true, true
+[Personajes] Player 0 handleInput: true, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, true, false, false
+[GameScreen] Host Input: false, true, true, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, true, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, true, false, false
+[GameScreen] Host Input: false, true, true, false, false
+[GameScreen] Host Input: false, true, true, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, true, false, false
+[GameScreen] Host Input: false, true, true, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, true, false, false
+[GameScreen] Host Input: false, true, true, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, true, false, false
+[GameScreen] Host Input: false, false, true, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, true, false, false
+[GameScreen] Host Input: true, false, true, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, true, false, false
+[GameScreen] Host Input: true, false, true, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, true, false, false
+[GameScreen] Host Input: true, false, true, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, true, false, false
+[GameScreen] Host Input: true, false, false, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, false, false
+[GameScreen] Host Input: true, false, false, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, false, false
+[GameScreen] Host Input: true, false, false, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, false, false
+[GameScreen] Host Input: true, false, false, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, false, false
+[GameScreen] Host Input: true, false, false, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, false, false
+[GameScreen] Host Input: true, false, false, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, false, false
+[GameScreen] Host Input: true, false, false, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, false, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, true, false, true, false
+[GameServer] Processing input for player 0: true, true
+[Personajes] Player 0 handleInput: true, true, false, true, false
+[GameScreen] Host Input: false, true, false, true, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, true, false
+[GameScreen] Host Input: false, true, false, true, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, true, false
+[GameScreen] Host Input: false, true, false, true, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, true, false
+[GameScreen] Host Input: false, true, false, true, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, true, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: true, true, false, true, false
+[GameScreen] Host Input: true, true, false, true, false
+[GameServer] Processing input for player 0: true, true
+[Personajes] Player 0 handleInput: true, true, false, true, false
+[GameServer] Processing input for player 0: true, true
+[Personajes] Player 0 handleInput: true, true, false, true, false
+[GameScreen] Host Input: true, true, false, true, false
+[GameServer] Processing input for player 0: true, true
+[Personajes] Player 0 handleInput: true, true, false, true, false
+[GameScreen] Host Input: true, true, false, true, false
+[GameScreen] Host Input: true, true, false, true, false
+[GameServer] Processing input for player 0: true, true
+[Personajes] Player 0 handleInput: true, true, false, true, false
+[GameServer] Processing input for player 0: true, true
+[Personajes] Player 0 handleInput: true, true, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, true, false, true, false
+[GameServer] Processing input for player 0: true, true
+[Personajes] Player 0 handleInput: true, true, false, true, false
+[GameScreen] Host Input: false, true, false, true, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, true, false
+[GameScreen] Host Input: false, true, false, true, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, true, false
+[GameScreen] Host Input: false, true, false, true, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, true, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: true, true, false, false, false
+[GameServer] Processing input for player 0: true, true
+[Personajes] Player 0 handleInput: true, true, false, false, false
+[GameScreen] Host Input: true, true, false, false, false
+[GameServer] Processing input for player 0: true, true
+[Personajes] Player 0 handleInput: true, true, false, false, false
+[GameScreen] Host Input: true, false, false, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, false, false
+[GameScreen] Host Input: true, false, false, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, false, false
+[GameScreen] Host Input: true, false, false, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, false, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: false, true, false, true, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, true, false
+[GameScreen] Host Input: false, true, false, true, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, true, false
+[GameScreen] Host Input: false, true, false, true, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, true, false
+[GameScreen] Host Input: false, true, false, true, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, true, false
+[GameScreen] Host Input: false, true, false, true, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, true, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, true, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, true, false, false
+[GameScreen] Host Input: false, true, true, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, true, false, false
+[GameScreen] Host Input: false, true, true, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, true, false, false
+[GameScreen] Host Input: false, true, true, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, true, false, false
+[GameScreen] Host Input: false, true, true, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, true, false, false
+[GameScreen] Host Input: true, false, true, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, true, false, false
+[GameScreen] Host Input: true, false, true, false, false
+[GameScreen] Host Input: true, false, true, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, true, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, true, false, false
+[GameScreen] Host Input: true, false, true, false, false
+[GameScreen] Host Input: true, false, false, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, false, false
+[GameScreen] Host Input: true, false, false, false, false
+[GameScreen] Host Input: true, false, false, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, false, false
+[GameScreen] Host Input: true, false, false, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, false, false
+[GameScreen] Host Input: true, false, false, false, false
+[GameScreen] Host Input: true, false, false, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, false, false
+[GameScreen] Host Input: true, false, false, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, false, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, true, false, true, false
+[GameServer] Processing input for player 0: true, true
+[Personajes] Player 0 handleInput: true, true, false, true, false
+[GameScreen] Host Input: false, true, false, true, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, true, false
+[GameScreen] Host Input: false, true, false, true, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, true, false
+[GameScreen] Host Input: false, true, false, true, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, true, false
+[GameScreen] Host Input: false, true, false, true, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, true, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, true, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, true, false, false
+[GameScreen] Host Input: false, false, true, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, true, false, false
+[GameScreen] Host Input: true, false, true, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, true, false, false
+[GameScreen] Host Input: true, false, true, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, true, false, false
+[GameScreen] Host Input: true, false, true, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, true, false, false
+[GameScreen] Host Input: true, false, true, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, true, false, false
+[GameScreen] Host Input: true, false, true, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, true, false, false
+[GameScreen] Host Input: true, false, false, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, false, false
+[GameScreen] Host Input: true, false, false, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, false, false
+[GameScreen] Host Input: true, false, false, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, false, false
+[GameScreen] Host Input: true, false, false, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, false, false
+[GameScreen] Host Input: true, false, false, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, false, false
+[GameScreen] Host Input: true, false, false, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, false, false
+[GameScreen] Host Input: true, false, false, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, false, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: false, true, false, true, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, true, false
+[GameScreen] Host Input: false, true, false, true, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, true, false
+[GameScreen] Host Input: false, true, false, true, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, true, false
+[GameScreen] Host Input: false, true, false, true, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, true, false
+[GameScreen] Host Input: false, true, false, true, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, true, false
+[GameScreen] Host Input: false, true, false, true, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, true, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, true, false, false
+[GameScreen] Host Input: false, true, true, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, true, false, false
+[GameScreen] Host Input: false, true, true, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, true, false, false
+[GameScreen] Host Input: false, true, true, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, true, false, false
+[GameScreen] Host Input: false, true, true, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, true, false, false
+[GameScreen] Host Input: false, true, true, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, true, false, false
+[GameScreen] Host Input: true, true, true, false, false
+[GameServer] Processing input for player 0: true, true
+[Personajes] Player 0 handleInput: true, true, true, false, false
+[GameScreen] Host Input: true, true, true, false, false
+[GameServer] Processing input for player 0: true, true
+[Personajes] Player 0 handleInput: true, true, true, false, false
+[GameScreen] Host Input: true, true, true, false, false
+[GameServer] Processing input for player 0: true, true
+[Personajes] Player 0 handleInput: true, true, true, false, false
+[GameScreen] Host Input: true, false, true, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, true, false, false
+[GameScreen] Host Input: true, false, false, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, false, false
+[GameScreen] Host Input: true, false, false, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, false, false
+[GameScreen] Host Input: true, false, false, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, false, false
+[GameScreen] Host Input: true, false, false, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, false, false
+[GameScreen] Host Input: true, false, false, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, false, false
+[GameScreen] Host Input: true, false, false, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, false, false
+[GameScreen] Host Input: true, false, false, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, false, false
+[GameScreen] Host Input: true, false, false, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, false, false
+[GameScreen] Host Input: true, false, false, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, false, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: false, false, false, true, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, true, false
+[GameScreen] Host Input: false, true, false, true, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, true, false
+[GameScreen] Host Input: false, true, false, true, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, true, false
+[GameScreen] Host Input: false, true, false, true, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, true, false
+[GameScreen] Host Input: false, true, false, true, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, true, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, true, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, true, false, false
+[GameScreen] Host Input: false, true, true, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, true, false, false
+[GameScreen] Host Input: false, true, true, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, true, false, false
+[GameScreen] Host Input: false, true, true, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, true, false, false
+[GameScreen] Host Input: false, true, true, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, true, false, false
+[GameScreen] Host Input: true, true, true, false, false
+[GameServer] Processing input for player 0: true, true
+[Personajes] Player 0 handleInput: true, true, true, false, false
+[GameScreen] Host Input: true, false, true, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, true, false, false
+[GameScreen] Host Input: true, false, true, false, false
+[GameScreen] Host Input: true, false, true, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, true, false, false
+[GameScreen] Host Input: true, false, true, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, true, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, true, false, false
+[GameScreen] Host Input: true, false, false, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, false, false
+[GameScreen] Host Input: true, false, false, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, false, false
+[GameScreen] Host Input: true, false, false, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, false, false
+[GameScreen] Host Input: true, false, false, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, false, false
+[GameScreen] Host Input: true, false, false, false, false
+[GameScreen] Host Input: true, false, false, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, false, false
+[GameServer] Processing input for player 0: true, false
+[GameScreen] Host Input: true, false, false, false, false
+[Personajes] Player 0 handleInput: true, false, false, false, false
+[GameScreen] Host Input: true, false, false, false, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, false, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, false, false, true, false
+[GameServer] Processing input for player 0: true, false
+[Personajes] Player 0 handleInput: true, false, false, true, false
+[GameScreen] Host Input: true, true, false, true, false
+[GameServer] Processing input for player 0: true, true
+[Personajes] Player 0 handleInput: true, true, false, true, false
+[GameScreen] Host Input: true, true, false, true, false
+[GameServer] Processing input for player 0: true, true
+[Personajes] Player 0 handleInput: true, true, false, true, false
+[GameScreen] Host Input: false, true, false, true, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, true, false
+[GameScreen] Host Input: false, true, false, true, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, true, false
+[GameScreen] Host Input: false, true, false, true, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, true, false
+[GameScreen] Host Input: false, true, false, true, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, true, false
+[GameScreen] Host Input: false, true, false, true, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, true, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, true, false, false, false
+[GameServer] Processing input for player 0: false, true
+[Personajes] Player 0 handleInput: false, true, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameServer] Processing input for player 0: false, false
+[Personajes] Player 0 handleInput: false, false, false, false, false
+[GameScreen] Host Input: false, false, false, false, false
+[NetworkManager] announceServer interrumpido.
+[NetworkManager] announceServer finalizado.
+[Assets] Todos los TextureAtlas liberados.
