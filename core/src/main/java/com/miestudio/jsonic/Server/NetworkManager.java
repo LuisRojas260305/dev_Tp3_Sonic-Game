@@ -48,6 +48,8 @@ public class NetworkManager {
     private Thread clientTcpReceiveThread;
     private Thread udpReceiveThread;
 
+    private GameServer gameServer; // Referencia al GameServer
+
     public NetworkManager(JuegoSonic game) {
         this.game = game;
     }
@@ -89,6 +91,10 @@ public class NetworkManager {
             serverTcpSocket.setSoTimeout(1000); // Establecer timeout para accept()
             udpSocket = new DatagramSocket(Constantes.GAME_PORT);
             Gdx.app.log("NetworkManager", "Servidor iniciado en TCP y UDP en el puerto " + Constantes.GAME_PORT);
+
+            // Inicializar GameServer
+            gameServer = new GameServer(game, playerInputs);
+            gameServer.start(); // Iniciar el bucle del juego del servidor
 
             hostDiscoveryThread = new Thread(this::announceServer);
             hostDiscoveryThread.setDaemon(true);
@@ -145,7 +151,7 @@ public class NetworkManager {
             } catch (IOException e) {
                 if (!isHost || serverTcpSocket.isClosed()) {
                     break; // Salir del bucle si el host se detiene o el socket del servidor se cierra
-                }
+                } 
                 e.printStackTrace();
             }
         }
@@ -265,11 +271,11 @@ public class NetworkManager {
 
     public void broadcastUdpGameState(GameState gameState) {
         if (!isHost) return;
-        this.currentGameState = gameState;
+        this.currentGameState = gameServer.getCurrentGameState(); // Obtener el estado del GameServer
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(baos);
-            oos.writeObject(gameState);
+            oos.writeObject(currentGameState); // Serializar el estado obtenido del GameServer
             oos.flush();
             byte[] data = baos.toByteArray();
 
@@ -303,6 +309,11 @@ public class NetworkManager {
         return currentGameState;
     }
 
+    // Nuevo método para que GameServer pueda actualizar el currentGameState
+    public void setCurrentGameState(GameState gameState) {
+        this.currentGameState = gameState;
+    }
+
     public ConcurrentHashMap<Integer, InputState> getPlayerInputs() {
         return playerInputs;
     }
@@ -313,6 +324,7 @@ public class NetworkManager {
 
     public void dispose() {
         if (isHost) {
+            if (gameServer != null) gameServer.stop(); // Detener GameServer
             if (hostDiscoveryThread != null) hostDiscoveryThread.interrupt();
             broadcastTcpMessage(new ShutdownPacket());
             try {
