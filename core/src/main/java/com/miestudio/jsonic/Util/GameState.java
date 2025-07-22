@@ -15,7 +15,7 @@ public class GameState implements Serializable {
      * Número de versión para la serialización. Incrementado a 2L debido a la adición
      * del estado de contaminación. Esto asegura compatibilidad entre versiones.
      */
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 3L; // Incrementado por la adición de sequenceNumber
 
     /** La lista de los estados de cada jugador en la partida. */
     private List<PlayerState> players;
@@ -23,15 +23,20 @@ public class GameState implements Serializable {
     /** La lista de los estados de contaminación en el mapa. */
     private List<CorruptionState> corruptionStates;
 
+    /** Número de secuencia para la versión del estado del juego. */
+    private long sequenceNumber;
+
     /**
      * Constructor para el estado del juego.
      *
      * @param players Lista de estados de los jugadores
      * @param corruptionStates Lista de estados de contaminación (puede ser null)
+     * @param sequenceNumber Número de secuencia de esta actualización del estado del juego
      */
-    public GameState(List<PlayerState> players, List<CorruptionState> corruptionStates) {
+    public GameState(List<PlayerState> players, List<CorruptionState> corruptionStates, long sequenceNumber) {
         this.players = players;
         this.corruptionStates = corruptionStates;
+        this.sequenceNumber = sequenceNumber;
     }
 
     /**
@@ -40,7 +45,7 @@ public class GameState implements Serializable {
      * @param players Lista de estados de los jugadores
      */
     public GameState(List<PlayerState> players) {
-        this(players, null);
+        this(players, null, 0); // Valor por defecto para sequenceNumber
     }
 
     public List<PlayerState> getPlayers() {
@@ -53,6 +58,10 @@ public class GameState implements Serializable {
 
     public void setCorruptionStates(List<CorruptionState> corruptionStates) {
         this.corruptionStates = corruptionStates;
+    }
+
+    public long getSequenceNumber() {
+        return sequenceNumber;
     }
 
     /**
