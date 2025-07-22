@@ -11,6 +11,10 @@ import com.miestudio.jsonic.Util.GameState;
 import com.miestudio.jsonic.Util.InputState;
 import com.miestudio.jsonic.Util.ShutdownPacket;
 
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.miestudio.jsonic.Util.CollisionManager;
+import com.miestudio.jsonic.Sistemas.PollutionSystem;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -92,9 +96,7 @@ public class NetworkManager {
             udpSocket = new DatagramSocket(Constantes.GAME_PORT);
             Gdx.app.log("NetworkManager", "Servidor iniciado en TCP y UDP en el puerto " + Constantes.GAME_PORT);
 
-            // Inicializar GameServer
-            gameServer = new GameServer(game, playerInputs);
-            gameServer.start(); // Iniciar el bucle del juego del servidor
+            
 
             hostDiscoveryThread = new Thread(this::announceServer);
             hostDiscoveryThread.setDaemon(true);
@@ -108,6 +110,14 @@ public class NetworkManager {
             Gdx.app.postRunnable(() -> game.setScreen(new LobbyScreen(game, Color.BLUE, true)));
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    // Nuevo método para inicializar GameServer desde GameScreen
+    public void initializeGameServer(TiledMap map, CollisionManager collisionManager, PollutionSystem pollutionSystem, float mapWidth, float mapHeight) {
+        if (gameServer == null) {
+            gameServer = new GameServer(game, playerInputs, map, collisionManager, pollutionSystem, mapWidth, mapHeight);
+            gameServer.start(); // Iniciar el bucle del juego del servidor
         }
     }
 

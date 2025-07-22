@@ -34,27 +34,20 @@ public class GameServer {
     private final PollutionSystem pollutionSystem;
     private final float mapWidth;
     private final float mapHeight;
-    private TiledMap map;
+    private final TiledMap map;
 
     private volatile boolean running = false;
     private long sequenceNumber = 0; // Contador de versiones del GameState
 
-    public GameServer(JuegoSonic game, ConcurrentHashMap<Integer, InputState> playerInputs) {
+    public GameServer(JuegoSonic game, ConcurrentHashMap<Integer, InputState> playerInputs, TiledMap map, CollisionManager collisionManager, PollutionSystem pollutionSystem, float mapWidth, float mapHeight) {
         this.game = game;
         this.playerInputs = playerInputs;
+        this.map = map;
+        this.collisionManager = collisionManager;
+        this.pollutionSystem = pollutionSystem;
+        this.mapWidth = mapWidth;
+        this.mapHeight = mapHeight;
         this.characters = new ConcurrentHashMap<>();
-
-        // Cargar el mapa y configurar sistemas
-        map = new TmxMapLoader().load(Constantes.MAPA_PATH + "Mapa.tmx");
-        TiledMapTileLayer layer = (TiledMapTileLayer) map.getLayers().get(0);
-        mapWidth = layer.getWidth() * layer.getTileWidth();
-        mapHeight = layer.getHeight() * layer.getTileHeight();
-
-        collisionManager = new CollisionManager(map, "Colisiones", mapWidth, mapHeight);
-        collisionManager.addTileCollisions(map, "Colisiones");
-
-        pollutionSystem = new PollutionSystem(map, "Capa1");
-        pollutionSystem.generarContaminacionInicial();
 
         initializeCharacters();
     }
@@ -89,7 +82,12 @@ public class GameServer {
         float groundYKnuckles = collisionManager.getGroundY(new Rectangle(knucklesSpawn.x, knucklesSpawn.y, knuckles.getWidth(), knuckles.getHeight()));
         knuckles.setPosition(knucklesSpawn.x, groundYKnuckles >= 0 ? groundYKnuckles : knucklesSpawn.y);
         knuckles.setPreviousPosition(knuckles.getX(), knuckles.getY());
+
+        // Generar contaminación inicial solo si GameServer es el responsable (es decir, si es el host)
+        pollutionSystem.generarContaminacionInicial();
     }
+
+    
 
     private Map<String, Vector2> findSpawnPoints() {
         Map<String, Vector2> spawnPoints = new HashMap<>();
@@ -181,6 +179,7 @@ public class GameServer {
             InputState input = playerInputs.get(character.getPlayerId());
 
             if (input != null) {
+                Gdx.app.log("GameServer", "Processing input for player " + character.getPlayerId() + ": " + input.isLeft() + ", " + input.isRight());
                 // Guardar posición anterior para interpolación
                 character.setPreviousPosition(character.getX(), character.getY());
 

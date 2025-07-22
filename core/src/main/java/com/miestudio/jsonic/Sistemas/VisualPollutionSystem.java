@@ -37,7 +37,8 @@ public class VisualPollutionSystem {
         batch.begin();
         tiempoAcumulado += Gdx.graphics.getDeltaTime();
 
-        for (PollutionSystem.PuntoContaminacion punto : puntos) {
+        Array<PollutionSystem.PuntoContaminacion> puntosCopia = new Array<>(puntos);
+        for (PollutionSystem.PuntoContaminacion punto : puntosCopia) {
             // Solo dibujar humo en puntos de origen (nivel 3)
             if (punto.nivel == 3) {
                 dibujarHumo(batch, punto);

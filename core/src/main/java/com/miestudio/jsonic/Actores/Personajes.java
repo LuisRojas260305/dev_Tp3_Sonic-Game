@@ -130,6 +130,7 @@ public abstract class Personajes extends Actor {
      * @param input El estado de los botones del jugador.
      */
     public void handleInput(InputState input, CollisionManager collisionManager, float delta) {
+        Gdx.app.log("Personajes", "Player " + playerId + " handleInput: " + input.isLeft() + ", " + input.isRight() + ", " + input.isUp() + ", " + input.isDown() + ", " + input.isAbility());
 
         if (isAbilityActive) return;
 
@@ -199,6 +200,12 @@ public abstract class Personajes extends Actor {
             currentAnimation = newAnimation;
             stateTime = 0f;
         }
+    }
+
+    @Override
+    public void act(float delta) {
+        super.act(delta);
+        stateTime += delta;
     }
 
     /**

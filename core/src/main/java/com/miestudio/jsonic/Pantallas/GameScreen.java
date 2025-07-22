@@ -73,6 +73,7 @@ public class GameScreen implements Screen {
      * @param localPlayerId El ID del jugador local (0 para el host, >0 para clientes).
      */
     public GameScreen(JuegoSonic game, int localPlayerId) {
+        Gdx.app.log("GameScreen", "Constructor llamado para localPlayerId: " + localPlayerId);
         this.game = game;
         this.localPlayerId = localPlayerId;
         this.isHost = (localPlayerId == 0);
@@ -103,14 +104,18 @@ public class GameScreen implements Screen {
         this.pollutionSystem = new PollutionSystem(map, "Capa1");
         this.visualPollutionSystem = new VisualPollutionSystem();
 
-        // Inicializar personajes para el cliente (predicción y renderizado)
+        // Inicializar personajes
         initializeCharacters();
+
+        // Si es host, inicializar GameServer con las instancias creadas aquí
+        if (isHost) {
+            game.networkManager.initializeGameServer(map, collisionManager, pollutionSystem, mapWidth, mapHeight);
+        }
     }
 
     /**
      * Inicializa las instancias de los personajes para todos los jugadores.
      * Asigna un personaje a cada ID de jugador y establece sus posiciones iniciales.
-     * Esta versión es para el cliente, el servidor maneja la lógica autoritativa.
      */
     private void initializeCharacters() {
         Assets assets = game.getAssets();
@@ -119,10 +124,78 @@ public class GameScreen implements Screen {
         characters.put(1, new Tails(1, assets.tailsAtlas));
         characters.put(2, new Knockles(2, assets.knocklesAtlas));
 
-        // Posiciones iniciales simplificadas para el cliente, el servidor enviará las posiciones reales.
-        characters.get(0).setPosition(100, 100);
-        characters.get(1).setPosition(200, 100);
-        characters.get(2).setPosition(300, 100);
+        // Establecer posiciones de spawn
+        Map<String, Vector2> spawnPoints = findSpawnPoints();
+
+        // Sonic
+        Personajes sonic = characters.get(0);
+        Vector2 sonicSpawn = spawnPoints.getOrDefault("Sonic", new Vector2(mapWidth * 0.1f, mapHeight * 0.5f));
+        float groundYSonic = collisionManager.getGroundY(new Rectangle(sonicSpawn.x, sonicSpawn.y, sonic.getWidth(), sonic.getHeight()));
+        sonic.setPosition(sonicSpawn.x, groundYSonic >= 0 ? groundYSonic : sonicSpawn.y);
+        sonic.setPreviousPosition(sonic.getX(), sonic.getY());
+
+        // Tails
+        Personajes tails = characters.get(1);
+        Vector2 tailsSpawn = spawnPoints.getOrDefault("Tails", new Vector2(mapWidth * 0.2f, mapHeight * 0.5f));
+        float groundYTails = collisionManager.getGroundY(new Rectangle(tailsSpawn.x, tailsSpawn.y, tails.getWidth(), tails.getHeight()));
+        tails.setPosition(tailsSpawn.x, groundYTails >= 0 ? groundYTails : tailsSpawn.y);
+        tails.setPreviousPosition(tails.getX(), tails.getY());
+
+        // Knuckles
+        Personajes knuckles = characters.get(2);
+        Vector2 knucklesSpawn = spawnPoints.getOrDefault("Knuckles", new Vector2(mapWidth * 0.3f, mapHeight * 0.5f));
+        float groundYKnuckles = collisionManager.getGroundY(new Rectangle(knucklesSpawn.x, knucklesSpawn.y, knuckles.getWidth(), knuckles.getHeight()));
+        knuckles.setPosition(knucklesSpawn.x, groundYKnuckles >= 0 ? groundYKnuckles : knucklesSpawn.y);
+        knuckles.setPreviousPosition(knuckles.getX(), knuckles.getY());
+    }
+
+    /**
+     * Encuentra los puntos de spawn de los jugadores en la capa "SpawnJugadores" del mapa.
+     * Los puntos de spawn se definen como tiles con la propiedad "Spawn" establecida a true,
+     * y una propiedad adicional ("Sonic", "Tails", "Knuckles") para identificar al personaje.
+     * @return Un mapa donde la clave es el nombre del personaje y el valor es su posición de spawn (Vector2).
+     */
+    private Map<String, Vector2> findSpawnPoints() {
+        Map<String, Vector2> spawnPoints = new HashMap<>();
+        MapLayer layer = map.getLayers().get("SpawnJugadores");
+
+        if (layer == null || !(layer instanceof TiledMapTileLayer)) {
+            Gdx.app.error("GameScreen", "No se encontró la capa de tiles 'SpawnJugadores'.");
+            return spawnPoints;
+        }
+
+        TiledMapTileLayer tileLayer = (TiledMapTileLayer) layer;
+        float tileWidth = tileLayer.getTileWidth();
+        float tileHeight = tileLayer.getTileHeight();
+
+        for (int y = 0; y < tileLayer.getHeight(); y++) {
+            for (int x = 0; x < tileLayer.getWidth(); x++) {
+                TiledMapTileLayer.Cell cell = tileLayer.getCell(x, y);
+                if (cell == null || cell.getTile() == null) {
+                    continue;
+                }
+
+                com.badlogic.gdx.maps.MapProperties properties = cell.getTile().getProperties();
+                if (properties.get("Spawn", false, Boolean.class)) {
+                    String characterName = null;
+                    if (properties.get("Sonic", false, Boolean.class)) {
+                        characterName = "Sonic";
+                    } else if (properties.get("Tails", false, Boolean.class)) {
+                        characterName = "Tails";
+                    } else if (properties.get("Knuckles", false, Boolean.class)) {
+                        characterName = "Knuckles";
+                    }
+
+                    if (characterName != null) {
+                        float spawnX = x * tileWidth;
+                        float spawnY = y * tileHeight;
+                        spawnPoints.put(characterName, new Vector2(spawnX, spawnY));
+                        Gdx.app.log("GameScreen", "Spawn encontrado para " + characterName + " en (" + spawnX + ", " + spawnY + ")");
+                    }
+                }
+            }
+        }
+        return spawnPoints;
     }
 
     @Override
@@ -204,6 +277,7 @@ public class GameScreen implements Screen {
             hostInput.setAbility(Gdx.input.isKeyPressed(Input.Keys.E));
             hostInput.setPlayerId(localPlayerId);
             playerInputs.put(localPlayerId, hostInput);
+            Gdx.app.log("GameScreen", "Host Input: " + hostInput.isLeft() + ", " + hostInput.isRight() + ", " + hostInput.isUp() + ", " + hostInput.isDown() + ", " + hostInput.isAbility());
         } else {
             // El Cliente realiza la predicción local y envía su input al servidor.
             InputState localInput = new InputState();
@@ -267,6 +341,7 @@ public class GameScreen implements Screen {
                         // Reconciliación para el jugador local
                         float errorMargin = 0.5f; // Pequeño margen de error
                         if (Vector2.dst(character.getX(), character.getY(), playerState.getX(), playerState.getY()) > errorMargin) {
+                            Gdx.app.log("GameScreen", "Reconciling player " + localPlayerId + ": old(" + character.getX() + "," + character.getY() + ") new(" + playerState.getX() + "," + playerState.getY() + ")");
                             // Corrección suave si la predicción fue muy diferente
                             character.setPosition(playerState.getX(), playerState.getY());
                         }
@@ -331,7 +406,12 @@ public class GameScreen implements Screen {
             character.dispose();
         }
         visualPollutionSystem.dispose();
-        // No dispose map, collisionManager, pollutionSystem here as they are managed by GameServer or shared.
+        // Si es host, GameScreen es responsable de disponer el mapa y los sistemas
+        if (isHost) {
+            map.dispose();
+            // collisionManager y pollutionSystem no tienen un método dispose explícito
+            // pero sus recursos (como el mapa) se disponen con el mapa.
+        }
     }
 
     @Override public void show() {}
@@ -339,4 +419,5 @@ public class GameScreen implements Screen {
     @Override public void resume() {}
     @Override public void hide() {}
 }
+
 
