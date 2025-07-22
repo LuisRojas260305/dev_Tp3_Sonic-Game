@@ -1,0 +1,62 @@
+
+SonicHabilidad.png
+size: 595, 62
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+SH0
+  rotate: false
+  xy: 381, 2
+  size: 69, 58
+  orig: 69, 58
+  offset: 0, 0
+  index: -1
+SH1
+  rotate: false
+  xy: 85, 2
+  size: 76, 58
+  orig: 76, 58
+  offset: 0, 0
+  index: -1
+SH2
+  rotate: false
+  xy: 309, 2
+  size: 70, 58
+  orig: 70, 58
+  offset: 0, 0
+  index: -1
+SH3
+  rotate: false
+  xy: 237, 2
+  size: 70, 58
+  orig: 70, 58
+  offset: 0, 0
+  index: -1
+SH4
+  rotate: false
+  xy: 163, 2
+  size: 72, 58
+  orig: 72, 58
+  offset: 0, 0
+  index: -1
+SH5
+  rotate: false
+  xy: 2, 2
+  size: 81, 58
+  orig: 81, 58
+  offset: 0, 0
+  index: -1
+SH6
+  rotate: false
+  xy: 452, 12
+  size: 71, 48
+  orig: 71, 48
+  offset: 0, 0
+  index: -1
+SH7
+  rotate: false
+  xy: 525, 12
+  size: 68, 48
+  orig: 68, 48
+  offset: 0, 0
+  index: -1

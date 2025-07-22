@@ -1,0 +1,23 @@
+TailsF.png
+	size: 212, 110
+	repeat: none
+TF0
+	bounds: 170, 2, 40, 52
+TF1
+	bounds: 86, 2, 40, 52
+TF2
+	bounds: 2, 2, 40, 52
+TF3
+	bounds: 128, 2, 40, 52
+TF4
+	bounds: 44, 2, 40, 52
+TF5
+	bounds: 2, 56, 40, 52
+TF6
+	bounds: 128, 56, 40, 52
+TF7
+	bounds: 44, 56, 40, 52
+TF8
+	bounds: 170, 56, 40, 52
+TF9
+	bounds: 86, 56, 40, 52

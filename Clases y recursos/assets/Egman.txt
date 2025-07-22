@@ -1,0 +1,90 @@
+
+Egman.png
+size: 266, 41
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+EgD0
+  rotate: false
+  xy: 140, 2
+  size: 42, 37
+  orig: 42, 37
+  offset: 0, 0
+  index: -1
+EgD2
+  rotate: false
+  xy: 140, 2
+  size: 42, 37
+  orig: 42, 37
+  offset: 0, 0
+  index: -1
+EgD1
+  rotate: false
+  xy: 94, 2
+  size: 44, 37
+  orig: 44, 37
+  offset: 0, 0
+  index: -1
+EgD3
+  rotate: false
+  xy: 94, 2
+  size: 44, 37
+  orig: 44, 37
+  offset: 0, 0
+  index: -1
+EgD4
+  rotate: false
+  xy: 48, 2
+  size: 44, 37
+  orig: 44, 37
+  offset: 0, 0
+  index: -1
+EgD6
+  rotate: false
+  xy: 48, 2
+  size: 44, 37
+  orig: 44, 37
+  offset: 0, 0
+  index: -1
+EgD5
+  rotate: false
+  xy: 2, 2
+  size: 44, 37
+  orig: 44, 37
+  offset: 0, 0
+  index: -1
+EgD7
+  rotate: false
+  xy: 2, 2
+  size: 44, 37
+  orig: 44, 37
+  offset: 0, 0
+  index: -1
+EgE0
+  rotate: false
+  xy: 225, 3
+  size: 39, 36
+  orig: 39, 36
+  offset: 0, 0
+  index: -1
+EgE1
+  rotate: false
+  xy: 225, 3
+  size: 39, 36
+  orig: 39, 36
+  offset: 0, 0
+  index: -1
+EgE2
+  rotate: false
+  xy: 225, 3
+  size: 39, 36
+  orig: 39, 36
+  offset: 0, 0
+  index: -1
+EgE3
+  rotate: false
+  xy: 184, 3
+  size: 39, 36
+  orig: 39, 36
+  offset: 0, 0
+  index: -1
