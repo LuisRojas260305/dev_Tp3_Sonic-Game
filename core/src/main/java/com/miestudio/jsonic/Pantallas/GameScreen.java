@@ -282,7 +282,6 @@ public class GameScreen implements Screen {
             hostInput.setAbility(Gdx.input.isKeyPressed(Input.Keys.E));
             hostInput.setPlayerId(localPlayerId);
             playerInputs.put(localPlayerId, hostInput);
-            Gdx.app.log("GameScreen", "Host Input: " + hostInput.isLeft() + ", " + hostInput.isRight() + ", " + hostInput.isUp() + ", " + hostInput.isDown() + ", " + hostInput.isAbility());
         } else {
             // El Cliente realiza la predicción local y envía su input al servidor.
             InputState localInput = new InputState();
@@ -297,10 +296,8 @@ public class GameScreen implements Screen {
             // Predicción del lado del cliente: aplica la física y el input al jugador local.
             Personajes localPlayer = characters.get(localPlayerId);
             if (localPlayer != null) {
-                // Para la predicción local, necesitamos una instancia de CollisionManager y PollutionSystem
-                // que refleje el estado del mapa en el cliente. Estos ya están inicializados en el constructor.
-                localPlayer.update(delta, collisionManager); // Aplica gravedad y actualiza stateTime
-                localPlayer.handleInput(localInput, collisionManager, delta); // Aplica movimiento del input
+                localPlayer.update(delta, collisionManager);
+                localPlayer.handleInput(localInput, collisionManager, delta);
             }
 
             // Actualiza los demás personajes basándose en el estado del servidor (interpolación).
@@ -346,14 +343,13 @@ public class GameScreen implements Screen {
                         // Reconciliación para el jugador local
                         float errorMargin = 0.5f; // Pequeño margen de error
                         if (Vector2.dst(character.getX(), character.getY(), playerState.getX(), playerState.getY()) > errorMargin) {
-                            Gdx.app.log("GameScreen", "Reconciling player " + localPlayerId + ": old(" + character.getX() + "," + character.getY() + ") new(" + playerState.getX() + "," + playerState.getY() + ")");
                             // Corrección suave si la predicción fue muy diferente
                             character.setPosition(playerState.getX(), playerState.getY());
                         }
-                        // El resto de estados (animación, dirección) se actualizan directamente.
                         character.setFacingRight(playerState.isFacingRight());
                         character.setAnimation(Personajes.AnimationType.valueOf(playerState.getCurrentAnimationName().toUpperCase()));
-
+                        // Ajustar el stateTime de la animación al valor del servidor
+                        character.setAnimationStateTime(playerState.getAnimationStateTime());
                     } else {
                         // Interpolación para los otros jugadores
                         float interpolationFactor = 0.2f; // Ajusta este valor para un movimiento más suave o más rápido
@@ -363,18 +359,13 @@ public class GameScreen implements Screen {
                         );
                         character.setFacingRight(playerState.isFacingRight());
                         character.setAnimation(Personajes.AnimationType.valueOf(playerState.getCurrentAnimationName().toUpperCase()));
-                        character.setAnimationStateTime(
-                            character.getAnimationStateTime() + (playerState.getAnimationStateTime() - character.getAnimationStateTime()) * interpolationFactor
-                        );
+                        character.setAnimationStateTime(playerState.getAnimationStateTime());
                     }
                 }
 
                 // Actualizar el estado visual de la contaminación en el cliente
-                // Esto asume que pollutionSystem en GameScreen es para la visualización
-                // y que se actualizará con los datos del GameState del servidor.
-                // Necesitamos un método en PollutionSystem para aplicar el CorruptionState.
                 if (gameState.getCorruptionStates() != null) {
-                    pollutionSystem.clearPollution(); // Limpiar el estado actual
+                    pollutionSystem.clearPollution();
                     for (GameState.CorruptionState cs : gameState.getCorruptionStates()) {
                         pollutionSystem.applyCorruptionState(cs.getTileX(), cs.getTileY(), cs.getNivel());
                     }
@@ -414,8 +405,6 @@ public class GameScreen implements Screen {
         // Si es host, GameScreen es responsable de disponer el mapa y los sistemas
         if (isHost) {
             map.dispose();
-            // collisionManager y pollutionSystem no tienen un método dispose explícito
-            // pero sus recursos (como el mapa) se disponen con el mapa.
         }
     }
 
@@ -424,5 +413,3 @@ public class GameScreen implements Screen {
     @Override public void resume() {}
     @Override public void hide() {}
 }
-
-

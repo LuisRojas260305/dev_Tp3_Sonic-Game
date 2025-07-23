@@ -63,7 +63,6 @@ public class LobbyScreen implements Screen {
         stage.addActor(startButton);
     }
 
-    
 
     @Override
     public void render(float delta) {

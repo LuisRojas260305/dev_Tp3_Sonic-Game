@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
-import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.miestudio.jsonic.Actores.Knockles;
@@ -37,7 +36,7 @@ public class GameServer {
     private final TiledMap map;
 
     private volatile boolean running = false;
-    private long sequenceNumber = 0; // Contador de versiones del GameState
+    private long sequenceNumber = 0;
 
     public GameServer(JuegoSonic game, ConcurrentHashMap<Integer, InputState> playerInputs, TiledMap map, CollisionManager collisionManager, PollutionSystem pollutionSystem, float mapWidth, float mapHeight) {
         this.game = game;
@@ -56,7 +55,6 @@ public class GameServer {
         Assets assets = game.getAssets();
         Map<Integer, String> playerCharacterMap = game.networkManager.getSelectedCharacters();
 
-        // Establecer posiciones de spawn
         Map<String, Vector2> spawnPoints = findSpawnPoints();
 
         for (Map.Entry<Integer, String> entry : playerCharacterMap.entrySet()) {
@@ -75,7 +73,6 @@ public class GameServer {
                     character = new Knockles(playerId, assets.knocklesAtlas);
                     break;
                 default:
-                    Gdx.app.error("GameServer", "Tipo de personaje desconocido: " + characterType);
                     continue;
             }
 
@@ -88,18 +85,14 @@ public class GameServer {
             }
         }
 
-        // Generar contaminación inicial solo si GameServer es el responsable (es decir, si es el host)
         pollutionSystem.generarContaminacionInicial();
     }
-
-    
 
     private Map<String, Vector2> findSpawnPoints() {
         Map<String, Vector2> spawnPoints = new HashMap<>();
         MapLayer layer = map.getLayers().get("SpawnJugadores");
 
         if (layer == null || !(layer instanceof TiledMapTileLayer)) {
-            Gdx.app.error("GameServer", "No se encontró la capa de tiles 'SpawnJugadores'.");
             return spawnPoints;
         }
 
@@ -129,7 +122,6 @@ public class GameServer {
                         float spawnX = x * tileWidth;
                         float spawnY = y * tileHeight;
                         spawnPoints.put(characterName, new Vector2(spawnX, spawnY));
-                        Gdx.app.log("GameServer", "Spawn encontrado para " + characterName + " en (" + spawnX + ", " + spawnY + ")");
                     }
                 }
             }
@@ -140,7 +132,7 @@ public class GameServer {
     public void start() {
         running = true;
         Thread gameLoopThread = new Thread(this::serverGameLoop);
-        gameLoopThread.setDaemon(true); // Asegura que el hilo se detenga con la aplicación
+        gameLoopThread.setDaemon(true);
         gameLoopThread.start();
     }
 
@@ -149,31 +141,29 @@ public class GameServer {
     }
 
     private void serverGameLoop() {
-        final float FIXED_DELTA_TIME = 1f / 60f; // 60 actualizaciones por segundo
+        final float FIXED_DELTA_TIME = 1f / 60f;
         long lastTime = System.nanoTime();
         float accumulator = 0f;
 
         while (running) {
             long now = System.nanoTime();
-            float frameTime = (now - lastTime) / 1_000_000_000f; // Tiempo transcurrido en segundos
+            float frameTime = (now - lastTime) / 1_000_000_000f;
             lastTime = now;
 
             accumulator += frameTime;
 
             while (accumulator >= FIXED_DELTA_TIME) {
-                // Actualizar lógica del juego con FIXED_DELTA_TIME
                 updateGameState(FIXED_DELTA_TIME);
                 accumulator -= FIXED_DELTA_TIME;
             }
 
-            // Dormir para no consumir CPU si hay tiempo de sobra
-            long sleepTime = (long) ((FIXED_DELTA_TIME - accumulator) * 1000); // Convertir a milisegundos
+            long sleepTime = (long) ((FIXED_DELTA_TIME - accumulator) * 1000);
             if (sleepTime > 0) {
                 try {
                     Thread.sleep(sleepTime);
                 } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt(); // Restaura el estado de interrupción
-                    running = false; // Detiene el bucle
+                    Thread.currentThread().interrupt();
+                    running = false;
                 }
             }
         }
@@ -184,17 +174,10 @@ public class GameServer {
             InputState input = playerInputs.get(character.getPlayerId());
 
             if (input != null) {
-                Gdx.app.log("GameServer", "Processing input for player " + character.getPlayerId() + ": " + input.isLeft() + ", " + input.isRight());
-                // Guardar posición anterior para interpolación
                 character.setPreviousPosition(character.getX(), character.getY());
-
-                // Actualizar física básica
                 character.update(delta, collisionManager);
-
-                // Manejar input con colisiones
                 character.handleInput(input, collisionManager, delta);
 
-                // Limitar personajes dentro del mapa
                 float newX = Math.max(0, Math.min(character.getX(), mapWidth - character.getWidth()));
                 float newY = Math.max(0, Math.min(character.getY(), mapHeight - character.getHeight()));
                 character.setPosition(newX, newY);
@@ -202,14 +185,12 @@ public class GameServer {
         }
 
         pollutionSystem.update(delta);
-        if (Math.random() < 0.1f) { // Lógica de propagación de contaminación
+        if (Math.random() < 0.1f) {
             pollutionSystem.propagarContaminacion();
         }
 
-        // Incrementar número de secuencia
         sequenceNumber++;
 
-        // Generar GameState con el nuevo sequenceNumber
         ArrayList<PlayerState> playerStates = new ArrayList<>();
         for (Personajes character : characters.values()) {
             playerStates.add(new PlayerState(
@@ -220,18 +201,15 @@ public class GameServer {
                 character.getAnimationStateTime()));
         }
 
-        // Convertir PuntosContaminacion a CorruptionState
         ArrayList<GameState.CorruptionState> corruptionStates = new ArrayList<>();
         for (PollutionSystem.PuntoContaminacion punto : pollutionSystem.getPuntosContaminacion()) {
             corruptionStates.add(new GameState.CorruptionState(punto.tileX, punto.tileY, punto.nivel));
         }
 
-        // Actualizar el GameState actual del servidor
         game.networkManager.setCurrentGameState(new GameState(playerStates, corruptionStates, sequenceNumber));
     }
 
     public GameState getCurrentGameState() {
-        // Asegurarse de que networkManager tenga un método setCurrentGameState
         return game.networkManager.getCurrentGameState();
     }
 }
