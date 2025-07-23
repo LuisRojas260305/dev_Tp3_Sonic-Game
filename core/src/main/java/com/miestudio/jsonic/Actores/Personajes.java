@@ -69,16 +69,19 @@ public abstract class Personajes extends Actor {
 
     /** Indica si el personaje está rodando. */
     public boolean isRolling = false;
-    
+
     protected boolean isAbilityActive = false;
     /** ID del jugador asociado a este personaje. */
     protected int playerId;
     /** Velocidad de movimiento horizontal del personaje. */
     protected float moveSpeed = 300f;
 
-    
+    private float predictedX;
+
+    private float predictedY;
+
     public abstract void useAbility();
-    
+
     /**
      * Libera los recursos asociados al personaje.
      * Las subclases deben implementar este método si tienen recursos propios que liberar.
@@ -130,8 +133,6 @@ public abstract class Personajes extends Actor {
      * @param input El estado de los botones del jugador.
      */
     public void handleInput(InputState input, CollisionManager collisionManager, float delta) {
-        Gdx.app.log("Personajes", "Player " + playerId + " handleInput: " + input.isLeft() + ", " + input.isRight() + ", " + input.isUp() + ", " + input.isDown() + ", " + input.isAbility());
-
         boolean isMoving = false;
 
         if (input.isRight()){
@@ -196,7 +197,7 @@ public abstract class Personajes extends Actor {
         }
     }
 
-    
+
 
     /**
      * Establece la animación actual del personaje.
@@ -258,6 +259,14 @@ public abstract class Personajes extends Actor {
         this.prevX = x;
         this.prevY = y;
     }
+
+    public void setPredictedPosition(float x, float y) {
+        this.predictedX = x;
+        this.predictedY = y;
+    }
+
+    public float getPredictedX() { return predictedX; }
+    public float getPredictedY() { return predictedY; }
 
     /**
      * Obtiene el fotograma actual de la animación.

@@ -38,6 +38,5 @@ public class Assets {
         if (sonicAtlas != null) sonicAtlas.dispose();
         if (tailsAtlas != null) tailsAtlas.dispose();
         if (knocklesAtlas != null) knocklesAtlas.dispose();
-        Gdx.app.log("Assets", "Todos los TextureAtlas liberados.");
     }
 }

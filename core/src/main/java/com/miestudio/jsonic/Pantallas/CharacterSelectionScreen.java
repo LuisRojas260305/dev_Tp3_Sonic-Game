@@ -82,7 +82,6 @@ public class CharacterSelectionScreen implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 if (knucklesButton.isDisabled()) return;
-                Gdx.app.log("CharacterSelectionScreen", "Knuckles seleccionado");
                 game.networkManager.sendCharacterSelection("Knuckles");
             }
         });

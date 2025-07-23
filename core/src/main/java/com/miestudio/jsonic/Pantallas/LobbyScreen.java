@@ -79,7 +79,6 @@ public class LobbyScreen implements Screen {
 
     @Override
     public void dispose() {
-        Gdx.app.log("LobbyScreen", "dispose() llamado.");
         stage.dispose();
     }
 

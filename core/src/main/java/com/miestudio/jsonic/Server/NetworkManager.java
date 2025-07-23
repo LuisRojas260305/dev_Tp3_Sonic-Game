@@ -266,40 +266,72 @@ public class NetworkManager {
 
     private void startUdpListener() {
         try {
-            udpSocket.setSoTimeout(1000);
+            udpSocket.setSoTimeout(1000); // Timeout de 1 segundo
         } catch (SocketException e) {
-            e.printStackTrace();
+            Gdx.app.error("NetworkManager", "Error al configurar timeout UDP: " + e.getMessage());
         }
+
         udpReceiveThread = new Thread(() -> {
             byte[] buffer = new byte[4096];
+            Gdx.app.log("NetworkManager", "Iniciando escucha UDP...");
+
             while (!udpSocket.isClosed() && !Thread.currentThread().isInterrupted()) {
                 try {
+                    // Preparar paquete para recepción
                     DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-                    udpSocket.receive(packet);
-                    ByteArrayInputStream bais = new ByteArrayInputStream(packet.getData(), 0, packet.getLength());
+                    udpSocket.receive(packet); // Espera hasta recibir datos (o timeout)
+
+                    // Procesar paquete recibido
+                    ByteArrayInputStream bais = new ByteArrayInputStream(
+                        packet.getData(),
+                        0,
+                        packet.getLength()
+                    );
+
                     ObjectInputStream ois = new ObjectInputStream(bais);
                     Object obj = ois.readObject();
 
                     if (isHost) {
+                        // Host recibe inputs de los clientes
                         if (obj instanceof InputState) {
                             InputState input = (InputState) obj;
+                            Gdx.app.log("NetworkManager",
+                                "Input recibido - Jugador: " + input.getPlayerId() +
+                                    ", Izq: " + input.isLeft() +
+                                    ", Der: " + input.isRight() +
+                                    ", Salto: " + input.isUp()
+                            );
+
+                            // Guardar input para procesamiento en el game loop
                             playerInputs.put(input.getPlayerId(), input);
                         }
                     } else {
+                        // Cliente recibe estados del juego del host
                         if (obj instanceof GameState) {
-                            currentGameState = (GameState) obj;
+                            GameState gameState = (GameState) obj;
+                            Gdx.app.log("NetworkManager",
+                                "Estado recibido - Secuencia: " + gameState.getSequenceNumber() +
+                                    ", Jugadores: " + gameState.getPlayers().size()
+                            );
+
+                            // Actualizar estado actual del juego
+                            currentGameState = gameState;
                         }
                     }
                 } catch (SocketTimeoutException e) {
-                    // Timeout, continuar
+                    // Timeout esperado, continuar
                 } catch (SocketException e) {
-                    break;
-                } catch (IOException | ClassNotFoundException e) {
-                    e.printStackTrace();
+                    if (!udpSocket.isClosed()) {
+                    }
+                    break; // Salir si el socket se cerró
+                } catch (IOException e) {
+                } catch (ClassNotFoundException e) {
                 }
             }
         });
+
         udpReceiveThread.setDaemon(true);
+        udpReceiveThread.setName("UDP-Listener");
         udpReceiveThread.start();
     }
 
@@ -318,9 +350,12 @@ public class NetworkManager {
         }
     }
 
-    public void broadcastUdpGameState(GameState gameState) {
-        if (!isHost) return;
-        this.currentGameState = gameServer.getCurrentGameState();
+    /**
+     * Transmite el estado actual del juego a todos los clientes (solo host)
+     */
+    public void broadcastUdpGameState() {
+        if (!isHost || currentGameState == null) return;
+
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(baos);
@@ -330,7 +365,11 @@ public class NetworkManager {
 
             synchronized (clientConnections) {
                 for (ClientConnection conn : clientConnections) {
-                    DatagramPacket packet = new DatagramPacket(data, data.length, conn.getClientAddress(), conn.getClientUdpPort());
+                    DatagramPacket packet = new DatagramPacket(
+                        data, data.length,
+                        conn.getClientAddress(),
+                        conn.getClientUdpPort()
+                    );
                     udpSocket.send(packet);
                 }
             }

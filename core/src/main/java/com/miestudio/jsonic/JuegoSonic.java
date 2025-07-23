@@ -57,8 +57,7 @@ public class JuegoSonic extends Game {
                 networkManager.broadcastTcpMessage(new ShutdownPacket());
             }
             networkManager.dispose();
-            Gdx.app.exit();
-        }
+            }
         if (assets != null) {
             assets.dispose();
         }

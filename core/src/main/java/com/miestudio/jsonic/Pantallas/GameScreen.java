@@ -39,11 +39,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Pantalla principal del juego donde se desarrolla la acción.
- * Se encarga de renderizar el estado del juego, gestionar los inputs del jugador,
- * y sincronizar el estado entre el host y los clientes.
- */
 public class GameScreen implements Screen {
 
     private final JuegoSonic game;
@@ -63,14 +58,6 @@ public class GameScreen implements Screen {
 
     private float mapWidth, mapHeight;
 
-    
-
-    /**
-     * Constructor de la pantalla de juego.
-     *
-     * @param game La instancia principal del juego.
-     * @param localPlayerId El ID del jugador local (0 para el host, >0 para clientes).
-     */
     public GameScreen(JuegoSonic game, int localPlayerId) {
         Gdx.app.log("GameScreen", "Constructor llamado para localPlayerId: " + localPlayerId);
         this.game = game;
@@ -100,64 +87,127 @@ public class GameScreen implements Screen {
         collisionManager = new CollisionManager(map, "Colisiones", mapWidth, mapHeight);
         collisionManager.addTileCollisions(map, "Colisiones");
 
-        
-
-        // Inicializar personajes
-        initializeCharacters();
-
-        // Si es host, inicializar GameServer con las instancias creadas aquí
+        // Si es host, inicializar GameServer
         if (isHost) {
             game.networkManager.initializeGameServer(map, collisionManager, mapWidth, mapHeight);
         }
     }
 
-    /**
-     * Inicializa las instancias de los personajes para todos los jugadores.
-     * Asigna un personaje a cada ID de jugador y establece sus posiciones iniciales.
-     */
     private void initializeCharacters() {
+        // Vacío - los personajes se crearán bajo demanda
+    }
+
+    private void createCharacter(int playerId, String characterType) {
+        if (characters.containsKey(playerId)) return;
+
         Assets assets = game.getAssets();
-        Map<Integer, String> playerCharacterMap = game.networkManager.getSelectedCharacters();
+        Personajes character = null;
 
-        // Establecer posiciones de spawn
-        Map<String, Vector2> spawnPoints = findSpawnPoints();
+        switch (characterType) {
+            case "Sonic":
+                character = new Sonic(playerId, assets.sonicAtlas);
+                break;
+            case "Tails":
+                character = new Tails(playerId, assets.tailsAtlas);
+                break;
+            case "Knuckles":
+                character = new Knockles(playerId, assets.knocklesAtlas);
+                break;
+            default:
+                characterType = "Sonic"; // Valor por defecto
+                character = new Sonic(playerId, assets.sonicAtlas);
+                Gdx.app.error("GameScreen", "Tipo de personaje desconocido, usando Sonic por defecto");
+                break;
+        }
 
-        for (Map.Entry<Integer, String> entry : playerCharacterMap.entrySet()) {
-            int playerId = entry.getKey();
-            String characterType = entry.getValue();
-            Personajes character = null;
+        if (character != null) {
+            characters.put(playerId, character);
 
-            switch (characterType) {
-                case "Sonic":
-                    character = new Sonic(playerId, assets.sonicAtlas);
-                    break;
-                case "Tails":
-                    character = new Tails(playerId, assets.tailsAtlas);
-                    break;
-                case "Knuckles":
-                    character = new Knockles(playerId, assets.knocklesAtlas);
-                    break;
-                default:
-                    Gdx.app.error("GameScreen", "Tipo de personaje desconocido: " + characterType);
-                    continue;
-            }
+            // Posición inicial basada en el jugador
+            float x = mapWidth * 0.1f + playerId * 50;
+            float y = mapHeight * 0.5f;
 
-            if (character != null) {
-                characters.put(playerId, character);
-                Vector2 spawn = spawnPoints.getOrDefault(characterType, new Vector2(mapWidth * 0.1f + playerId * 50, mapHeight * 0.5f));
-                float groundY = collisionManager.getGroundY(new Rectangle(spawn.x, spawn.y, character.getWidth(), character.getHeight()));
-                character.setPosition(spawn.x, groundY >= 0 ? groundY : spawn.y);
-                character.setPreviousPosition(character.getX(), character.getY());
+            // Ajustar al suelo si es posible
+            float groundY = collisionManager.getGroundY(new Rectangle(x, y, 50, 50));
+            character.setPosition(x, groundY >= 0 ? groundY : y);
+            character.setPreviousPosition(x, y);
+
+            // Inicializar posición predicha
+            character.setPredictedPosition(x, y);
+        }
+    }
+
+    private void updateFromGameState() {
+        GameState gameState = game.networkManager.getCurrentGameState();
+        if (gameState == null) return;
+
+        // Obtener todos los personajes seleccionados
+        Map<Integer, String> allCharacters = game.networkManager.getSelectedCharacters();
+
+        synchronized (characters) {
+            for (PlayerState playerState : gameState.getPlayers()) {
+                int playerId = playerState.getPlayerId();
+                String characterType = allCharacters.get(playerId);
+
+                // Si no tenemos tipo, usar uno por defecto
+                if (characterType == null) {
+                    characterType = "Sonic";
+                    Gdx.app.error("GameScreen", "Tipo desconocido para jugador " + playerId + ", usando Sonic");
+                }
+
+                // Crear personaje si no existe
+                if (!characters.containsKey(playerId)) {
+                    createCharacter(playerId, characterType);
+                }
+
+                Personajes character = characters.get(playerId);
+                if (character == null) continue;
+
+                // Para todos los jugadores remotos y para el host
+                if (isHost || playerId != localPlayerId) {
+                    // Interpolación suave
+                    float interpolationFactor = 0.3f;
+                    float newX = character.getX() + (playerState.getX() - character.getX()) * interpolationFactor;
+                    float newY = character.getY() + (playerState.getY() - character.getY()) * interpolationFactor;
+
+                    character.setPosition(newX, newY);
+                    character.setFacingRight(playerState.isFacingRight());
+                    character.setAnimationStateTime(playerState.getAnimationStateTime());
+
+                    // Actualizar animación
+                    try {
+                        Personajes.AnimationType animation = Personajes.AnimationType.valueOf(
+                            playerState.getCurrentAnimationName().toUpperCase()
+                        );
+                        character.setAnimation(animation);
+                    } catch (IllegalArgumentException e) {
+                        character.setAnimation(Personajes.AnimationType.IDLE);
+                    }
+                }
+                // Reconciliación solo para jugador local en cliente
+                else if (!isHost) {
+                    // Solo corregir si hay gran discrepancia
+                    if (Vector2.dst(character.getX(), character.getY(),
+                        playerState.getX(), playerState.getY()) > 10f) {
+                        character.setPosition(playerState.getX(), playerState.getY());
+                        character.setPredictedPosition(playerState.getX(), playerState.getY());
+                    }
+                    // Actualizar animación y dirección desde el estado
+                    character.setFacingRight(playerState.isFacingRight());
+                    character.setAnimationStateTime(playerState.getAnimationStateTime());
+                    try {
+                        Personajes.AnimationType animation = Personajes.AnimationType.valueOf(
+                            playerState.getCurrentAnimationName().toUpperCase()
+                        );
+                        character.setAnimation(animation);
+                    } catch (IllegalArgumentException e) {
+                        character.setAnimation(Personajes.AnimationType.IDLE);
+                    }
+                }
             }
         }
     }
 
-    /**
-     * Encuentra los puntos de spawn de los jugadores en la capa "SpawnJugadores" del mapa.
-     * Los puntos de spawn se definen como tiles con la propiedad "Spawn" establecida a true,
-     * y una propiedad adicional ("Sonic", "Tails", "Knuckles") para identificar al personaje.
-     * @return Un mapa donde la clave es el nombre del personaje y el valor es su posición de spawn (Vector2).
-     */
     private Map<String, Vector2> findSpawnPoints() {
         Map<String, Vector2> spawnPoints = new HashMap<>();
         MapLayer layer = map.getLayers().get("SpawnJugadores");
@@ -193,7 +243,6 @@ public class GameScreen implements Screen {
                         float spawnX = x * tileWidth;
                         float spawnY = y * tileHeight;
                         spawnPoints.put(characterName, new Vector2(spawnX, spawnY));
-                        Gdx.app.log("GameScreen", "Spawn encontrado para " + characterName + " en (" + spawnX + ", " + spawnY + ")");
                     }
                 }
             }
@@ -206,49 +255,54 @@ public class GameScreen implements Screen {
         Gdx.gl.glClearColor(0.2f, 0.2f, 0.2f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        // Obtener jugador local sincronizado
-        Personajes localPlayer;
-        synchronized (characters) {
-            localPlayer = characters.get(localPlayerId);
-        }
+        // 1. Actualizar desde el estado del juego (crea/actualiza personajes)
+        updateFromGameState();
 
-        // Si es host, la lógica de contaminación se maneja en GameServer
-        // Si es cliente, la visualización de la contaminación se basa en el GameState recibido
-        
+        // 2. Procesar entrada del jugador local
+        processInput(delta);
 
-        // Actualizar cámara
+        // 3. Obtener jugador local para centrar cámara
+        Personajes localPlayer = characters.get(localPlayerId);
+
+        // 4. Actualizar cámara
         if (localPlayer != null) {
-            // Centrar cámara en el jugador local
+            // Para centrar la cámara, usamos la posición predicha en clientes
+            float posX = !isHost ? localPlayer.getPredictedX() : localPlayer.getX();
+            float posY = !isHost ? localPlayer.getPredictedY() : localPlayer.getY();
+
             float cameraHalfWidth = camera.viewportWidth / 2;
             float cameraHalfHeight = camera.viewportHeight / 2;
 
-            float cameraX = Math.max(cameraHalfWidth,
-                Math.min(localPlayer.getX(), mapWidth - cameraHalfWidth));
-            float cameraY = Math.max(cameraHalfHeight,
-                Math.min(localPlayer.getY(), mapHeight - cameraHalfHeight));
+            float cameraX = Math.max(cameraHalfWidth, Math.min(posX, mapWidth - cameraHalfWidth));
+            float cameraY = Math.max(cameraHalfHeight, Math.min(posY, mapHeight - cameraHalfHeight));
 
-            // Usar coordenadas enteras para evitar artefactos visuales
             camera.position.set((int)cameraX, (int)cameraY, 0);
         }
         camera.update();
 
-        // Renderizar mapa
+        // 5. Renderizar mapa
         mapRenderer.setView(camera);
         mapRenderer.render();
 
-        // --- Lógica de Sincronización y Predicción ---
-        processInput(delta); // Mover la lógica de input a un método separado
-
-        // --- Renderizado ---
+        // 6. Renderizar personajes
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
         synchronized (characters) {
             for (Personajes character : characters.values()) {
-                // En el cliente, el jugador local ya se actualizó. Los remotos se actualizan por interpolación.
-                // El stateTime de los remotos se actualiza en updateCharactersFromState.
+                // Para jugador local en cliente: usar posición predicha
+                if (!isHost && character.getPlayerId() == localPlayerId) {
+                    character.setPosition(
+                        character.getPredictedX(),
+                        character.getPredictedY()
+                    );
+                }
+
+                // Actualizar tiempo de animación
+                character.setAnimationStateTime(character.getAnimationStateTime() + delta);
 
                 TextureRegion frame = character.getCurrentFrame();
 
+                // Aplicar flip horizontal según dirección
                 if (!character.isFacingRight() && !frame.isFlipX()) {
                     frame.flip(true, false);
                 } else if (character.isFacingRight() && frame.isFlipX()) {
@@ -260,18 +314,13 @@ public class GameScreen implements Screen {
         }
         batch.end();
 
-        // Renderizar colisiones para debug (opcional)
+        // 7. Renderizar colisiones para debug (opcional)
         // debugRenderCollisions();
     }
 
-    /**
-     * Procesa la entrada del usuario, ya sea para el host (registrando el input) o para el cliente
-     * (enviando el input al servidor y realizando predicción local).
-     * @param delta El tiempo transcurrido desde el último fotograma en segundos.
-     */
     private void processInput(float delta) {
         if (isHost) {
-            // El Host solo necesita registrar su propio input para que el GameServer lo procese.
+            // Host: registrar su propio input
             InputState hostInput = new InputState();
             hostInput.setLeft(Gdx.input.isKeyPressed(Input.Keys.A));
             hostInput.setRight(Gdx.input.isKeyPressed(Input.Keys.D));
@@ -281,7 +330,7 @@ public class GameScreen implements Screen {
             hostInput.setPlayerId(localPlayerId);
             playerInputs.put(localPlayerId, hostInput);
         } else {
-            // El Cliente realiza la predicción local y envía su input al servidor.
+            // Cliente: enviar input al servidor y hacer predicción local
             InputState localInput = new InputState();
             localInput.setLeft(Gdx.input.isKeyPressed(Input.Keys.A));
             localInput.setRight(Gdx.input.isKeyPressed(Input.Keys.D));
@@ -291,27 +340,29 @@ public class GameScreen implements Screen {
             localInput.setPlayerId(localPlayerId);
             game.networkManager.sendInputState(localInput);
 
-            // Predicción del lado del cliente: aplica la física y el input al jugador local.
             Personajes localPlayer = characters.get(localPlayerId);
             if (localPlayer != null) {
+                // Guardar posición actual (para interpolación)
+                float currentX = localPlayer.getX();
+                float currentY = localPlayer.getY();
+
+                // Aplicar física y input (esto actualiza la posición)
                 localPlayer.update(delta, collisionManager);
                 localPlayer.handleInput(localInput, collisionManager, delta);
-            }
 
-            // Actualiza los demás personajes basándose en el estado del servidor (interpolación).
-            updateCharactersFromState();
+                // Guardar posición predicha
+                localPlayer.setPredictedPosition(localPlayer.getX(), localPlayer.getY());
+
+                // Restaurar posición actual (para interpolación)
+                localPlayer.setPosition(currentX, currentY);
+            }
         }
     }
 
-    /**
-     * Renderiza las formas de colisión para depuración visual.
-     * Este método es opcional y solo debe usarse para fines de depuración.
-     */
     private void debugRenderCollisions(){
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
 
-        // Crear copia para evitar problemas de concurrencia
         Array<Shape2D> shapesCopy = new Array<>();
         shapesCopy.addAll(collisionManager.getCollisionShapes());
 
@@ -325,50 +376,8 @@ public class GameScreen implements Screen {
         shapeRenderer.end();
     }
 
-    /**
-     * Actualiza las posiciones y estados de los personajes en el cliente según el GameState recibido del servidor.
-     * Realiza reconciliación para el jugador local y interpolación para los jugadores remotos.
-     */
-    private void updateCharactersFromState() {
-        GameState gameState = game.networkManager.getCurrentGameState();
-        if (gameState != null) {
-            synchronized (characters) {
-                for (PlayerState playerState : gameState.getPlayers()) {
-                    Personajes character = characters.get(playerState.getPlayerId());
-                    if (character == null) continue;
-
-                    if (playerState.getPlayerId() == localPlayerId) {
-                        // Reconciliación para el jugador local
-                        float errorMargin = 0.5f; // Pequeño margen de error
-                        if (Vector2.dst(character.getX(), character.getY(), playerState.getX(), playerState.getY()) > errorMargin) {
-                            // Corrección suave si la predicción fue muy diferente
-                            character.setPosition(playerState.getX(), playerState.getY());
-                        }
-                        character.setFacingRight(playerState.isFacingRight());
-                        character.setAnimation(Personajes.AnimationType.valueOf(playerState.getCurrentAnimationName().toUpperCase()));
-                        // Ajustar el stateTime de la animación al valor del servidor
-                        character.setAnimationStateTime(playerState.getAnimationStateTime());
-                    } else {
-                        // Interpolación para los otros jugadores
-                        float interpolationFactor = 0.2f; // Ajusta este valor para un movimiento más suave o más rápido
-                        character.setPosition(
-                            character.getX() + (playerState.getX() - character.getX()) * interpolationFactor,
-                            character.getY() + (playerState.getY() - character.getY()) * interpolationFactor
-                        );
-                        character.setFacingRight(playerState.isFacingRight());
-                        character.setAnimation(Personajes.AnimationType.valueOf(playerState.getCurrentAnimationName().toUpperCase()));
-                        character.setAnimationStateTime(playerState.getAnimationStateTime());
-                    }
-                }
-
-                
-            }
-        }
-    }
-
     @Override
     public void resize(int width, int height) {
-        // Mantener relación de aspecto del mapa
         float aspectRatio = mapWidth / mapHeight;
         float viewportWidth = width;
         float viewportHeight = width / aspectRatio;
@@ -378,7 +387,6 @@ public class GameScreen implements Screen {
             viewportWidth = height * aspectRatio;
         }
 
-        // Centrar la cámara
         camera.viewportWidth = viewportWidth;
         camera.viewportHeight = viewportHeight;
         camera.position.set(camera.viewportWidth / 2, camera.viewportHeight / 2, 0);
@@ -393,8 +401,7 @@ public class GameScreen implements Screen {
         for (Personajes character : characters.values()) {
             character.dispose();
         }
-        
-        // Si es host, GameScreen es responsable de disponer el mapa y los sistemas
+
         if (isHost) {
             map.dispose();
         }
