@@ -4,6 +4,7 @@ package com.miestudio.jsonic.Server;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.miestudio.jsonic.JuegoSonic;
+import com.miestudio.jsonic.Pantallas.CharacterSelectionScreen;
 import com.miestudio.jsonic.Pantallas.GameScreen;
 import com.miestudio.jsonic.Pantallas.LobbyScreen;
 import com.miestudio.jsonic.Util.Constantes;
@@ -42,6 +43,8 @@ public class NetworkManager {
     private final AtomicInteger nextPlayerId = new AtomicInteger(1);
     private volatile GameState currentGameState;
     private Socket clientTcpSocket;
+    private ObjectOutputStream clientTcpOut; // Añadido
+    private ObjectInputStream clientTcpIn; // Añadido
     private InetAddress serverAddress;
     private int serverUdpPort;
 
@@ -62,7 +65,7 @@ public class NetworkManager {
     }
 
     public void checkNetworkStatus() {
-        new Thread(() -> {
+        Thread networkThread = new Thread(() -> {
             String serverIp = discoverServer();
             if (serverIp != null) {
                 connectAsClient(serverIp, Constantes.GAME_PORT);
@@ -70,15 +73,27 @@ public class NetworkManager {
                 startHost();
             }
             Gdx.app.postRunnable(() -> game.setScreen(new CharacterSelectionScreen(game)));
-        }).start();
+        });
+        networkThread.start();
     }
 
     public void sendCharacterSelection(String characterType) {
         this.selectedCharacterType = characterType; // Almacenar la selección localmente
         if (!isHost) { // Si es cliente, enviar al servidor
-            sendTcpMessage(new com.miestudio.jsonic.Server.network.CharacterSelectionPacket(localPlayerId, characterType));
+            sendTcpMessageToServer(new com.miestudio.jsonic.Server.network.CharacterSelectionPacket(localPlayerId, characterType));
         } else { // Si es host, procesar localmente
             processCharacterSelection(localPlayerId, characterType);
+        }
+    }
+
+    public void sendTcpMessageToServer(Object message) {
+        try {
+            if (clientTcpOut != null) {
+                clientTcpOut.writeObject(message);
+                clientTcpOut.flush();
+            }
+        } catch (IOException e) {
+            Gdx.app.error("NetworkManager", "Error al enviar mensaje TCP al servidor: " + e.getMessage());
         }
     }
 
@@ -216,21 +231,21 @@ public class NetworkManager {
                 e.printStackTrace();
             }
 
-            ObjectOutputStream out = new ObjectOutputStream(clientTcpSocket.getOutputStream());
-            ObjectInputStream in = new ObjectInputStream(clientTcpSocket.getInputStream());
+            clientTcpOut = new ObjectOutputStream(clientTcpSocket.getOutputStream());
+            clientTcpIn = new ObjectInputStream(clientTcpSocket.getInputStream());
 
             // Enviar el puerto UDP al servidor
-            out.writeInt(udpSocket.getLocalPort());
-            out.flush();
+            clientTcpOut.writeInt(udpSocket.getLocalPort());
+            clientTcpOut.flush();
 
-            int playerId = in.readInt();
-            serverUdpPort = in.readInt();
+            int playerId = clientTcpIn.readInt();
+            serverUdpPort = clientTcpIn.readInt();
             localPlayerId = playerId;
 
             if (playerId != -1) {
                 Gdx.app.log("NetworkManager", "Conectado como jugador " + playerId);
 
-                startClientTcpListener(in, playerId);
+                startClientTcpListener(clientTcpIn, playerId);
                 startUdpListener();
             } else {
                 Gdx.app.log("NetworkManager", "Servidor lleno.");
@@ -242,11 +257,11 @@ public class NetworkManager {
         }
     }
 
-    private void startClientTcpListener(ObjectInputStream in, int playerId) {
+    private void startClientTcpListener(ObjectInputStream clientTcpIn, int playerId) {
         clientTcpReceiveThread = new Thread(() -> {
             try {
                 while (!clientTcpSocket.isClosed()) {
-                    Object msg = in.readObject();
+                    Object msg = clientTcpIn.readObject();
                     if ("START_GAME".equals(msg)) {
                         Gdx.app.postRunnable(() -> game.setScreen(new GameScreen(game, playerId)));
                     } else if (msg instanceof ShutdownPacket) {
@@ -434,7 +449,7 @@ public class NetworkManager {
                     Thread.sleep(100); // Pequeña pausa para evitar busy-waiting
                 }
 
-            } catch (IOException | InterruptedException e) {
+            } catch (IOException | ClassNotFoundException | InterruptedException e) {
                 Gdx.app.log("NetworkManager", "Cliente " + playerId + " desconectado.");
             } finally {
                 clientConnections.remove(this);

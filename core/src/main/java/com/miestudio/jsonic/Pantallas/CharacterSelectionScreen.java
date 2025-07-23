@@ -51,12 +51,14 @@ public class CharacterSelectionScreen implements Screen {
         TextButton knucklesButton = new TextButton("Knuckles", buttonStyle);
         table.add(knucklesButton).width(200).height(50).row();
 
+        // Listener genérico para todos los personajes
         sonicButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 Gdx.app.log("CharacterSelectionScreen", "Sonic seleccionado");
-                // Lógica para comunicar la selección al servidor (futuro)
-                game.networkManager.startNetworkAndSelectCharacter("Sonic");
+                game.networkManager.sendCharacterSelection("Sonic");
+                // Ejemplo: transición a LobbyScreen (puedes adaptar el nombre)
+                // game.setScreen(new LobbyScreen(game));
             }
         });
 
@@ -64,15 +66,17 @@ public class CharacterSelectionScreen implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 Gdx.app.log("CharacterSelectionScreen", "Tails seleccionado");
-                // Lógica para comunicar la selección al servidor (futuro)
                 game.networkManager.sendCharacterSelection("Tails");
+                // game.setScreen(new LobbyScreen(game));
+            }
+        });
 
         knucklesButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 Gdx.app.log("CharacterSelectionScreen", "Knuckles seleccionado");
-                // Lógica para comunicar la selección al servidor (futuro)
                 game.networkManager.sendCharacterSelection("Knuckles");
+                // game.setScreen(new LobbyScreen(game));
             }
         });
     }
