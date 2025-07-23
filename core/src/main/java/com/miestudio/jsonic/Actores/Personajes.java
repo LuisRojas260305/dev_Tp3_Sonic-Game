@@ -70,11 +70,14 @@ public abstract class Personajes extends Actor {
     /** Indica si el personaje está rodando. */
     public boolean isRolling = false;
     
+    protected boolean isAbilityActive = false;
     /** ID del jugador asociado a este personaje. */
     protected int playerId;
     /** Velocidad de movimiento horizontal del personaje. */
     protected float moveSpeed = 300f;
 
+    
+    public abstract void useAbility();
     
     /**
      * Libera los recursos asociados al personaje.

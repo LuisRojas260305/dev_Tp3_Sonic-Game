@@ -20,9 +20,9 @@ public class Assets {
      */
     public void load() {
         try {
-            sonicAtlas = new TextureAtlas(Gdx.files.internal(Constantes.PERSONAJES_PATH + "SonicAtlas.txt"));
-            tailsAtlas = new TextureAtlas(Gdx.files.internal(Constantes.PERSONAJES_PATH + "TailsAtlas.txt"));
-            knocklesAtlas = new TextureAtlas(Gdx.files.internal(Constantes.PERSONAJES_PATH + "KnocklesAtlas.txt"));
+            sonicAtlas = new TextureAtlas(Gdx.files.internal(Constantes.PERSONAJES_PATH + "AtlasSonic.txt"));
+            tailsAtlas = new TextureAtlas(Gdx.files.internal(Constantes.PERSONAJES_PATH + "AtlasTails.txt"));
+            knocklesAtlas = new TextureAtlas(Gdx.files.internal(Constantes.PERSONAJES_PATH + "AtlasKnuckles.txt"));
             Gdx.app.log("Assets", "Todos los TextureAtlas cargados correctamente.");
         } catch (Exception e) {
             Gdx.app.error("Assets", "Error al cargar TextureAtlas: " + e.getMessage());

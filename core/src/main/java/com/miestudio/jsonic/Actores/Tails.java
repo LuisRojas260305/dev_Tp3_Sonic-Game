@@ -10,42 +10,40 @@ import com.badlogic.gdx.utils.Array;
  * Incluye animaciones específicas para Tails.
  */
 public class Tails extends Personajes{
-    private TextureAtlas altasTails;
+    private TextureAtlas AtlasTails;
     
     public Tails(int playerId, TextureAtlas atlas){
         this.playerId = playerId;
-        this.altasTails = atlas;
+        this.AtlasTails = atlas;
         cargarAnimaciones();
         currentAnimation = idleAnimation;
     }
     
     private void cargarAnimaciones() {
         Array<TextureRegion> idleFrames = new Array<>();
-        for (int i = 1; i < 9; i++) {
-            idleFrames.add(altasTails.findRegion("TE (" + i + ")"));
+        for (int i = 0; i < 8; i++) {
+            idleFrames.add(AtlasTails.findRegion("TailsIdle" + i));
         }
         idleAnimation = new Animation<>(0.18f, idleFrames, Animation.PlayMode.LOOP);
         
         Array<TextureRegion> runFrames = new Array<>();
-        for (int i = 1; i < 8; i++) {
-            runFrames.add(altasTails.findRegion("TR (" + i + ")"));
+        for (int i = 0; i < 9; i++) {
+            runFrames.add(AtlasTails.findRegion("TailsRun" + i));
         }
         
         runAnimation = new Animation<>(0.08f, runFrames, Animation.PlayMode.LOOP);
         
         Array<TextureRegion> ballFrames = new Array<>();
-        for (int i = 1; i < 9; i++){
-            ballFrames.add(altasTails.findRegion("TB (" + i + ")"));
+        for (int i = 0; i < 2; i++){
+            ballFrames.add(AtlasTails.findRegion("TailsHit" + i));
         }
         
         rollAnimation = new Animation<>(0.1f, ballFrames, Animation.PlayMode.LOOP);
         
         Array<TextureRegion> jumpFrames = new Array<>();
-        jumpFrames.add(altasTails.findRegion("TJ (3)"));
-        jumpFrames.add(altasTails.findRegion("TJ (2)"));
-        jumpFrames.add(altasTails.findRegion("TJ (1)"));
-        jumpFrames.add(altasTails.findRegion("TJ (4)"));
-        jumpFrames.add(altasTails.findRegion("TJ (5)"));
+        for (int i = 0; i < 4; i++){
+            jumpFrames.add(AtlasTails.findRegion("TailsJump" + i));
+        }
         
         jumpAnimation = new Animation<>(0.25f, jumpFrames, Animation.PlayMode.NORMAL);
     }
@@ -53,5 +51,10 @@ public class Tails extends Personajes{
     @Override
     public void dispose() {
         // El atlas se gestiona en la clase Assets
+    }
+
+    @Override
+    public void useAbility() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }
