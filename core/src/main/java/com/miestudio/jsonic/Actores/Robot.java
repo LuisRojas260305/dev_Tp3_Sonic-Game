@@ -34,5 +34,10 @@ public class Robot extends Personajes {
         // Dispose resources if any
     }
 
+    @Override
+    public void useAbility() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
     
 }
