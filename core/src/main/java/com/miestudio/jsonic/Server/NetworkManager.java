@@ -46,7 +46,10 @@ public class NetworkManager {
     private int serverUdpPort;
 
     private final ConcurrentHashMap<Integer, InputState> playerInputs = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Integer, String> selectedCharacters = new ConcurrentHashMap<>(); // Nuevo: Almacena el personaje seleccionado por cada jugador
     private volatile boolean isHost = false;
+    private int localPlayerId = -1; // Almacena el ID del jugador local
+    private String selectedCharacterType; // Nuevo: Almacena el tipo de personaje seleccionado
 
     private Thread hostDiscoveryThread;
     private Thread clientTcpReceiveThread;
@@ -66,7 +69,44 @@ public class NetworkManager {
             } else {
                 startHost();
             }
+            Gdx.app.postRunnable(() -> game.setScreen(new CharacterSelectionScreen(game)));
         }).start();
+    }
+
+    public void sendCharacterSelection(String characterType) {
+        this.selectedCharacterType = characterType; // Almacenar la selección localmente
+        if (!isHost) { // Si es cliente, enviar al servidor
+            sendTcpMessage(new com.miestudio.jsonic.Server.network.CharacterSelectionPacket(localPlayerId, characterType));
+        } else { // Si es host, procesar localmente
+            processCharacterSelection(localPlayerId, characterType);
+        }
+    }
+
+    private void processCharacterSelection(int playerId, String characterType) {
+        // Lógica para verificar si el personaje ya está tomado
+        if (selectedCharacters.containsValue(characterType)) {
+            Gdx.app.log("NetworkManager", "Personaje " + characterType + " ya seleccionado.");
+            // Enviar mensaje de rechazo al cliente (futuro)
+            return;
+        }
+        selectedCharacters.put(playerId, characterType);
+        Gdx.app.log("NetworkManager", "Jugador " + playerId + " seleccionó " + characterType);
+
+        // Notificar a todos los clientes sobre la selección (futuro)
+        // Por ahora, simplemente pasar a la LobbyScreen
+        Gdx.app.postRunnable(() -> game.setScreen(new LobbyScreen(game, getColorForCharacter(characterType), isHost)));
+    }
+
+    private Color getColorForCharacter(String characterType) {
+        if ("Sonic".equals(characterType)) {
+            return Color.BLUE;
+        } else if ("Tails".equals(characterType)) {
+            return Color.YELLOW;
+        } else if ("Knuckles".equals(characterType)) {
+            return Color.RED;
+        } else {
+            return Color.GRAY; // Color por defecto
+        }
     }
 
     private String discoverServer() {
@@ -95,8 +135,7 @@ public class NetworkManager {
             serverTcpSocket.setSoTimeout(1000); // Establecer timeout para accept()
             udpSocket = new DatagramSocket(Constantes.GAME_PORT);
             Gdx.app.log("NetworkManager", "Servidor iniciado en TCP y UDP en el puerto " + Constantes.GAME_PORT);
-
-            
+            localPlayerId = 0; // Host es el jugador 0
 
             hostDiscoveryThread = new Thread(this::announceServer);
             hostDiscoveryThread.setDaemon(true);
@@ -106,8 +145,6 @@ public class NetworkManager {
             acceptClientsThread.setDaemon(true); // Hacer que este hilo sea demonio
             acceptClientsThread.start();
             startUdpListener();
-
-            Gdx.app.postRunnable(() -> game.setScreen(new LobbyScreen(game, Color.BLUE, true)));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -188,11 +225,10 @@ public class NetworkManager {
 
             int playerId = in.readInt();
             serverUdpPort = in.readInt();
+            localPlayerId = playerId;
 
             if (playerId != -1) {
                 Gdx.app.log("NetworkManager", "Conectado como jugador " + playerId);
-                Color playerColor = (playerId == 1) ? Color.YELLOW : (playerId == 2) ? Color.RED : Color.GRAY;
-                Gdx.app.postRunnable(() -> game.setScreen(new LobbyScreen(game, playerColor, false)));
 
                 startClientTcpListener(in, playerId);
                 startUdpListener();
@@ -215,6 +251,12 @@ public class NetworkManager {
                         Gdx.app.postRunnable(() -> game.setScreen(new GameScreen(game, playerId)));
                     } else if (msg instanceof ShutdownPacket) {
                         Gdx.app.postRunnable(game::dispose);
+                    } else if (msg instanceof com.miestudio.jsonic.Server.network.CharacterSelectionPacket) {
+                        com.miestudio.jsonic.Server.network.CharacterSelectionPacket packet = (com.miestudio.jsonic.Server.network.CharacterSelectionPacket) msg;
+                        // Aquí el cliente recibe la confirmación o rechazo de la selección
+                        // Por ahora, simplemente logueamos y pasamos a LobbyScreen si es exitoso
+                        Gdx.app.log("NetworkManager", "Recibido CharacterSelectionPacket para jugador " + packet.playerId + ": " + packet.characterType);
+                        Gdx.app.postRunnable(() -> game.setScreen(new LobbyScreen(game, getColorForCharacter(packet.characterType), isHost)));
                     }
                 }
             } catch (IOException | ClassNotFoundException e) {
@@ -382,8 +424,14 @@ public class NetworkManager {
 
                 // Mantener el hilo vivo para escuchar mensajes TCP si es necesario en el futuro
                 while (!tcpSocket.isClosed() && !Thread.currentThread().isInterrupted()) {
-                    // En esta implementación, no esperamos más mensajes TCP del cliente
-                    Thread.sleep(1000);
+                    Object msg = in.readObject();
+                    if (msg instanceof com.miestudio.jsonic.Server.network.CharacterSelectionPacket) {
+                        com.miestudio.jsonic.Server.network.CharacterSelectionPacket packet = (com.miestudio.jsonic.Server.network.CharacterSelectionPacket) msg;
+                        processCharacterSelection(packet.playerId, packet.characterType);
+                        // Enviar confirmación al cliente (futuro)
+                        sendTcpMessage(packet); // Reenviar el paquete al cliente para confirmación
+                    }
+                    Thread.sleep(100); // Pequeña pausa para evitar busy-waiting
                 }
 
             } catch (IOException | InterruptedException e) {

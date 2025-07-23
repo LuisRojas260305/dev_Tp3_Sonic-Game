@@ -34,8 +34,5 @@ public class Robot extends Personajes {
         // Dispose resources if any
     }
 
-    @Override
-    public void useAbility() {
-        // Robot does not have a specific ability for now
-    }
+    
 }

@@ -12,11 +12,6 @@ import com.badlogic.gdx.utils.Array;
 public class Tails extends Personajes{
     private TextureAtlas altasTails;
     
-    /**
-     * Constructor para el personaje Tails.
-     * @param playerId El ID del jugador asociado a este Tails.
-     * @param atlas El TextureAtlas que contiene las texturas de las animaciones de Tails.
-     */
     public Tails(int playerId, TextureAtlas atlas){
         this.playerId = playerId;
         this.altasTails = atlas;
@@ -24,9 +19,6 @@ public class Tails extends Personajes{
         currentAnimation = idleAnimation;
     }
     
-    /**
-     * Carga y configura todas las animaciones específicas de Tails desde su TextureAtlas.
-     */
     private void cargarAnimaciones() {
         Array<TextureRegion> idleFrames = new Array<>();
         for (int i = 1; i < 9; i++) {
@@ -58,21 +50,8 @@ public class Tails extends Personajes{
         jumpAnimation = new Animation<>(0.25f, jumpFrames, Animation.PlayMode.NORMAL);
     }
 
-    /**
-     * Libera los recursos específicos de Tails.
-     * En este caso, el TextureAtlas se gestiona centralmente en la clase Assets, por lo que no hay recursos adicionales que liberar aquí.
-     */
     @Override
     public void dispose() {
         // El atlas se gestiona en la clase Assets
-    }
-
-    /**
-     * Implementación de la habilidad especial de Tails.
-     * Actualmente no soportada y lanza una excepción.
-     */
-    @Override
-    public void useAbility() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

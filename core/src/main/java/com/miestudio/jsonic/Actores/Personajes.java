@@ -64,21 +64,18 @@ public abstract class Personajes extends Actor {
     protected final float gravity = -800f;
     /** Fuerza de salto aplicada al personaje. */
     protected final float jumpForce = 500f;
+    /** Indica si el personaje puede saltar. */
+    protected boolean canJump = true;
 
     /** Indica si el personaje está rodando. */
     public boolean isRolling = false;
-    /** Indica si la habilidad especial del personaje está activa. */
-    protected boolean isAbilityActive = false;
+    
     /** ID del jugador asociado a este personaje. */
     protected int playerId;
     /** Velocidad de movimiento horizontal del personaje. */
     protected float moveSpeed = 300f;
 
-    /**
-     * Ejecuta la habilidad especial del personaje.
-     * Esta es una implementación abstracta que debe ser definida por las subclases.
-     */
-    public abstract void useAbility();
+    
     /**
      * Libera los recursos asociados al personaje.
      * Las subclases deben implementar este método si tienen recursos propios que liberar.
@@ -132,8 +129,6 @@ public abstract class Personajes extends Actor {
     public void handleInput(InputState input, CollisionManager collisionManager, float delta) {
         Gdx.app.log("Personajes", "Player " + playerId + " handleInput: " + input.isLeft() + ", " + input.isRight() + ", " + input.isUp() + ", " + input.isDown() + ", " + input.isAbility());
 
-        if (isAbilityActive) return;
-
         boolean isMoving = false;
 
         if (input.isRight()){
@@ -180,10 +175,6 @@ public abstract class Personajes extends Actor {
             setCurrentAnimation(jumpAnimation);
         }
 
-        if (input.isAbility()){
-            useAbility();
-        }
-
         if (isRolling && isGrounded){
             setCurrentAnimation(rollAnimation);
         } else if (isMoving && isGrounded) {
@@ -195,7 +186,7 @@ public abstract class Personajes extends Actor {
         }
     }
 
-    protected void setCurrentAnimation(Animation<TextureRegion> newAnimation) {
+    public void setCurrentAnimation(Animation<TextureRegion> newAnimation) {
         if (currentAnimation != newAnimation) {
             currentAnimation = newAnimation;
             stateTime = 0f;
@@ -225,46 +216,26 @@ public abstract class Personajes extends Actor {
      * @return La posición X del personaje.
      */
     public float getX() { return x; }
-    /**
-     * Obtiene la posición Y actual del personaje.
-     * @return La posición Y del personaje.
-     */
+    public void setPlayerX(float x) { this.x = x; }
     public float getY() { return y; }
-    /**
-     * Obtiene la posición X previa del personaje.
-     * @return La posición X previa del personaje.
-     */
+    public void setPlayerY(float y) { this.y = y; }
     public float getPrevX() { return prevX; }
-    /**
-     * Obtiene la posición Y previa del personaje.
-     * @return La posición Y previa del personaje.
-     */
     public float getPrevY() { return prevY; }
-    /**
-     * Obtiene la velocidad de movimiento del personaje.
-     * @return La velocidad de movimiento del personaje.
-     */
     public float getMoveSpeed() { return moveSpeed; }
-    /**
-     * Establece la velocidad de movimiento del personaje.
-     * @param speed La nueva velocidad de movimiento.
-     */
     public void setMoveSpeed(float speed) { this.moveSpeed = speed; }
-    /**
-     * Verifica si el personaje está mirando a la derecha.
-     * @return True si el personaje mira a la derecha, false en caso contrario.
-     */
     public boolean isFacingRight() { return facingRight; }
-    /**
-     * Establece la dirección en la que mira el personaje.
-     * @param facingRight True si el personaje debe mirar a la derecha, false en caso contrario.
-     */
     public void setFacingRight(boolean facingRight) { this.facingRight = facingRight; }
-    /**
-     * Obtiene el ID del jugador asociado a este personaje.
-     * @return El ID del jugador.
-     */
     public int getPlayerId() { return playerId; }
+    public boolean isGrounded() { return isGrounded; }
+    public void setGrounded(boolean grounded) { isGrounded = grounded; }
+    public float getVelocityY() { return velocityY; }
+    public void setVelocityY(float velocityY) { this.velocityY = velocityY; }
+    public boolean getCanJump() { return canJump; }
+    public void setCanJump(boolean canJump) { this.canJump = canJump; }
+    public Animation<TextureRegion> getIdleAnimation() { return idleAnimation; }
+    public Animation<TextureRegion> getRunAnimation() { return runAnimation; }
+    public Animation<TextureRegion> getJumpAnimation() { return jumpAnimation; }
+    public Animation<TextureRegion> getRollAnimation() { return rollAnimation; }
     /**
      * Establece la posición del personaje.
      * @param x La nueva posición X.
