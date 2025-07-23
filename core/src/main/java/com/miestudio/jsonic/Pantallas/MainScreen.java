@@ -64,7 +64,6 @@ public class MainScreen implements Screen {
         statsButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                Gdx.app.log("MainScreen", "Botón Estadísticas presionado.");
                 // Transición a pantalla de estadísticas
                 //game.setScreen(new StatsScreen(game));
             }

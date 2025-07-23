@@ -322,17 +322,12 @@ public class NetworkManager {
                     // Timeout esperado, continuar
                 } catch (SocketException e) {
                     if (!udpSocket.isClosed()) {
-                        Gdx.app.error("NetworkManager", "Error de socket UDP: " + e.getMessage());
                     }
                     break; // Salir si el socket se cerró
                 } catch (IOException e) {
-                    Gdx.app.error("NetworkManager", "Error IO UDP: " + e.getMessage());
                 } catch (ClassNotFoundException e) {
-                    Gdx.app.error("NetworkManager", "Clase desconocida en paquete UDP: " + e.getMessage());
                 }
             }
-
-            Gdx.app.log("NetworkManager", "Escucha UDP terminada");
         });
 
         udpReceiveThread.setDaemon(true);

@@ -201,8 +201,6 @@ public class GameServer {
         GameState newGameState = new GameState(playerStates, sequenceNumber++);
         game.networkManager.setCurrentGameState(newGameState);
         game.networkManager.broadcastUdpGameState(); // Nuevo método
-
-        Gdx.app.log("GameServer", "Broadcast estado #" + newGameState.getSequenceNumber());
     }
 
     public GameState getCurrentGameState() {
