@@ -72,7 +72,7 @@ public class NetworkManager {
             } else {
                 startHost();
             }
-            Gdx.app.postRunnable(() -> game.setScreen(new CharacterSelectionScreen(game)));
+                        Gdx.app.postRunnable(() -> game.setScreen(new CharacterSelectionScreen(game, game.selectedCharacters)));
         });
         networkThread.start();
     }
@@ -99,16 +99,21 @@ public class NetworkManager {
 
     private void processCharacterSelection(int playerId, String characterType) {
         // Lógica para verificar si el personaje ya está tomado
-        if (selectedCharacters.containsValue(characterType)) {
+        if (game.isCharacterTaken(characterType)) { // Usar el método de JuegoSonic
             Gdx.app.log("NetworkManager", "Personaje " + characterType + " ya seleccionado.");
             // Enviar mensaje de rechazo al cliente (futuro)
+            // Por ahora, no hacemos nada si ya está tomado.
             return;
         }
-        selectedCharacters.put(playerId, characterType);
+        game.setCharacterTaken(characterType, true); // Actualizar el estado en JuegoSonic
+        selectedCharacters.put(playerId, characterType); // Mantener el mapa local del NetworkManager
+
         Gdx.app.log("NetworkManager", "Jugador " + playerId + " seleccionó " + characterType);
 
-        // Notificar a todos los clientes sobre la selección (futuro)
-        // Por ahora, simplemente pasar a la LobbyScreen
+        // Notificar a todos los clientes sobre la selección
+        broadcastTcpMessage(new com.miestudio.jsonic.Server.network.CharacterTakenPacket(characterType, true));
+
+        // Pasar a la LobbyScreen
         Gdx.app.postRunnable(() -> game.setScreen(new LobbyScreen(game, getColorForCharacter(characterType), isHost)));
     }
 
@@ -389,6 +394,10 @@ public class NetworkManager {
         return isHost;
     }
 
+    public ConcurrentHashMap<Integer, String> getSelectedCharacters() {
+        return selectedCharacters;
+    }
+
     public void dispose() {
         if (isHost) {
             if (gameServer != null) gameServer.stop(); // Detener GameServer
@@ -436,6 +445,13 @@ public class NetworkManager {
                 tcpOut.flush();
 
                 Gdx.app.log("NetworkManager", "Cliente " + playerId + " conectado desde " + clientAddress.getHostAddress() + ":" + clientUdpPort);
+
+                // Enviar el estado actual de los personajes seleccionados al nuevo cliente
+                for (java.util.Map.Entry<String, Boolean> entry : game.selectedCharacters.entrySet()) {
+                    if (entry.getValue()) { // Si el personaje está tomado
+                        sendTcpMessage(new com.miestudio.jsonic.Server.network.CharacterTakenPacket(entry.getKey(), true));
+                    }
+                }
 
                 // Mantener el hilo vivo para escuchar mensajes TCP si es necesario en el futuro
                 while (!tcpSocket.isClosed() && !Thread.currentThread().isInterrupted()) {

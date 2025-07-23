@@ -42,7 +42,7 @@ public class MainScreen implements Screen {
                 Gdx.app.log("MainScreen", "Botón Jugar presionado. Iniciando NetworkManager.");
                 game.networkManager.checkNetworkStatus();
                 // Transición a pantalla de selección de personaje
-                game.setScreen(new CharacterSelectionScreen(game));
+                game.setScreen(new CharacterSelectionScreen(game, game.selectedCharacters));
             }
         });
 

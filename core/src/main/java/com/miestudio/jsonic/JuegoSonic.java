@@ -7,6 +7,8 @@ import com.miestudio.jsonic.Server.NetworkManager;
 import com.miestudio.jsonic.Util.Assets;
 import com.miestudio.jsonic.Util.ShutdownPacket;
 
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * Clase principal del juego que extiende la clase Game de LibGDX.
  * Controla la gestión global del juego, inicializa el NetworkManager
@@ -19,6 +21,9 @@ public class JuegoSonic extends Game {
     /** Gestor de assets para cargar y liberar recursos. */
     private Assets assets;
 
+    /** Almacena el estado de selección de personajes (true si está tomado, false si está disponible). */
+    public ConcurrentHashMap<String, Boolean> selectedCharacters;
+
     /**
      * Método principal de inicialización del juego.
      * Crea el gestor de red y establece la pantalla de menú principal.
@@ -29,6 +34,12 @@ public class JuegoSonic extends Game {
         assets.load(); // Cargar todos los assets al inicio
 
         networkManager = new NetworkManager(this);
+
+        selectedCharacters = new ConcurrentHashMap<>();
+        selectedCharacters.put("Sonic", false);
+        selectedCharacters.put("Tails", false);
+        selectedCharacters.put("Knuckles", false);
+
         // Al iniciar, siempre mostramos la pantalla para elegir rol.
         setScreen(new MainScreen(this));
     }
@@ -59,5 +70,23 @@ public class JuegoSonic extends Game {
      */
     public Assets getAssets() {
         return assets;
+    }
+
+    /**
+     * Verifica si un personaje ya ha sido seleccionado.
+     * @param characterType El tipo de personaje (ej. "Sonic", "Tails").
+     * @return true si el personaje ya está tomado, false en caso contrario.
+     */
+    public boolean isCharacterTaken(String characterType) {
+        return selectedCharacters.getOrDefault(characterType, false);
+    }
+
+    /**
+     * Establece el estado de selección de un personaje.
+     * @param characterType El tipo de personaje.
+     * @param taken true si el personaje está tomado, false si está disponible.
+     */
+    public void setCharacterTaken(String characterType, boolean taken) {
+        selectedCharacters.put(characterType, taken);
     }
 }

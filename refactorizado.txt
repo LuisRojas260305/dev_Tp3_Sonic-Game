@@ -1,5 +1,86 @@
-1.- Eliminar la logica de los actores actual (mateniendo la logica de las colisiones)
-2.- Vas a crear una clase basica de actores, despues los personajes sonic, tails y knuckles, solo una instancia basica, que tenga gravedad, y que interaccione con la logica de colisiones para el piso que tenemos actualmente
-3.- Vas a añadirle las texturas basicas a cada personaje junto a su animacion de estar depie
-4.- vamos a crear un sistema de seleccion de personaje, para que antes de iniciar la partida y entrar al lobby se acceda a una pantalla de seleccion de personajes, donde habran 3 botones (Sonic, Tails, Knuckles), el usuario podra seleccionar alguno de esos 3, le mandara un mensaje al servidor para que sepa cual es el personaje que le corresponde y evite que cualquier otro jugador lo pueda seleccionar
-5.- vamos a implementar la logica basica de los mensajes de estado del personaje entre el servidor y el cliente junto a la interpolacion con manejo de versiones en los mensajes
+✦ Claro, aquí tienes una lista de los cambios que estamos implementando y el porqué de cada uno:
+
+
+  1. Sincronización de la Selección de Personajes y Bloqueo de Botones
+
+
+   * Problema: Actualmente, varios clientes pueden seleccionar el mismo personaje, y los botones de selección
+     no se deshabilitan, lo que genera confusión y asignaciones incorrectas. Además, el host no actualiza
+     visualmente la disponibilidad de los personajes.
+   * Solución:
+       * Nuevo paquete `CharacterTakenPacket.java`: Un paquete de red dedicado para comunicar qué personaje ha
+          sido seleccionado (o liberado).
+       * `JuegoSonic.java` como fuente de verdad: Se ha añadido un ConcurrentHashMap<String, Boolean>
+         selectedCharacters en la clase JuegoSonic. Este mapa centraliza el estado de disponibilidad de cada
+         personaje (true si está tomado, false si está disponible). También se han añadido métodos
+         isCharacterTaken() y setCharacterTaken() para gestionar este estado.
+       * `NetworkManager.java`:
+           * Cuando un personaje es seleccionado (ya sea por el host o un cliente), el host actualiza el
+             estado en JuegoSonic.selectedCharacters.
+           * El host ahora envía un `CharacterTakenPacket` a todos los clientes (y a sí mismo) para
+             notificarles sobre la nueva disponibilidad del personaje.
+           * Cuando un nuevo cliente se conecta, el host le envía el estado actual de todos los personajes ya
+             seleccionados para que su UI se inicialice correctamente.
+           * Los clientes, al recibir un CharacterTakenPacket, actualizan su JuegoSonic.selectedCharacters
+             local.
+       * `CharacterSelectionScreen.java`: Los botones de selección de personaje ahora consultan
+         JuegoSonic.isCharacterTaken() para habilitarse/deshabilitarse y cambiar su estilo visual (ej. texto
+         "Sonic (Tomado)"). Los ClickListeners de los botones solo envían la selección si el botón está
+         habilitado.
+   * Por qué: Para garantizar que solo un jugador pueda elegir un personaje, proporcionar retroalimentación
+     visual clara a todos los jugadores y evitar conflictos en la asignación de personajes.
+
+
+   * Problema: Actualmente, varios clientes pueden seleccionar el mismo personaje, y los botones de
+     selección no se deshabilitan, lo que genera confusión y asignaciones incorrectas. Además, el host no
+     actualiza visualmente la disponibilidad de los personajes.
+  2. Manejo Correcto de los Streams de Red
+
+
+   * Problema: El error "Se ha anulado una conexión establecida por el software en su equipo host" se producía
+      porque se creaba un nuevo ObjectOutputStream para cada mensaje TCP enviado, lo que corrompía el flujo de
+      datos.
+   * Solución:
+       * `NetworkManager.java`: Las instancias de ObjectOutputStream (clientTcpOut) y ObjectInputStream
+         (clientTcpIn) ahora son variables de instancia. Se inicializan una única vez cuando el cliente se
+         conecta al servidor y se reutilizan para todas las comunicaciones TCP posteriores.
+   * Por qué: Para mantener una conexión TCP estable y sin corrupción entre el cliente y el servidor, evitando
+      desconexiones prematuras y asegurando la integridad de los datos.
+
+
+  3. Flujo de Pantallas: Selección de Personaje después de la Asignación de Rol
+
+
+   * Problema: La pantalla de selección de personaje (CharacterSelectionScreen) se mostraba inmediatamente al
+     iniciar el juego, antes de que se estableciera si el jugador era host o cliente. Esto podía llevar a
+     problemas si el jugador intentaba seleccionar un personaje antes de que su rol de red estuviera definido.
+   * Solución:
+       * `NetworkManager.java`: La llamada para mostrar la CharacterSelectionScreen (game.setScreen(new
+         CharacterSelectionScreen(game))) se ha movido dentro del hilo de red (networkThread) y se ejecuta
+         solo después de que el proceso de descubrimiento de servidor y la asignación de rol (host/cliente) se
+          hayan completado.
+   * Por qué: Para asegurar que el rol de red del jugador esté completamente establecido antes de que se le
+     permita interactuar con la selección de personajes, haciendo el flujo del juego más robusto y lógico.
+
+  4. Inicialización Dinámica y Sincronización Visual de Personajes en GameScreen y GameServer
+
+
+   * Problema: Los personajes en GameScreen y GameServer se inicializaban de forma fija (ej. el jugador 0
+     siempre era Sonic, el jugador 1 siempre Tails), ignorando la selección real del jugador. Además, el host
+     no actualizaba visualmente a los personajes de forma consistente con el estado del servidor.
+   * Solución:
+       * `NetworkManager.java`: Se ha añadido un método getPlayerCharacterMap() (actualmente con una
+         asignación por defecto, pero que en una implementación completa contendría la asignación real de
+         playerId a characterType una vez confirmada la selección). Este mapa se pasa a GameScreen y
+         GameServer.
+       * `GameScreen.java`: El método initializeCharacters() ahora utiliza
+         game.networkManager.getPlayerCharacterMap() para crear dinámicamente las instancias correctas de
+         Sonic, Tails o Knuckles para cada playerId activo. El método render() ahora llama explícitamente a
+         updateCharactersFromState() usando el GameState más reciente
+         (game.networkManager.getCurrentGameState()) para renderizar a todos los personajes, asegurando que el
+          host también visualice correctamente a todos los jugadores.
+       * `GameServer.java`: El método initializeCharacters() también utiliza el playerCharacterMap para crear
+         las instancias correctas de los personajes para su lógica interna del juego.
+   * Por qué: Para asegurar que los personajes que aparecen y son controlados en el juego coincidan con la
+     selección real de cada jugador, y para garantizar que la representación visual de todos los personajes en
+      la pantalla del host sea consistente con el estado autoritativo del servidor.

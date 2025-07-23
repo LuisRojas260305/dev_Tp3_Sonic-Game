@@ -119,34 +119,39 @@ public class GameScreen implements Screen {
      */
     private void initializeCharacters() {
         Assets assets = game.getAssets();
-
-        characters.put(0, new Sonic(0, assets.sonicAtlas));
-        characters.put(1, new Tails(1, assets.tailsAtlas));
-        characters.put(2, new Knockles(2, assets.knocklesAtlas));
+        Map<Integer, String> playerCharacterMap = game.networkManager.getSelectedCharacters();
 
         // Establecer posiciones de spawn
         Map<String, Vector2> spawnPoints = findSpawnPoints();
 
-        // Sonic
-        Personajes sonic = characters.get(0);
-        Vector2 sonicSpawn = spawnPoints.getOrDefault("Sonic", new Vector2(mapWidth * 0.1f, mapHeight * 0.5f));
-        float groundYSonic = collisionManager.getGroundY(new Rectangle(sonicSpawn.x, sonicSpawn.y, sonic.getWidth(), sonic.getHeight()));
-        sonic.setPosition(sonicSpawn.x, groundYSonic >= 0 ? groundYSonic : sonicSpawn.y);
-        sonic.setPreviousPosition(sonic.getX(), sonic.getY());
+        for (Map.Entry<Integer, String> entry : playerCharacterMap.entrySet()) {
+            int playerId = entry.getKey();
+            String characterType = entry.getValue();
+            Personajes character = null;
 
-        // Tails
-        Personajes tails = characters.get(1);
-        Vector2 tailsSpawn = spawnPoints.getOrDefault("Tails", new Vector2(mapWidth * 0.2f, mapHeight * 0.5f));
-        float groundYTails = collisionManager.getGroundY(new Rectangle(tailsSpawn.x, tailsSpawn.y, tails.getWidth(), tails.getHeight()));
-        tails.setPosition(tailsSpawn.x, groundYTails >= 0 ? groundYTails : tailsSpawn.y);
-        tails.setPreviousPosition(tails.getX(), tails.getY());
+            switch (characterType) {
+                case "Sonic":
+                    character = new Sonic(playerId, assets.sonicAtlas);
+                    break;
+                case "Tails":
+                    character = new Tails(playerId, assets.tailsAtlas);
+                    break;
+                case "Knuckles":
+                    character = new Knockles(playerId, assets.knocklesAtlas);
+                    break;
+                default:
+                    Gdx.app.error("GameScreen", "Tipo de personaje desconocido: " + characterType);
+                    continue;
+            }
 
-        // Knuckles
-        Personajes knuckles = characters.get(2);
-        Vector2 knucklesSpawn = spawnPoints.getOrDefault("Knuckles", new Vector2(mapWidth * 0.3f, mapHeight * 0.5f));
-        float groundYKnuckles = collisionManager.getGroundY(new Rectangle(knucklesSpawn.x, knucklesSpawn.y, knuckles.getWidth(), knuckles.getHeight()));
-        knuckles.setPosition(knucklesSpawn.x, groundYKnuckles >= 0 ? groundYKnuckles : knucklesSpawn.y);
-        knuckles.setPreviousPosition(knuckles.getX(), knuckles.getY());
+            if (character != null) {
+                characters.put(playerId, character);
+                Vector2 spawn = spawnPoints.getOrDefault(characterType, new Vector2(mapWidth * 0.1f + playerId * 50, mapHeight * 0.5f));
+                float groundY = collisionManager.getGroundY(new Rectangle(spawn.x, spawn.y, character.getWidth(), character.getHeight()));
+                character.setPosition(spawn.x, groundY >= 0 ? groundY : spawn.y);
+                character.setPreviousPosition(character.getX(), character.getY());
+            }
+        }
     }
 
     /**
