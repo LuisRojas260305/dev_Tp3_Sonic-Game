@@ -63,7 +63,7 @@ public class GameScreen implements Screen {
 
     private float mapWidth, mapHeight;
 
-    
+
 
     /**
      * Constructor de la pantalla de juego.
@@ -100,11 +100,6 @@ public class GameScreen implements Screen {
         collisionManager = new CollisionManager(map, "Colisiones", mapWidth, mapHeight);
         collisionManager.addTileCollisions(map, "Colisiones");
 
-        
-
-        // Inicializar personajes
-        initializeCharacters();
-
         // Si es host, inicializar GameServer con las instancias creadas aquí
         if (isHost) {
             game.networkManager.initializeGameServer(map, collisionManager, mapWidth, mapHeight);
@@ -116,38 +111,80 @@ public class GameScreen implements Screen {
      * Asigna un personaje a cada ID de jugador y establece sus posiciones iniciales.
      */
     private void initializeCharacters() {
+
+    }
+
+    // Método nuevo para crear personajes bajo demanda
+    private void createCharacter(int playerId, String characterType) {
+        if (characters.containsKey(playerId)) return;
+
         Assets assets = game.getAssets();
-        Map<Integer, String> playerCharacterMap = game.networkManager.getSelectedCharacters();
+        Personajes character = null;
 
-        // Establecer posiciones de spawn
-        Map<String, Vector2> spawnPoints = findSpawnPoints();
+        switch (characterType) {
+            case "Sonic":
+                character = new Sonic(playerId, assets.sonicAtlas);
+                break;
+            case "Tails":
+                character = new Tails(playerId, assets.tailsAtlas);
+                break;
+            case "Knuckles":
+                character = new Knockles(playerId, assets.knocklesAtlas);
+                break;
+            default:
+                Gdx.app.error("GameScreen", "Tipo de personaje desconocido: " + characterType);
+                return;
+        }
 
-        for (Map.Entry<Integer, String> entry : playerCharacterMap.entrySet()) {
-            int playerId = entry.getKey();
-            String characterType = entry.getValue();
-            Personajes character = null;
+        if (character != null) {
+            characters.put(playerId, character);
 
-            switch (characterType) {
-                case "Sonic":
-                    character = new Sonic(playerId, assets.sonicAtlas);
-                    break;
-                case "Tails":
-                    character = new Tails(playerId, assets.tailsAtlas);
-                    break;
-                case "Knuckles":
-                    character = new Knockles(playerId, assets.knocklesAtlas);
-                    break;
-                default:
-                    Gdx.app.error("GameScreen", "Tipo de personaje desconocido: " + characterType);
-                    continue;
-            }
+            // Establecer posición inicial (será actualizada por el primer GameState)
+            Vector2 spawn = new Vector2(mapWidth * 0.1f + playerId * 50, mapHeight * 0.5f);
+            character.setPosition(spawn.x, spawn.y);
+            character.setPreviousPosition(spawn.x, spawn.y);
+        }
+    }
 
-            if (character != null) {
-                characters.put(playerId, character);
-                Vector2 spawn = spawnPoints.getOrDefault(characterType, new Vector2(mapWidth * 0.1f + playerId * 50, mapHeight * 0.5f));
-                float groundY = collisionManager.getGroundY(new Rectangle(spawn.x, spawn.y, character.getWidth(), character.getHeight()));
-                character.setPosition(spawn.x, groundY >= 0 ? groundY : spawn.y);
-                character.setPreviousPosition(character.getX(), character.getY());
+    // Método nuevo para actualizar desde GameState
+    private void updateFromGameState() {
+        GameState gameState = game.networkManager.getCurrentGameState();
+        if (gameState != null) {
+            synchronized (characters) {
+                for (PlayerState playerState : gameState.getPlayers()) {
+                    int playerId = playerState.getPlayerId();
+                    String characterType = game.networkManager.getSelectedCharacters().get(playerId);
+
+                    // Crear personaje si no existe
+                    if (!characters.containsKey(playerId) && characterType != null) {
+                        createCharacter(playerId, characterType);
+                    }
+
+                    Personajes character = characters.get(playerId);
+                    if (character == null) continue;
+
+                    // Solo aplicar estado completo para jugadores remotos
+                    if (playerId != localPlayerId) {
+                        character.setPosition(playerState.getX(), playerState.getY());
+                        character.setFacingRight(playerState.isFacingRight());
+                        character.setAnimationStateTime(playerState.getAnimationStateTime());
+
+                        // Actualizar animación
+                        try {
+                            Personajes.AnimationType animation = Personajes.AnimationType.valueOf(
+                                playerState.getCurrentAnimationName().toUpperCase()
+                            );
+                            character.setAnimation(animation);
+                        } catch (IllegalArgumentException e) {
+                            Gdx.app.error("GameScreen", "Animación desconocida: " + playerState.getCurrentAnimationName());
+                        }
+                    }
+                    // Para el jugador local solo hacemos reconciliación si hay discrepancia
+                    else if (Vector2.dst(character.getX(), character.getY(),
+                        playerState.getX(), playerState.getY()) > 5f) {
+                        character.setPosition(playerState.getX(), playerState.getY());
+                    }
+                }
             }
         }
     }
@@ -206,17 +243,16 @@ public class GameScreen implements Screen {
         Gdx.gl.glClearColor(0.2f, 0.2f, 0.2f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        // Obtener jugador local sincronizado
-        Personajes localPlayer;
-        synchronized (characters) {
-            localPlayer = characters.get(localPlayerId);
-        }
+        // 1. Actualizar desde el estado del juego (esto crea/actualiza los personajes)
+        updateFromGameState();
 
-        // Si es host, la lógica de contaminación se maneja en GameServer
-        // Si es cliente, la visualización de la contaminación se basa en el GameState recibido
-        
+        // 2. Procesar entrada del jugador local
+        processInput(delta);
 
-        // Actualizar cámara
+        // 3. Obtener jugador local para centrar cámara
+        Personajes localPlayer = characters.get(localPlayerId);
+
+        // 4. Actualizar cámara
         if (localPlayer != null) {
             // Centrar cámara en el jugador local
             float cameraHalfWidth = camera.viewportWidth / 2;
@@ -232,23 +268,23 @@ public class GameScreen implements Screen {
         }
         camera.update();
 
-        // Renderizar mapa
+        // 5. Renderizar mapa
         mapRenderer.setView(camera);
         mapRenderer.render();
 
-        // --- Lógica de Sincronización y Predicción ---
-        processInput(delta); // Mover la lógica de input a un método separado
-
-        // --- Renderizado ---
+        // 6. Renderizar personajes
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
         synchronized (characters) {
             for (Personajes character : characters.values()) {
-                // En el cliente, el jugador local ya se actualizó. Los remotos se actualizan por interpolación.
-                // El stateTime de los remotos se actualiza en updateCharactersFromState.
+                // Solo actualizar animaciones para jugadores remotos
+                if (character.getPlayerId() != localPlayerId) {
+                    character.setAnimationStateTime(character.getAnimationStateTime() + delta);
+                }
 
                 TextureRegion frame = character.getCurrentFrame();
 
+                // Aplicar flip horizontal según dirección
                 if (!character.isFacingRight() && !frame.isFlipX()) {
                     frame.flip(true, false);
                 } else if (character.isFacingRight() && frame.isFlipX()) {
@@ -260,8 +296,13 @@ public class GameScreen implements Screen {
         }
         batch.end();
 
-        // Renderizar colisiones para debug (opcional)
+        // 7. Renderizar colisiones para debug (opcional)
         // debugRenderCollisions();
+
+        // 8. Actualizar estado de animación local (si es cliente)
+        if (!isHost && localPlayer != null) {
+            localPlayer.setAnimationStateTime(localPlayer.getAnimationStateTime() + delta);
+        }
     }
 
     /**
@@ -361,7 +402,7 @@ public class GameScreen implements Screen {
                     }
                 }
 
-                
+
             }
         }
     }
@@ -393,7 +434,7 @@ public class GameScreen implements Screen {
         for (Personajes character : characters.values()) {
             character.dispose();
         }
-        
+
         // Si es host, GameScreen es responsable de disponer el mapa y los sistemas
         if (isHost) {
             map.dispose();

@@ -30,7 +30,7 @@ public class GameServer {
     private final ConcurrentHashMap<Integer, Personajes> characters;
     private final ConcurrentHashMap<Integer, InputState> playerInputs;
     private final CollisionManager collisionManager;
-    
+
     private final float mapWidth;
     private final float mapHeight;
     private final TiledMap map;
@@ -43,7 +43,7 @@ public class GameServer {
         this.playerInputs = playerInputs;
         this.map = map;
         this.collisionManager = collisionManager;
-        
+
         this.mapWidth = mapWidth;
         this.mapHeight = mapHeight;
         this.characters = new ConcurrentHashMap<>();
@@ -85,7 +85,7 @@ public class GameServer {
             }
         }
 
-        
+
     }
 
     private Map<String, Vector2> findSpawnPoints() {
@@ -170,24 +170,22 @@ public class GameServer {
     }
 
     private void updateGameState(float delta) {
+        // Actualizar todos los personajes
         for (Personajes character : characters.values()) {
             InputState input = playerInputs.get(character.getPlayerId());
-
             if (input != null) {
                 character.setPreviousPosition(character.getX(), character.getY());
                 character.update(delta, collisionManager);
                 character.handleInput(input, collisionManager, delta);
 
+                // Limitar dentro del mapa
                 float newX = Math.max(0, Math.min(character.getX(), mapWidth - character.getWidth()));
                 float newY = Math.max(0, Math.min(character.getY(), mapHeight - character.getHeight()));
                 character.setPosition(newX, newY);
             }
         }
 
-        
-
-        sequenceNumber++;
-
+        // Crear nuevo estado del juego
         ArrayList<PlayerState> playerStates = new ArrayList<>();
         for (Personajes character : characters.values()) {
             playerStates.add(new PlayerState(
@@ -195,12 +193,16 @@ public class GameServer {
                 character.getX(), character.getY(),
                 character.isFacingRight(),
                 character.getCurrentAnimationName(),
-                character.getAnimationStateTime()));
+                character.getAnimationStateTime()
+            ));
         }
 
-        
+        // Actualizar y transmitir el estado
+        GameState newGameState = new GameState(playerStates, sequenceNumber++);
+        game.networkManager.setCurrentGameState(newGameState);
+        game.networkManager.broadcastUdpGameState(); // Nuevo método
 
-        game.networkManager.setCurrentGameState(new GameState(playerStates, sequenceNumber));
+        Gdx.app.log("GameServer", "Broadcast estado #" + newGameState.getSequenceNumber());
     }
 
     public GameState getCurrentGameState() {
