@@ -103,6 +103,13 @@ public class GameScreen implements Screen {
         Assets assets = game.getAssets();
         Personajes character = null;
 
+        // Asegurarnos de que characterType no sea nulo
+        if (characterType == null) {
+            Gdx.app.error("GameScreen", "Tipo de personaje nulo para jugador " + playerId);
+            characterType = "Sonic"; // Valor por defecto
+        }
+
+        // Crear el personaje según el tipo seleccionado
         switch (characterType) {
             case "Sonic":
                 character = new Sonic(playerId, assets.sonicAtlas);
@@ -114,9 +121,8 @@ public class GameScreen implements Screen {
                 character = new Knockles(playerId, assets.knocklesAtlas);
                 break;
             default:
-                characterType = "Sonic"; // Valor por defecto
+                Gdx.app.error("GameScreen", "Tipo de personaje desconocido: " + characterType + ", usando Sonic por defecto");
                 character = new Sonic(playerId, assets.sonicAtlas);
-                Gdx.app.error("GameScreen", "Tipo de personaje desconocido, usando Sonic por defecto");
                 break;
         }
 
@@ -131,9 +137,9 @@ public class GameScreen implements Screen {
             float groundY = collisionManager.getGroundY(new Rectangle(x, y, 50, 50));
             character.setPosition(x, groundY >= 0 ? groundY : y);
             character.setPreviousPosition(x, y);
-
-            // Inicializar posición predicha
             character.setPredictedPosition(x, y);
+
+            Gdx.app.log("GameScreen", "Personaje creado: " + characterType + " para jugador " + playerId);
         }
     }
 
@@ -141,15 +147,19 @@ public class GameScreen implements Screen {
         GameState gameState = game.networkManager.getCurrentGameState();
         if (gameState == null) return;
 
-        // Obtener todos los personajes seleccionados
-        Map<Integer, String> allCharacters = game.networkManager.getSelectedCharacters();
-
         synchronized (characters) {
             for (PlayerState playerState : gameState.getPlayers()) {
-                int playerId = playerState.getPlayerId();
-                String characterType = allCharacters.get(playerId);
 
-                // Si no tenemos tipo, usar uno por defecto
+                int playerId = playerState.getPlayerId();
+
+                String characterType = playerState.getCharacterType();
+
+                // Si no tenemos tipo para este jugador, intentar obtenerlo del jugador local
+                if (characterType == null && playerId == localPlayerId) {
+                    characterType = game.networkManager.getSelectedCharacterType();
+                }
+
+                // Si todavía no tenemos tipo, usar uno por defecto
                 if (characterType == null) {
                     characterType = "Sonic";
                     Gdx.app.error("GameScreen", "Tipo desconocido para jugador " + playerId + ", usando Sonic");
@@ -207,7 +217,6 @@ public class GameScreen implements Screen {
             }
         }
     }
-
     private Map<String, Vector2> findSpawnPoints() {
         Map<String, Vector2> spawnPoints = new HashMap<>();
         MapLayer layer = map.getLayers().get("SpawnJugadores");

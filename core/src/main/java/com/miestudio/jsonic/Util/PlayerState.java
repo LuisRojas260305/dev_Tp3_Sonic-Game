@@ -15,14 +15,16 @@ public class PlayerState implements Serializable {
     private boolean facingRight;
     private String currentAnimationName; // Nombre de la animación actual (ej. "idle", "run", "jump")
     private float animationStateTime; // stateTime de la animación
+    private String characterType;
 
-    public PlayerState(int playerId, float x, float y, boolean facingRight, String currentAnimationName, float animationStateTime) {
+    public PlayerState(int playerId, float x, float y, boolean facingRight, String currentAnimationName, float animationStateTime, String characterType) {
         this.playerId = playerId;
         this.x = x;
         this.y = y;
         this.facingRight = facingRight;
         this.currentAnimationName = currentAnimationName;
         this.animationStateTime = animationStateTime;
+        this.characterType = characterType;
     }
 
     // Getters para que el cliente pueda leer el estado
@@ -32,4 +34,5 @@ public class PlayerState implements Serializable {
     public boolean isFacingRight() { return facingRight; }
     public String getCurrentAnimationName() { return currentAnimationName; }
     public float getAnimationStateTime() { return animationStateTime; }
+    public String getCharacterType() { return characterType; }
 }

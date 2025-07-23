@@ -435,6 +435,10 @@ public class NetworkManager {
         if (udpReceiveThread != null) udpReceiveThread.interrupt();
     }
 
+    public String getSelectedCharacterType() {
+        return selectedCharacterType;
+    }
+
     private class ClientConnection implements Runnable {
         private final Socket tcpSocket;
         private final int playerId;

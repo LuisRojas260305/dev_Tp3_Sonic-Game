@@ -188,12 +188,15 @@ public class GameServer {
         // Crear nuevo estado del juego
         ArrayList<PlayerState> playerStates = new ArrayList<>();
         for (Personajes character : characters.values()) {
+
+            String characterType = game.networkManager.getSelectedCharacters().get(character.getPlayerId());
             playerStates.add(new PlayerState(
                 character.getPlayerId(),
                 character.getX(), character.getY(),
                 character.isFacingRight(),
                 character.getCurrentAnimationName(),
-                character.getAnimationStateTime()
+                character.getAnimationStateTime(),
+                characterType
             ));
         }
 
