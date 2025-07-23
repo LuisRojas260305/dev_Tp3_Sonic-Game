@@ -11,7 +11,7 @@ import com.miestudio.jsonic.Actores.Personajes;
 import com.miestudio.jsonic.Actores.Sonic;
 import com.miestudio.jsonic.Actores.Tails;
 import com.miestudio.jsonic.JuegoSonic;
-import com.miestudio.jsonic.Sistemas.PollutionSystem;
+
 import com.miestudio.jsonic.Util.Assets;
 import com.miestudio.jsonic.Util.CollisionManager;
 import com.miestudio.jsonic.Util.Constantes;
@@ -30,7 +30,7 @@ public class GameServer {
     private final ConcurrentHashMap<Integer, Personajes> characters;
     private final ConcurrentHashMap<Integer, InputState> playerInputs;
     private final CollisionManager collisionManager;
-    private final PollutionSystem pollutionSystem;
+    
     private final float mapWidth;
     private final float mapHeight;
     private final TiledMap map;
@@ -38,12 +38,12 @@ public class GameServer {
     private volatile boolean running = false;
     private long sequenceNumber = 0;
 
-    public GameServer(JuegoSonic game, ConcurrentHashMap<Integer, InputState> playerInputs, TiledMap map, CollisionManager collisionManager, PollutionSystem pollutionSystem, float mapWidth, float mapHeight) {
+    public GameServer(JuegoSonic game, ConcurrentHashMap<Integer, InputState> playerInputs, TiledMap map, CollisionManager collisionManager, float mapWidth, float mapHeight) {
         this.game = game;
         this.playerInputs = playerInputs;
         this.map = map;
         this.collisionManager = collisionManager;
-        this.pollutionSystem = pollutionSystem;
+        
         this.mapWidth = mapWidth;
         this.mapHeight = mapHeight;
         this.characters = new ConcurrentHashMap<>();
@@ -85,7 +85,7 @@ public class GameServer {
             }
         }
 
-        pollutionSystem.generarContaminacionInicial();
+        
     }
 
     private Map<String, Vector2> findSpawnPoints() {
@@ -184,10 +184,7 @@ public class GameServer {
             }
         }
 
-        pollutionSystem.update(delta);
-        if (Math.random() < 0.1f) {
-            pollutionSystem.propagarContaminacion();
-        }
+        
 
         sequenceNumber++;
 
@@ -201,12 +198,9 @@ public class GameServer {
                 character.getAnimationStateTime()));
         }
 
-        ArrayList<GameState.CorruptionState> corruptionStates = new ArrayList<>();
-        for (PollutionSystem.PuntoContaminacion punto : pollutionSystem.getPuntosContaminacion()) {
-            corruptionStates.add(new GameState.CorruptionState(punto.tileX, punto.tileY, punto.nivel));
-        }
+        
 
-        game.networkManager.setCurrentGameState(new GameState(playerStates, corruptionStates, sequenceNumber));
+        game.networkManager.setCurrentGameState(new GameState(playerStates, sequenceNumber));
     }
 
     public GameState getCurrentGameState() {

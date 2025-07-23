@@ -32,7 +32,7 @@ import com.miestudio.jsonic.Util.Constantes;
 import com.miestudio.jsonic.Util.GameState;
 import com.miestudio.jsonic.Util.InputState;
 import com.miestudio.jsonic.Util.PlayerState;
-import com.miestudio.jsonic.Sistemas.*;
+
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -63,8 +63,7 @@ public class GameScreen implements Screen {
 
     private float mapWidth, mapHeight;
 
-    private PollutionSystem pollutionSystem;
-    private VisualPollutionSystem visualPollutionSystem;
+    
 
     /**
      * Constructor de la pantalla de juego.
@@ -101,15 +100,14 @@ public class GameScreen implements Screen {
         collisionManager = new CollisionManager(map, "Colisiones", mapWidth, mapHeight);
         collisionManager.addTileCollisions(map, "Colisiones");
 
-        this.pollutionSystem = new PollutionSystem(map, "Capa1");
-        this.visualPollutionSystem = new VisualPollutionSystem();
+        
 
         // Inicializar personajes
         initializeCharacters();
 
         // Si es host, inicializar GameServer con las instancias creadas aquí
         if (isHost) {
-            game.networkManager.initializeGameServer(map, collisionManager, pollutionSystem, mapWidth, mapHeight);
+            game.networkManager.initializeGameServer(map, collisionManager, mapWidth, mapHeight);
         }
     }
 
@@ -216,7 +214,7 @@ public class GameScreen implements Screen {
 
         // Si es host, la lógica de contaminación se maneja en GameServer
         // Si es cliente, la visualización de la contaminación se basa en el GameState recibido
-        visualPollutionSystem.dibujarEfectos(batch, pollutionSystem.getPuntosContaminacion());
+        
 
         // Actualizar cámara
         if (localPlayer != null) {
@@ -363,13 +361,7 @@ public class GameScreen implements Screen {
                     }
                 }
 
-                // Actualizar el estado visual de la contaminación en el cliente
-                if (gameState.getCorruptionStates() != null) {
-                    pollutionSystem.clearPollution();
-                    for (GameState.CorruptionState cs : gameState.getCorruptionStates()) {
-                        pollutionSystem.applyCorruptionState(cs.getTileX(), cs.getTileY(), cs.getNivel());
-                    }
-                }
+                
             }
         }
     }
@@ -401,7 +393,7 @@ public class GameScreen implements Screen {
         for (Personajes character : characters.values()) {
             character.dispose();
         }
-        visualPollutionSystem.dispose();
+        
         // Si es host, GameScreen es responsable de disponer el mapa y los sistemas
         if (isHost) {
             map.dispose();

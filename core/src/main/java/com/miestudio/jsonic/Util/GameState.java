@@ -15,13 +15,12 @@ public class GameState implements Serializable {
      * Número de versión para la serialización. Incrementado a 2L debido a la adición
      * del estado de contaminación. Esto asegura compatibilidad entre versiones.
      */
-    private static final long serialVersionUID = 3L; // Incrementado por la adición de sequenceNumber
+    private static final long serialVersionUID = 1L;
 
     /** La lista de los estados de cada jugador en la partida. */
     private List<PlayerState> players;
 
-    /** La lista de los estados de contaminación en el mapa. */
-    private List<CorruptionState> corruptionStates;
+    
 
     /** Número de secuencia para la versión del estado del juego. */
     private long sequenceNumber;
@@ -33,9 +32,9 @@ public class GameState implements Serializable {
      * @param corruptionStates Lista de estados de contaminación (puede ser null)
      * @param sequenceNumber Número de secuencia de esta actualización del estado del juego
      */
-    public GameState(List<PlayerState> players, List<CorruptionState> corruptionStates, long sequenceNumber) {
+    public GameState(List<PlayerState> players, long sequenceNumber) {
         this.players = players;
-        this.corruptionStates = corruptionStates;
+        
         this.sequenceNumber = sequenceNumber;
     }
 
@@ -45,65 +44,18 @@ public class GameState implements Serializable {
      * @param players Lista de estados de los jugadores
      */
     public GameState(List<PlayerState> players) {
-        this(players, null, 0); // Valor por defecto para sequenceNumber
+        this(players, 0);
     }
 
     public List<PlayerState> getPlayers() {
         return players;
     }
 
-    public List<CorruptionState> getCorruptionStates() {
-        return corruptionStates;
-    }
-
-    public void setCorruptionStates(List<CorruptionState> corruptionStates) {
-        this.corruptionStates = corruptionStates;
-    }
+    
 
     public long getSequenceNumber() {
         return sequenceNumber;
     }
 
-    /**
-     * Representa el estado de un punto de contaminación en el mapa.
-     */
-    public static class CorruptionState implements Serializable {
-        private int tileX;
-        private int tileY;
-        private int nivel;
-
-        public CorruptionState() {
-            // Constructor vacío necesario para serialización
-        }
-
-        public CorruptionState(int tileX, int tileY, int nivel) {
-            this.tileX = tileX;
-            this.tileY = tileY;
-            this.nivel = nivel;
-        }
-
-        public int getTileX() {
-            return tileX;
-        }
-
-        public void setTileX(int tileX) {
-            this.tileX = tileX;
-        }
-
-        public int getTileY() {
-            return tileY;
-        }
-
-        public void setTileY(int tileY) {
-            this.tileY = tileY;
-        }
-
-        public int getNivel() {
-            return nivel;
-        }
-
-        public void setNivel(int nivel) {
-            this.nivel = nivel;
-        }
-    }
+    
 }

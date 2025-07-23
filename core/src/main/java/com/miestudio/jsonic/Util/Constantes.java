@@ -20,9 +20,7 @@ public class Constantes {
     public static final float GRAVITY = -500f;
     public static final float JUMP_FORCE = 200f;
 
-    /** Sistema de corrupcion */
-    public static final String PROP_ORIGEN = "Origen";
-    public static final String PROP_CONTAMINABLE = "Contaminable";
+    
 
     /** Constantes del mapa */
     public static final int TILE_SIZE = 32;

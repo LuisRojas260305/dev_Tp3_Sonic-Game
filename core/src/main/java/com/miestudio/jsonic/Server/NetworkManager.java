@@ -15,7 +15,7 @@ import com.miestudio.jsonic.Server.network.CharacterTakenPacket;
 
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.miestudio.jsonic.Util.CollisionManager;
-import com.miestudio.jsonic.Sistemas.PollutionSystem;
+
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -161,9 +161,9 @@ public class NetworkManager {
         }
     }
 
-    public void initializeGameServer(TiledMap map, CollisionManager collisionManager, PollutionSystem pollutionSystem, float mapWidth, float mapHeight) {
+    public void initializeGameServer(TiledMap map, CollisionManager collisionManager, float mapWidth, float mapHeight) {
         if (gameServer == null) {
-            gameServer = new GameServer(game, playerInputs, map, collisionManager, pollutionSystem, mapWidth, mapHeight);
+            gameServer = new GameServer(game, playerInputs, map, collisionManager, mapWidth, mapHeight);
             gameServer.start();
         }
     }
