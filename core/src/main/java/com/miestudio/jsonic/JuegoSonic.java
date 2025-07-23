@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class JuegoSonic extends Game {
 
+    
     /** Gestor de red para manejar la creación del host y la conexión de clientes. */
     public NetworkManager networkManager;
     /** Gestor de assets para cargar y liberar recursos. */
