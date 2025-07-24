@@ -223,7 +223,8 @@ public class GameServer {
                 character.isFacingRight(),
                 character.getCurrentAnimationName(),
                 character.getAnimationStateTime(),
-                characterType
+                characterType,
+                ((Tails) character).isFlying()
             ));
         }
 

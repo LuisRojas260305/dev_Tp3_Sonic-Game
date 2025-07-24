@@ -242,6 +242,8 @@ public class GameScreen implements Screen {
                     Gdx.app.error("GameScreen", "Tipo de personaje desconocido para jugador " + playerId + ", usando Sonic por defecto.");
                 }
 
+                
+                
                 // Crear el personaje si aún no existe en el mapa de personajes
                 if (!characters.containsKey(playerId)) {
                     createCharacter(playerId, characterType);
@@ -251,6 +253,11 @@ public class GameScreen implements Screen {
                 // Si el personaje no se pudo crear o es nulo por alguna razón, saltar al siguiente
                 if (character == null) continue;
 
+                if (playerState.isFlying() && character instanceof Tails) {
+                    ((Tails) character).setFlying(true);
+                    character.setAnimation(Personajes.AnimationType.FLY);
+                }
+                
                 // Lógica de actualización para jugadores remotos (clientes) y para el host
                 if (isHost || playerId != localPlayerId) {
                     // Aplicar interpolación suave para un movimiento más fluido de los personajes remotos

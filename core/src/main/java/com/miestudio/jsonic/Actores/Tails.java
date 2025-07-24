@@ -9,7 +9,6 @@ import com.badlogic.gdx.utils.Array;
 import com.miestudio.jsonic.Server.domain.InputState;
 import com.miestudio.jsonic.Util.CollisionManager;
 
-
 public class Tails extends Personajes {
     private TextureAtlas AtlasTails;
     private Animation<TextureRegion> flyAnimation;
@@ -114,6 +113,11 @@ public class Tails extends Personajes {
             if (flyTime >= MAX_FLY_TIME) {
                 stopFlying();
             }
+            
+            // Asegurar que la animación de vuelo se mantenga
+            if (currentAnimation != flyAnimation) {
+                setCurrentAnimation(flyAnimation);
+            }
         }
         
         // Actualizar el robot activo
@@ -185,7 +189,7 @@ public class Tails extends Personajes {
         if (isAbilityActive) {
             setCurrentAnimation(abilityAnimation);
         } else if (isFlying) {
-            setCurrentAnimation(flyAnimation);
+            setCurrentAnimation(flyAnimation); // Prioridad máxima para vuelo
         } else if (!isGrounded) {
             // Si está en el aire, la animación de salto/caída ya se gestiona en update()
             // Pero si la velocidad es ascendente, es un salto.
@@ -217,15 +221,12 @@ public class Tails extends Personajes {
             
             // Configurar cooldown
             robotCooldown = ROBOT_COOLDOWN_TIME;
-            
-            
         }
     }
     
     public void startFlying() {
         if (!isFlying && flyTime < MAX_FLY_TIME) {
             isFlying = true;
-
             setCurrentAnimation(flyAnimation);
         }
     }
@@ -233,7 +234,7 @@ public class Tails extends Personajes {
     public void stopFlying() {
         if (isFlying) {
             isFlying = false;
-            setCurrentAnimation(fallAnimation);
+            // No establecer animación de caída aquí, se manejará en update()
         }
     }
     
@@ -251,6 +252,23 @@ public class Tails extends Personajes {
     
     public Robot getActiveRobot() {
         return activeRobot;
+    }
+
+    @Override
+    public String getCurrentAnimationName() {
+        if (isFlying) {
+            return "FLY"; // Nuevo estado de animación para vuelo
+        }
+        return super.getCurrentAnimationName();
+    }
+    
+    @Override
+    public void setAnimation(AnimationType animationType) {
+        if (animationType == AnimationType.FLY) {
+            setCurrentAnimation(flyAnimation);
+        } else {
+            super.setAnimation(animationType);
+        }
     }
 
     @Override
@@ -285,7 +303,7 @@ public class Tails extends Personajes {
             distanceTraveled += moveAmount;
             
             // Verificar colisiones
-            Rectangle bounds = new Rectangle(x, y, 32, 32); // Tamaño estimado del robot
+            Rectangle bounds = new Rectangle(x, y, 15, 15); // Tamaño estimado del robot
             if (collisionManager.collides(bounds)) {
                 distanceTraveled = MAX_DISTANCE; // Terminar si choca
             }

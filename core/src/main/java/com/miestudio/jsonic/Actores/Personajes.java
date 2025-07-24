@@ -32,7 +32,11 @@ public abstract class Personajes extends Actor {
         /** Animación de rodar. */
         ROLL,
         /** Animación de habilidad especial. */
-        ABILITY
+        ABILITY,
+        
+        FLY,  // Nueva animación
+        
+        FALL
     }
 
     /** Tiempo de estado actual de la animación. */
