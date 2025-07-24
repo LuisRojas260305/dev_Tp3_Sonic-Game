@@ -1,42 +1,64 @@
 package com.miestudio.jsonic.Util;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.utils.Array;
 
 /**
  * Clase para gestionar la carga y descarga de todos los assets del juego.
- * Centraliza la gestión de recursos para una mejor organización y mantenimiento.
+ * Centraliza la gestion de recursos para una mejor organizacion y mantenimiento.
  */
 public class Assets {
 
-    // Atlas de texturas para los personajes
+    /**
+     * Atlas de texturas para el personaje Sonic.
+     */
     public TextureAtlas sonicAtlas;
+    /**
+     * Atlas de texturas para el personaje Tails.
+     */
     public TextureAtlas tailsAtlas;
-    public TextureAtlas knocklesAtlas;
+    /**
+     * Atlas de texturas para el personaje Knuckles.
+     */
+    public TextureAtlas knucklesAtlas;
+
+    public TextureAtlas objetosAtlas;
+
+    public Animation<TextureRegion> anilloAnimation;
 
     /**
      * Carga todos los assets del juego.
-     * Este método debe ser llamado al inicio de la aplicación.
+     * Este metodo debe ser llamado al inicio de la aplicacion para precargar los recursos.
      */
     public void load() {
         try {
             sonicAtlas = new TextureAtlas(Gdx.files.internal(Constantes.PERSONAJES_PATH + "AtlasSonic.txt"));
             tailsAtlas = new TextureAtlas(Gdx.files.internal(Constantes.PERSONAJES_PATH + "AtlasTails.txt"));
-            knocklesAtlas = new TextureAtlas(Gdx.files.internal(Constantes.PERSONAJES_PATH + "AtlasKnuckles.txt"));
-            Gdx.app.log("Assets", "Todos los TextureAtlas cargados correctamente.");
+            knucklesAtlas = new TextureAtlas(Gdx.files.internal(Constantes.PERSONAJES_PATH + "AtlasKnuckles.txt"));
+            objetosAtlas = new TextureAtlas(Gdx.files.internal(Constantes.OBJECT_PATCH + "Objetos.txt"));
+
+            Array<TextureRegion> framesAnillo = new Array<>();
+            for (int i = 0; i < 5; i++) {
+                framesAnillo.add(objetosAtlas.findRegion("ObjA" + i));
+            }
+            anilloAnimation = new Animation<>(0.15f, framesAnillo, Animation.PlayMode.LOOP);
+
         } catch (Exception e) {
-            Gdx.app.error("Assets", "Error al cargar TextureAtlas: " + e.getMessage());
-            // Aquí podrías manejar el error de forma más robusta, como cargar assets de fallback
+
         }
     }
 
     /**
      * Libera todos los assets cargados.
-     * Este método debe ser llamado al finalizar la aplicación para evitar fugas de memoria.
+     * Este metodo debe ser llamado al finalizar la aplicacion para evitar fugas de memoria.
      */
     public void dispose() {
         if (sonicAtlas != null) sonicAtlas.dispose();
         if (tailsAtlas != null) tailsAtlas.dispose();
-        if (knocklesAtlas != null) knocklesAtlas.dispose();
+        if (knucklesAtlas != null) knucklesAtlas.dispose();
+        if (objetosAtlas != null) objetosAtlas.dispose();
     }
 }

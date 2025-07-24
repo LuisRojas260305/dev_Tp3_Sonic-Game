@@ -1,26 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="50" height="20" tilewidth="32" tileheight="32" infinite="0" nextlayerid="5" nextobjectid="1">
- <tileset firstgid="1" source="../Tilesets/Especiales.tsx"/>
- <tileset firstgid="1801" source="../Tilesets/Sonic.tsx"/>
- <tileset firstgid="3601" source="../Tilesets/Sin fondo.tsx"/>
- <layer id="1" name="Colisiones" width="50" height="20">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="50" height="20" tilewidth="32" tileheight="32" infinite="0" nextlayerid="7" nextobjectid="1">
+ <tileset firstgid="1" source="../Tilesets/TileSet.tsx"/>
+ <layer id="4" name="SpawnEntidades" width="50" height="20">
   <data encoding="base64" compression="zlib">
-   eJztw7EJAAAIA7D6/9Pe0E0kgSQAAAA05kluWXGsADM=
+   eJztziEBAAAIwDDqAP374QkAZnN3jwAAAOBbrq7VfTXCmwEFpwB/
   </data>
  </layer>
- <layer id="2" name="SpawnJugadores" width="50" height="20">
+ <layer id="5" name="SpawnObjetos" width="50" height="20">
   <data encoding="base64" compression="zlib">
-   eJztzjEKADAIBEH/FP3/12xS2gmBwEyzcNVFAAAA/OsMW93myyOw1LorAJ0=
+   eJztz8EJAAAIA7Fu5P7buYN+BBO4f5sAAABf1KJLpnv84LIGd2kDfg==
   </data>
  </layer>
- <layer id="3" name="Fondo" width="50" height="20">
+ <layer id="6" name="SpanwEgman" width="50" height="20">
   <data encoding="base64" compression="zlib">
-   eJztwzENAAAMA6Cek13plbEHEnpJVVVV1dcDblUTXw==
+   eJztwTEBAAAAwqD1T20MH6AAAACAtwEPoAAB
   </data>
  </layer>
- <layer id="4" name="Capa1" width="50" height="20">
+ <layer id="3" name="Colisiones" width="50" height="20">
   <data encoding="base64" compression="zlib">
-   eJztz0kNACAMAMEq4MHp3ym1wLNkJlkBGwEAAMCL2SJG8Va2s16889HHBZwyEwg=
+   eJztwwENAAAMAiDjvH/C91DYSAAAAFh0JVs8R4cH0Q==
+  </data>
+ </layer>
+ <layer id="1" name="Capa1" width="50" height="20">
+  <data encoding="base64" compression="zlib">
+   eJztw4EJAAAIA6AR9P/L/bEUTAAAAPhoSm7JA+k0AV8=
+  </data>
+ </layer>
+ <layer id="2" name="Decoracion" width="50" height="20">
+  <data encoding="base64" compression="zlib">
+   eJztzUEKwCAMRNHs2tpK9f6X7RQSkKCL7rr4DwZB48QMAAAAAPDV5uehnEpXdr+7lZbmYjYri94wdpnvmv2N3e+OS6mLt9yP/3gA4QcA6w==
   </data>
  </layer>
 </map>

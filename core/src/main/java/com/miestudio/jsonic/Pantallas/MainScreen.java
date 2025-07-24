@@ -13,11 +13,19 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.miestudio.jsonic.JuegoSonic;
 import com.miestudio.jsonic.Util.UIUtils;
 
+/**
+ * Pantalla principal del juego que muestra las opciones iniciales al usuario.
+ * Permite iniciar el juego, acceder a la ayuda o ver estadisticas.
+ */
 public class MainScreen implements Screen {
 
-    private final JuegoSonic game;
-    private final Stage stage;
+    private final JuegoSonic game; /** Referencia a la instancia principal del juego. */
+    private final Stage stage; /** Escenario de Scene2D para la gestion de la UI. */
 
+    /**
+     * Constructor de MainScreen.
+     * @param game La instancia principal del juego.
+     */
     public MainScreen(JuegoSonic game) {
         this.game = game;
         this.stage = new Stage(new ScreenViewport());
@@ -26,6 +34,9 @@ public class MainScreen implements Screen {
         setupUI();
     }
 
+    /**
+     * Configura la interfaz de usuario de la pantalla principal, incluyendo botones y sus listeners.
+     */
     private void setupUI() {
         TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
         buttonStyle.font = new BitmapFont();
@@ -39,7 +50,7 @@ public class MainScreen implements Screen {
         playButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                Gdx.app.log("MainScreen", "Botón Jugar presionado. Iniciando NetworkManager.");
+                Gdx.app.log("MainScreen", "Boton Jugar presionado. Iniciando NetworkManager.");
                 game.networkManager.checkNetworkStatus();
                 // Transición a pantalla de selección de personaje
                 game.setScreen(new CharacterSelectionScreen(game, game.selectedCharacters));
@@ -52,7 +63,7 @@ public class MainScreen implements Screen {
         helpButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                Gdx.app.log("MainScreen", "Botón Ayuda presionado.");
+                Gdx.app.log("MainScreen", "Boton Ayuda presionado.");
                 // Transición a pantalla de ayuda
                 //game.setScreen(new HelpScreen(game));
             }

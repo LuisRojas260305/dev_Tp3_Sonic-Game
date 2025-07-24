@@ -18,15 +18,24 @@ import com.miestudio.jsonic.Util.UIUtils;
 
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Pantalla de seleccion de personaje donde los jugadores eligen su personaje antes de iniciar la partida.
+ * Muestra los personajes disponibles y su estado (tomado/disponible).
+ */
 public class CharacterSelectionScreen implements Screen {
-    private JuegoSonic game;
-    private Stage stage;
-    private ConcurrentHashMap<String, Boolean> selectedCharacters;
+    private JuegoSonic game; /** Referencia a la instancia principal del juego. */
+    private Stage stage; /** Escenario de Scene2D para la gestion de la UI. */
+    private ConcurrentHashMap<String, Boolean> selectedCharacters; /** Mapa que almacena el estado de seleccion de cada personaje. */
 
-    private TextButton sonicButton;
-    private TextButton tailsButton;
-    private TextButton knucklesButton;
+    private TextButton sonicButton; /** Boton para seleccionar a Sonic. */
+    private TextButton tailsButton; /** Boton para seleccionar a Tails. */
+    private TextButton knucklesButton; /** Boton para seleccionar a Knuckles. */
 
+    /**
+     * Constructor de CharacterSelectionScreen.
+     * @param game La instancia principal del juego.
+     * @param selectedCharacters Mapa que contiene el estado de seleccion actual de los personajes.
+     */
     public CharacterSelectionScreen(JuegoSonic game, ConcurrentHashMap<String, Boolean> selectedCharacters) {
         this.game = game;
         this.selectedCharacters = selectedCharacters;
@@ -36,6 +45,9 @@ public class CharacterSelectionScreen implements Screen {
         createUI();
     }
 
+    /**
+     * Crea y configura la interfaz de usuario para la seleccion de personajes.
+     */
     private void createUI() {
         Table table = new Table();
         table.setFillParent(true);
@@ -59,7 +71,7 @@ public class CharacterSelectionScreen implements Screen {
         table.add(tailsButton).width(200).height(50).padBottom(20).row();
         table.add(knucklesButton).width(200).height(50).row();
 
-        // Listener genérico para todos los personajes
+        // Listener generico para todos los personajes
         sonicButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -87,6 +99,11 @@ public class CharacterSelectionScreen implements Screen {
         });
     }
 
+    /**
+     * Actualiza el estado visual de un boton de seleccion de personaje (habilitado/deshabilitado, texto).
+     * @param button El TextButton a actualizar.
+     * @param characterName El nombre del personaje asociado al boton.
+     */
     private void updateButtonState(TextButton button, String characterName) {
         if (game.isCharacterTaken(characterName)) {
             button.setText(characterName + " (Tomado)");

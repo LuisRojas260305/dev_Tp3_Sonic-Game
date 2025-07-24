@@ -14,22 +14,22 @@ import com.miestudio.jsonic.JuegoSonic;
 import com.miestudio.jsonic.Util.UIUtils;
 
 /**
- * Pantalla de Lobby que se muestra después de que un jugador ha elegido ser Host o Cliente.
- * Muestra un color de fondo según el personaje y un botón para iniciar la partida (solo para el Host).
+ * Pantalla de Lobby que se muestra despues de que un jugador ha elegido ser Host o Cliente.
+ * Muestra un color de fondo segun el personaje y un boton para iniciar la partida (solo para el Host).
  */
 public class LobbyScreen implements Screen {
 
-    private final JuegoSonic game;
-    private final Stage stage;
-    private final Color playerColor;
-    private final boolean isHost;
+    private final JuegoSonic game; /** Referencia a la instancia principal del juego. */
+    private final Stage stage; /** Escenario de Scene2D para la gestion de la UI. */
+    private final Color playerColor; /** Color de fondo de la pantalla, basado en la seleccion del personaje. */
+    private final boolean isHost; /** Indica si el jugador actual es el host de la partida. */
 
     /**
      * Constructor para la pantalla de Lobby.
      *
      * @param game La instancia principal del juego.
-     * @param playerColor El color que se usará para el fondo.
-     * @param isHost True si el jugador es el Host, lo que le permitirá ver el botón de inicio.
+     * @param playerColor El color que se usara para el fondo.
+     * @param isHost True si el jugador es el Host, lo que le permitira ver el boton de inicio.
      */
     public LobbyScreen(JuegoSonic game, Color playerColor, boolean isHost) {
         this.game = game;
@@ -44,7 +44,7 @@ public class LobbyScreen implements Screen {
     }
 
     /**
-     * Configura la UI adicional que solo el Host puede ver, como el botón de "Iniciar Partida".
+     * Configura la UI adicional que solo el Host puede ver, como el boton de "Iniciar Partida".
      */
     private void setupHostUI() {
         TextButton.TextButtonStyle startStyle = new TextButton.TextButtonStyle();
