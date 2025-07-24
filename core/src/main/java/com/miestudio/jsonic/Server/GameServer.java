@@ -228,6 +228,15 @@ public class GameServer {
             ));
         }
 
+        for (Personajes character : characters.values()) {
+            if (character instanceof Tails) {
+                Tails tails = (Tails) character;
+                for (Robot robot : tails.getActiveRobots()) {
+                    robot.update(delta, collisionManager);
+                }
+            }
+        }
+        
         // Crear estados de objetos
         List<ObjectState> objectStates = new ArrayList<>();
         for (Objetos obj : gameObjects.values()) {

@@ -21,6 +21,7 @@ import com.miestudio.jsonic.Actores.Knockles;
 
 
 import com.miestudio.jsonic.Actores.Personajes;
+import com.miestudio.jsonic.Actores.Robot;
 import com.miestudio.jsonic.Actores.Sonic;
 import com.miestudio.jsonic.Actores.Tails;
 import com.miestudio.jsonic.JuegoSonic;
@@ -381,6 +382,25 @@ public class GameScreen implements Screen {
         }
         batch.end();
     }
+    
+    private void renderRobots() {
+        batch.begin();
+        for (Personajes character : characters.values()) {
+            if (character instanceof Tails) {
+                Tails tails = (Tails) character;
+                for (Robot robot : tails.getActiveRobots()) {
+                    TextureRegion frame = robot.getTexture();
+                    if (!robot.isFacingRight() && !frame.isFlipX()) {
+                        frame.flip(true, false);
+                    } else if (robot.isFacingRight() && frame.isFlipX()) {
+                        frame.flip(true, false);
+                    }
+                    batch.draw(frame, robot.getX(), robot.getY());
+                }
+            }
+        }
+        batch.end();
+    }
 
     @Override
     public void render(float delta) {
@@ -396,7 +416,7 @@ public class GameScreen implements Screen {
 
         // 3. Obtener la instancia del personaje local para centrar la cámara
         Personajes localPlayer = characters.get(localPlayerId);
-
+        
         // 4. Actualizar la posición de la cámara
         if (localPlayer != null) {
             // Para centrar la cámara, se usa la posición predicha en clientes para suavizar el movimiento
@@ -415,7 +435,7 @@ public class GameScreen implements Screen {
         }
 
         renderParallaxBackground();
-
+        renderRobots();
         camera.update();
 
         // 5. Renderizar el mapa del juego

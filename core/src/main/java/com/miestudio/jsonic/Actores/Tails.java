@@ -22,7 +22,7 @@ public class Tails extends Personajes {
     private static final float MAX_FLY_TIME = 5f; // Tiempo máximo de vuelo
     
     // Sistema de robot
-    private Robot activeRobot;
+    private Array<Robot> activeRobots = new Array<>(); // Lista de robots activos
     private float robotCooldown = 0f;
     private static final float ROBOT_COOLDOWN_TIME = 3f;
     
@@ -97,18 +97,17 @@ public class Tails extends Personajes {
             robotCooldown -= delta;
         }
         
-        // CAMBIO: Gestionar el temporizador de la habilidad activa.
+        // Gestionar el temporizador de la habilidad activa
         if (abilityActiveTimer > 0) {
             abilityActiveTimer -= delta;
             if (abilityActiveTimer <= 0) {
-                isAbilityActive = false; // La habilidad termina después de la duración.
+                isAbilityActive = false;
             }
         }
         
         // Actualizar tiempo de vuelo y aplicar movimiento
         if (isFlying) {
             flyTime += delta;
-            // La gravedad ya está desactivada en Personajes.updatePhysics
             velocityY = flySpeed; // Aplicar velocidad de ascenso constante.
             if (flyTime >= MAX_FLY_TIME) {
                 stopFlying();
@@ -120,11 +119,15 @@ public class Tails extends Personajes {
             }
         }
         
-        // Actualizar el robot activo
-        if (activeRobot != null) {
-            activeRobot.update(delta, collisionManager);
-            if (activeRobot.isFinished()) {
-                activeRobot = null;
+        // Actualizar robots activos
+        for (Robot robot : activeRobots) {
+            robot.update(delta, collisionManager);
+        }
+        
+        // Eliminar robots inactivos
+        for (int i = activeRobots.size - 1; i >= 0; i--) {
+            if (!activeRobots.get(i).isActive()) {
+                activeRobots.removeIndex(i);
             }
         }
         
@@ -159,7 +162,7 @@ public class Tails extends Personajes {
             isMoving = true;
         }
         
-        // CAMBIO: Lógica de salto y vuelo mejorada
+        // Lógica de salto y vuelo
         if (input.isUp()) {
             if (isGrounded) { // Salto normal si está en el suelo
                 velocityY = jumpForce;
@@ -189,12 +192,12 @@ public class Tails extends Personajes {
         if (isAbilityActive) {
             setCurrentAnimation(abilityAnimation);
         } else if (isFlying) {
-            setCurrentAnimation(flyAnimation); // Prioridad máxima para vuelo
+            setCurrentAnimation(flyAnimation);
         } else if (!isGrounded) {
-            // Si está en el aire, la animación de salto/caída ya se gestiona en update()
-            // Pero si la velocidad es ascendente, es un salto.
             if (velocityY > 0) {
                 setCurrentAnimation(jumpAnimation);
+            } else {
+                setCurrentAnimation(fallAnimation);
             }
         } else if (isRolling) {
             setCurrentAnimation(rollAnimation);
@@ -210,16 +213,19 @@ public class Tails extends Personajes {
         if (!isAbilityActive && robotCooldown <= 0) {
             isAbilityActive = true;
             stateTime = 0f;
+            abilityActiveTimer = ABILITY_DURATION;
             
-            // Crear nuevo robot
-            activeRobot = new Robot(
-                this.x, 
-                this.y, 
+            // Crear nuevo robot independiente
+            TextureRegion robotTexture = robotAnimation.getKeyFrame(0);
+            Robot newRobot = new Robot(
+                this.x + (facingRight ? 30 : -30), // Aparece al lado de Tails
+                this.y,
                 this.facingRight,
-                this.moveSpeed * 1.5f // Robot más rápido que Tails
+                this.moveSpeed * 1.5f,
+                robotTexture
             );
             
-            // Configurar cooldown
+            activeRobots.add(newRobot);
             robotCooldown = ROBOT_COOLDOWN_TIME;
         }
     }
@@ -234,7 +240,6 @@ public class Tails extends Personajes {
     public void stopFlying() {
         if (isFlying) {
             isFlying = false;
-            // No establecer animación de caída aquí, se manejará en update()
         }
     }
     
@@ -250,14 +255,14 @@ public class Tails extends Personajes {
         return robotCooldown;
     }
     
-    public Robot getActiveRobot() {
-        return activeRobot;
+    public Array<Robot> getActiveRobots() {
+        return activeRobots;
     }
 
     @Override
     public String getCurrentAnimationName() {
         if (isFlying) {
-            return "FLY"; // Nuevo estado de animación para vuelo
+            return "FLY";
         }
         return super.getCurrentAnimationName();
     }
@@ -273,52 +278,8 @@ public class Tails extends Personajes {
 
     @Override
     public void dispose() {
-        // Liberar recursos del robot si existe
-        if (activeRobot != null) {
-            activeRobot.dispose();
-            activeRobot = null;
-        }
+        activeRobots.clear();
     }
     
-    // Clase interna para el robot
-    public class Robot {
-        public float x;
-        public float y;
-        public boolean facingRight;
-        private float speed;
-        private float distanceTraveled = 0;
-        private static final float MAX_DISTANCE = 500f; // Distancia máxima del robot
-        
-        public Robot(float startX, float startY, boolean facingRight, float speed) {
-            this.x = startX;
-            this.y = startY;
-            this.facingRight = facingRight;
-            this.speed = speed;
-        }
-        
-        public void update(float delta, CollisionManager collisionManager) {
-            // Mover robot en la dirección indicada
-            float moveAmount = speed * delta;
-            x += facingRight ? moveAmount : -moveAmount;
-            distanceTraveled += moveAmount;
-            
-            // Verificar colisiones
-            Rectangle bounds = new Rectangle(x, y, 15, 15); // Tamaño estimado del robot
-            if (collisionManager.collides(bounds)) {
-                distanceTraveled = MAX_DISTANCE; // Terminar si choca
-            }
-        }
-        
-        public boolean isFinished() {
-            return distanceTraveled >= MAX_DISTANCE;
-        }
-        
-        public float getX() { return x; }
-        public float getY() { return y; }
-        public boolean isFacingRight() { return facingRight; }
-        
-        public void dispose() {
-            // Liberar recursos si es necesario
-        }
-    }
+    
 }
