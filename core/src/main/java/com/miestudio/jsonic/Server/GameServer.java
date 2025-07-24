@@ -121,7 +121,7 @@ public class GameServer {
                     character = new Tails(playerId, assets.tailsAtlas);
                     break;
                 case "Knuckles":
-                    character = new Knuckles(playerId, assets.knucklesAtlas);
+                    character = new Knockles(playerId, assets.knucklesAtlas);
                     break;
                 default:
                     continue;

@@ -17,8 +17,9 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Shape2D;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.miestudio.jsonic.Actores.Knockles;
 
-import com.miestudio.jsonic.Actores.Knuckles;
+
 import com.miestudio.jsonic.Actores.Personajes;
 import com.miestudio.jsonic.Actores.Sonic;
 import com.miestudio.jsonic.Actores.Tails;
@@ -192,7 +193,7 @@ public class GameScreen implements Screen {
                 character = new Tails(playerId, assets.tailsAtlas);
                 break;
             case "Knuckles":
-                character = new Knuckles(playerId, assets.knucklesAtlas);
+                character = new Knockles(playerId, assets.knucklesAtlas);
                 break;
             default:
                 // En caso de tipo desconocido, usar Sonic y registrar un error
