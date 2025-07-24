@@ -6,12 +6,13 @@ import java.util.Enumeration;
 
 /**
  * Clase de utilidad para operaciones relacionadas con la red, como la obtención de la dirección IP local.
+ * Proporciona métodos estáticos para facilitar la configuración de la red en el juego.
  */
 public class NetworkHelper {
     /**
-     * Obtiene la dirección IP local de la máquina.
-     *
-     * @return La dirección IP local como una cadena, o "127.0.0.1" si no se puede determinar.
+     * Obtiene la dirección IP local no-loopback de la máquina.
+     * Busca entre todas las interfaces de red activas y devuelve la primera dirección IP de sitio local encontrada.
+     * @return La dirección IP local como una cadena (String), o "127.0.0.1" si no se puede determinar una dirección de sitio local.
      */
     public static String getIpLocal(){
         try{
@@ -28,17 +29,17 @@ public class NetworkHelper {
                 while (addresses.hasMoreElements()){
                     InetAddress addr = addresses.nextElement();
 
-                    // Direcciones site-local
-
+                    // Buscar direcciones de sitio local (no loopback, no link-local, etc.)
                     if (addr.isSiteLocalAddress()){
                         return addr.getHostAddress();
                     }
                 }
             }
         } catch (Exception e) {
+            // En caso de cualquier error al obtener las interfaces de red, imprimir el stack trace.
             e.printStackTrace();
         }
 
-        return "127.0.0.1"; // Fallback a localhost
+        return "127.0.0.1"; // Fallback a localhost si no se encuentra una dirección de sitio local.
     }
 }

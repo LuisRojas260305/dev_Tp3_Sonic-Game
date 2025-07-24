@@ -1,11 +1,10 @@
 package com.miestudio.jsonic;
 
 import com.badlogic.gdx.Game;
-import com.badlogic.gdx.Gdx;
 import com.miestudio.jsonic.Pantallas.MainScreen;
 import com.miestudio.jsonic.Server.NetworkManager;
 import com.miestudio.jsonic.Util.Assets;
-import com.miestudio.jsonic.Util.ShutdownPacket;
+import com.miestudio.jsonic.Server.domain.ShutdownPacket;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -26,7 +25,7 @@ public class JuegoSonic extends Game {
 
     /**
      * Método principal de inicialización del juego.
-     * Crea el gestor de red y establece la pantalla de menú principal.
+     * Se llama una vez al crear la aplicación. Aquí se inicializan los recursos y gestores principales.
      */
     @Override
     public void create() {
@@ -40,23 +39,23 @@ public class JuegoSonic extends Game {
         selectedCharacters.put("Tails", false);
         selectedCharacters.put("Knuckles", false);
 
-        // Al iniciar, siempre mostramos la pantalla para elegir rol.
+        // Al iniciar, siempre mostramos la pantalla principal para elegir rol o iniciar el juego.
         setScreen(new MainScreen(this));
     }
 
     /**
-     * Libera los recursos del juego cuando es destruido.
-     * Se encarga de liberar los recursos de red y los assets.
+     * Libera todos los recursos del juego cuando la aplicación es destruida.
+     * Es crucial para evitar fugas de memoria y asegurar un cierre limpio.
      */
     @Override
     public void dispose() {
         if (networkManager != null) {
-            // Si este es el host, notifica a los clientes antes de cerrar.
+            // Si esta instancia es el host, notifica a los clientes antes de cerrar.
             if (networkManager.isHost()) {
                 networkManager.broadcastTcpMessage(new ShutdownPacket());
             }
             networkManager.dispose();
-            }
+        }
         if (assets != null) {
             assets.dispose();
         }

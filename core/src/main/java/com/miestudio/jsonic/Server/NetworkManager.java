@@ -7,9 +7,9 @@ import com.miestudio.jsonic.Pantallas.CharacterSelectionScreen;
 import com.miestudio.jsonic.Pantallas.GameScreen;
 import com.miestudio.jsonic.Pantallas.LobbyScreen;
 import com.miestudio.jsonic.Util.Constantes;
-import com.miestudio.jsonic.Util.GameState;
-import com.miestudio.jsonic.Util.InputState;
-import com.miestudio.jsonic.Util.ShutdownPacket;
+import com.miestudio.jsonic.Server.domain.GameState;
+import com.miestudio.jsonic.Server.domain.InputState;
+import com.miestudio.jsonic.Server.domain.ShutdownPacket;
 import com.miestudio.jsonic.Server.network.CharacterSelectionPacket;
 import com.miestudio.jsonic.Server.network.CharacterTakenPacket;
 
@@ -37,34 +37,43 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class NetworkManager {
 
-    private final JuegoSonic game;
-    private ServerSocket serverTcpSocket;
-    private DatagramSocket udpSocket;
-    private final List<ClientConnection> clientConnections = Collections.synchronizedList(new ArrayList<>());
-    private final AtomicInteger nextPlayerId = new AtomicInteger(1);
-    private volatile GameState currentGameState;
-    private Socket clientTcpSocket;
-    private ObjectOutputStream clientTcpOut;
-    private ObjectInputStream clientTcpIn;
-    private InetAddress serverAddress;
-    private int serverUdpPort;
+    private final JuegoSonic game; /** Referencia a la instancia principal del juego. */
+    private ServerSocket serverTcpSocket; /** Socket TCP para el servidor (solo host). */
+    private DatagramSocket udpSocket; /** Socket UDP para el envío y recepción de datagramas. */
+    private final List<ClientConnection> clientConnections = Collections.synchronizedList(new ArrayList<>()); /** Lista de conexiones de clientes (solo host). */
+    private final AtomicInteger nextPlayerId = new AtomicInteger(1); /** Generador de IDs para nuevos jugadores. */
+    private volatile GameState currentGameState; /** El estado actual del juego, sincronizado entre host y clientes. */
+    private Socket clientTcpSocket; /** Socket TCP para la conexión al servidor (solo cliente). */
+    private ObjectOutputStream clientTcpOut; /** Stream de salida TCP para el cliente. */
+    private ObjectInputStream clientTcpIn; /** Stream de entrada TCP para el cliente. */
+    private InetAddress serverAddress; /** Dirección IP del servidor al que el cliente está conectado. */
+    private int serverUdpPort; /** Puerto UDP del servidor. */
 
-    private final ConcurrentHashMap<Integer, InputState> playerInputs = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<Integer, String> selectedCharacters = new ConcurrentHashMap<>();
-    private volatile boolean isHost = false;
-    private int localPlayerId = -1;
-    private String selectedCharacterType;
+    private final ConcurrentHashMap<Integer, InputState> playerInputs = new ConcurrentHashMap<>(); /** Inputs de los jugadores, indexados por ID de jugador. */
+    private final ConcurrentHashMap<Integer, String> selectedCharacters = new ConcurrentHashMap<>(); /** Personajes seleccionados por los jugadores, indexados por ID de jugador. */
+    private volatile boolean isHost = false; /** Indica si esta instancia es el host del juego. */
+    private int localPlayerId = -1; /** ID del jugador local. */
+    private String selectedCharacterType; /** Tipo de personaje seleccionado por el jugador local. */
 
-    private Thread hostDiscoveryThread;
-    private Thread clientTcpReceiveThread;
-    private Thread udpReceiveThread;
+    private Thread hostDiscoveryThread; /** Hilo para la detección de host. */
+    private Thread clientTcpReceiveThread; /** Hilo para la recepción de mensajes TCP del servidor (solo cliente). */
+    private Thread udpReceiveThread; /** Hilo para la recepción de mensajes UDP. */
 
-    private GameServer gameServer;
+    private GameServer gameServer; /** Instancia del GameServer (solo host). */
 
+    /**
+     * Constructor de NetworkManager.
+     * @param game La instancia principal del juego.
+     */
     public NetworkManager(JuegoSonic game) {
         this.game = game;
     }
 
+    /**
+     * Inicia el proceso de verificación de estado de la red.
+     * Intenta descubrir un host existente; si no lo encuentra, inicia uno nuevo.
+     * Luego, transiciona a la pantalla de selección de personaje.
+     */
     public void checkNetworkStatus() {
         Thread networkThread = new Thread(() -> {
             String serverIp = discoverServer();
@@ -78,6 +87,11 @@ public class NetworkManager {
         networkThread.start();
     }
 
+    /**
+     * Envía la selección de personaje del jugador local al servidor.
+     * Si es cliente, envía un paquete TCP. Si es host, procesa la selección directamente.
+     * @param characterType El tipo de personaje seleccionado (ej. "Sonic", "Tails").
+     */
     public void sendCharacterSelection(String characterType) {
         this.selectedCharacterType = characterType;
         if (!isHost) {
@@ -87,6 +101,10 @@ public class NetworkManager {
         }
     }
 
+    /**
+     * Envía un mensaje TCP al servidor. Solo para clientes.
+     * @param message El objeto Serializable a enviar.
+     */
     public void sendTcpMessageToServer(Object message) {
         try {
             if (clientTcpOut != null) {
@@ -98,6 +116,11 @@ public class NetworkManager {
         }
     }
 
+    /**
+     * Procesa la selección de un personaje, marcándolo como tomado y notificando a los demás clientes.
+     * @param playerId El ID del jugador que seleccionó el personaje.
+     * @param characterType El tipo de personaje seleccionado.
+     */
     private void processCharacterSelection(int playerId, String characterType) {
         if (game.isCharacterTaken(characterType)) {
             return;
@@ -113,6 +136,11 @@ public class NetworkManager {
         }
     }
 
+    /**
+     * Obtiene un color asociado a un tipo de personaje.
+     * @param characterType El tipo de personaje.
+     * @return Un objeto Color que representa el color del personaje.
+     */
     private Color getColorForCharacter(String characterType) {
         if ("Sonic".equals(characterType)) {
             return Color.BLUE;
@@ -266,13 +294,13 @@ public class NetworkManager {
 
     private void startUdpListener() {
         try {
-            udpSocket.setSoTimeout(1000); // Timeout de 1 segundo
+            udpSocket.setSoTimeout(1000); // Timeout de 1 segundo para no bloquear indefinidamente
         } catch (SocketException e) {
             Gdx.app.error("NetworkManager", "Error al configurar timeout UDP: " + e.getMessage());
         }
 
         udpReceiveThread = new Thread(() -> {
-            byte[] buffer = new byte[4096];
+            byte[] buffer = new byte[4096]; // Buffer para los datos del paquete UDP
             Gdx.app.log("NetworkManager", "Iniciando escucha UDP...");
 
             while (!udpSocket.isClosed() && !Thread.currentThread().isInterrupted()) {
@@ -281,7 +309,7 @@ public class NetworkManager {
                     DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                     udpSocket.receive(packet); // Espera hasta recibir datos (o timeout)
 
-                    // Procesar paquete recibido
+                    // Procesar paquete recibido: deserializar el objeto
                     ByteArrayInputStream bais = new ByteArrayInputStream(
                         packet.getData(),
                         0,
@@ -302,7 +330,7 @@ public class NetworkManager {
                                     ", Salto: " + input.isUp()
                             );
 
-                            // Guardar input para procesamiento en el game loop
+                            // Guardar input para procesamiento en el game loop del servidor
                             playerInputs.put(input.getPlayerId(), input);
                         }
                     } else {
@@ -314,20 +342,24 @@ public class NetworkManager {
                                     ", Jugadores: " + gameState.getPlayers().size()
                             );
 
-                            // Actualizar estado actual del juego
+                            // Actualizar estado actual del juego del cliente
                             currentGameState = gameState;
                         }
                     }
                 } catch (SocketTimeoutException e) {
-                    // Timeout esperado, continuar
+                    // Timeout esperado, continuar el bucle para seguir escuchando
                 } catch (SocketException e) {
                     if (!udpSocket.isClosed()) {
+                        Gdx.app.error("NetworkManager", "Error de socket UDP: " + e.getMessage());
                     }
-                    break; // Salir si el socket se cerró
+                    break; // Salir si el socket se cerró inesperadamente
                 } catch (IOException e) {
+                    Gdx.app.error("NetworkManager", "Error IO UDP: " + e.getMessage());
                 } catch (ClassNotFoundException e) {
+                    Gdx.app.error("NetworkManager", "Clase desconocida en paquete UDP: " + e.getMessage());
                 }
             }
+            Gdx.app.log("NetworkManager", "Escucha UDP terminada.");
         });
 
         udpReceiveThread.setDaemon(true);
@@ -335,13 +367,21 @@ public class NetworkManager {
         udpReceiveThread.start();
     }
 
+    /**
+     * Inicia la partida. Solo el host puede llamar a este método.
+     * Envía un mensaje TCP a todos los clientes para que transicionen a la GameScreen.
+     */
     public void startGame() {
         if (isHost) {
             broadcastTcpMessage("START_GAME");
-            Gdx.app.postRunnable(() -> game.setScreen(new GameScreen(game, 0)));
+            Gdx.app.postRunnable(() -> game.setScreen(new GameScreen(game, 0))); // El host también va a la GameScreen
         }
     }
 
+    /**
+     * Envía un mensaje TCP a todos los clientes conectados (solo host).
+     * @param message El objeto Serializable a enviar.
+     */
     public void broadcastTcpMessage(Object message) {
         synchronized (clientConnections) {
             for (ClientConnection conn : clientConnections) {
@@ -351,7 +391,8 @@ public class NetworkManager {
     }
 
     /**
-     * Transmite el estado actual del juego a todos los clientes (solo host)
+     * Transmite el estado actual del juego a todos los clientes a través de UDP (solo host).
+     * Se llama en cada tick del GameServer.
      */
     public void broadcastUdpGameState() {
         if (!isHost || currentGameState == null) return;
@@ -374,12 +415,17 @@ public class NetworkManager {
                 }
             }
         } catch (IOException e) {
+            Gdx.app.error("NetworkManager", "Error al transmitir estado UDP: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
+    /**
+     * Envía el estado de input del jugador local al servidor a través de UDP (solo cliente).
+     * @param inputState El objeto InputState con el estado actual de los inputs del jugador.
+     */
     public void sendInputState(InputState inputState) {
-        if (isHost) return;
+        if (isHost) return; // El host no envía inputs a sí mismo
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(baos);
@@ -389,38 +435,64 @@ public class NetworkManager {
             DatagramPacket packet = new DatagramPacket(data, data.length, serverAddress, serverUdpPort);
             udpSocket.send(packet);
         } catch (IOException e) {
+            Gdx.app.error("NetworkManager", "Error al enviar input UDP: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
+    /**
+     * Obtiene el estado actual del juego recibido del servidor.
+     * @return El objeto GameState actual.
+     */
     public GameState getCurrentGameState() {
         return currentGameState;
     }
 
+    /**
+     * Establece el estado actual del juego. Utilizado por el hilo UDP para actualizar el estado.
+     * @param gameState El nuevo objeto GameState.
+     */
     public void setCurrentGameState(GameState gameState) {
         this.currentGameState = gameState;
     }
 
+    /**
+     * Obtiene el mapa de inputs de los jugadores. Utilizado por el GameServer.
+     * @return Un ConcurrentHashMap de IDs de jugador a InputState.
+     */
     public ConcurrentHashMap<Integer, InputState> getPlayerInputs() {
         return playerInputs;
     }
 
+    /**
+     * Verifica si esta instancia es el host del juego.
+     * @return true si es el host, false en caso contrario.
+     */
     public boolean isHost() {
         return isHost;
     }
 
+    /**
+     * Obtiene el mapa de personajes seleccionados por los jugadores.
+     * @return Un ConcurrentHashMap de IDs de jugador a tipos de personaje.
+     */
     public ConcurrentHashMap<Integer, String> getSelectedCharacters() {
         return selectedCharacters;
     }
 
+    /**
+     * Libera todos los recursos de red y detiene los hilos.
+     * Se llama al cerrar la aplicación.
+     */
     public void dispose() {
         if (isHost) {
             if (gameServer != null) gameServer.stop();
             if (hostDiscoveryThread != null) hostDiscoveryThread.interrupt();
-            broadcastTcpMessage(new ShutdownPacket());
+            broadcastTcpMessage(new ShutdownPacket()); // Notificar a los clientes antes de cerrar
             try {
                 if (serverTcpSocket != null) serverTcpSocket.close();
             } catch (IOException e) {
+                Gdx.app.error("NetworkManager", "Error al cerrar serverTcpSocket: " + e.getMessage());
                 e.printStackTrace();
             }
         } else {
@@ -428,69 +500,101 @@ public class NetworkManager {
             try {
                 if (clientTcpSocket != null) clientTcpSocket.close();
             } catch (IOException e) {
+                Gdx.app.error("NetworkManager", "Error al cerrar clientTcpSocket: " + e.getMessage());
                 e.printStackTrace();
             }
         }
         if (udpSocket != null) udpSocket.close();
         if (udpReceiveThread != null) udpReceiveThread.interrupt();
+        Gdx.app.log("NetworkManager", "Recursos de red liberados.");
     }
 
+    /**
+     * Obtiene el tipo de personaje seleccionado por el jugador local.
+     * @return El tipo de personaje como String.
+     */
     public String getSelectedCharacterType() {
         return selectedCharacterType;
     }
 
+    /**
+     * Clase interna que representa la conexión de un cliente individual en el lado del host.
+     * Maneja la comunicación TCP con ese cliente.
+     */
     private class ClientConnection implements Runnable {
-        private final Socket tcpSocket;
-        private final int playerId;
-        private ObjectOutputStream tcpOut;
-        private InetAddress clientAddress;
-        private int clientUdpPort;
+        private final Socket tcpSocket; /** Socket TCP para la comunicación con este cliente. */
+        private final int playerId; /** ID del jugador asociado a esta conexión. */
+        private ObjectOutputStream tcpOut; /** Stream de salida TCP para enviar mensajes al cliente. */
+        private InetAddress clientAddress; /** Dirección IP del cliente. */
+        private int clientUdpPort; /** Puerto UDP del cliente para enviar GameStates. */
 
+        /**
+         * Constructor de ClientConnection.
+         * @param socket El socket TCP conectado al cliente.
+         * @param playerId El ID asignado a este cliente.
+         */
         ClientConnection(Socket socket, int playerId) {
             this.tcpSocket = socket;
             this.playerId = playerId;
             this.clientAddress = socket.getInetAddress();
         }
 
+        /**
+         * Método principal del hilo de ClientConnection.
+         * Lee mensajes TCP del cliente y los procesa.
+         */
         @Override
         public void run() {
             try (ObjectInputStream in = new ObjectInputStream(tcpSocket.getInputStream())) {
                 this.tcpOut = new ObjectOutputStream(tcpSocket.getOutputStream());
 
+                // Recibir el puerto UDP del cliente
                 this.clientUdpPort = in.readInt();
 
+                // Enviar el ID de jugador y el puerto UDP del servidor al cliente
                 tcpOut.writeInt(playerId);
                 tcpOut.writeInt(udpSocket.getLocalPort());
                 tcpOut.flush();
 
+                // Enviar al nuevo cliente el estado actual de los personajes ya seleccionados
                 for (java.util.Map.Entry<String, Boolean> entry : game.selectedCharacters.entrySet()) {
                     if (entry.getValue()) {
                         sendTcpMessage(new CharacterTakenPacket(entry.getKey(), true));
                     }
                 }
 
+                // Bucle principal de escucha de mensajes TCP del cliente
                 while (!tcpSocket.isClosed() && !Thread.currentThread().isInterrupted()) {
                     Object msg = in.readObject();
                     if (msg instanceof CharacterSelectionPacket) {
                         CharacterSelectionPacket packet = (CharacterSelectionPacket) msg;
+                        // Procesar la selección de personaje del cliente y reenviarla a todos
                         processCharacterSelection(packet.playerId, packet.characterType);
-                        sendTcpMessage(packet);
+                        sendTcpMessage(packet); // Reenviar al propio cliente para confirmación
                     }
-                    Thread.sleep(100);
+                    Thread.sleep(100); // Pequeña pausa para evitar busy-waiting
                 }
 
             } catch (IOException | ClassNotFoundException | InterruptedException e) {
-                // Desconexión
+                Gdx.app.error("NetworkManager", "Error en ClientConnection para jugador " + playerId + ": " + e.getMessage());
+                // Desconexión del cliente (se manejará en el bloque finally)
             } finally {
+                // Eliminar la conexión de la lista y cerrar el socket
                 clientConnections.remove(this);
                 try {
                     if (!tcpSocket.isClosed()) tcpSocket.close();
                 } catch (IOException e) {
+                    Gdx.app.error("NetworkManager", "Error al cerrar socket de cliente " + playerId + ": " + e.getMessage());
                     e.printStackTrace();
                 }
+                Gdx.app.log("NetworkManager", "Cliente ID " + playerId + " desconectado.");
             }
         }
 
+        /**
+         * Envía un mensaje TCP a este cliente específico.
+         * @param message El objeto Serializable a enviar.
+         */
         void sendTcpMessage(Object message) {
             try {
                 if (tcpOut != null) {
@@ -498,14 +602,23 @@ public class NetworkManager {
                     tcpOut.flush();
                 }
             } catch (IOException e) {
+                Gdx.app.error("NetworkManager", "Error al enviar mensaje TCP a cliente " + playerId + ": " + e.getMessage());
                 e.printStackTrace();
             }
         }
 
+        /**
+         * Obtiene la dirección IP del cliente.
+         * @return La dirección IP del cliente.
+         */
         public InetAddress getClientAddress() {
             return clientAddress;
         }
 
+        /**
+         * Obtiene el puerto UDP del cliente.
+         * @return El puerto UDP del cliente.
+         */
         public int getClientUdpPort() {
             return clientUdpPort;
         }

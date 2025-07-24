@@ -1,14 +1,11 @@
 package com.miestudio.jsonic.Actores;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.miestudio.jsonic.Util.CollisionManager;
-import com.miestudio.jsonic.Util.Constantes;
-import com.miestudio.jsonic.Util.InputState;
+import com.miestudio.jsonic.Server.domain.InputState;
 
 /**
  * Clase base abstracta para todos los personajes jugables en el juego.
@@ -80,6 +77,9 @@ public abstract class Personajes extends Actor {
 
     private float predictedY;
 
+    /**
+     * Método abstracto para que cada personaje implemente su habilidad especial.
+     */
     public abstract void useAbility();
 
     /**
@@ -90,6 +90,7 @@ public abstract class Personajes extends Actor {
 
     /**
      * Actualiza el estado del personaje, incluyendo la física y el tiempo de animación.
+     * Este método debe ser llamado en cada fotograma del juego.
      * @param delta El tiempo transcurrido desde el último fotograma en segundos.
      * @param collisionManager El gestor de colisiones para interactuar con el entorno.
      */
@@ -100,6 +101,7 @@ public abstract class Personajes extends Actor {
 
     /**
      * Aplica la física al personaje, incluyendo gravedad y detección de suelo.
+     * Este método es llamado internamente por {@link #update(float, CollisionManager)}.
      * @param delta El tiempo transcurrido desde el último fotograma en segundos.
      * @param collisionManager El gestor de colisiones para interactuar con el entorno.
      */
@@ -129,8 +131,11 @@ public abstract class Personajes extends Actor {
 
     /**
      * Maneja los inputs del jugador para actualizar el estado del personaje.
-     * Este método es llamado por el servidor (Host) basado en los InputState recibidos.
+     * Este método es llamado por el servidor (Host) basado en los InputState recibidos,
+     * o por el cliente para predicción local.
      * @param input El estado de los botones del jugador.
+     * @param collisionManager El gestor de colisiones para interactuar con el entorno.
+     * @param delta El tiempo transcurrido desde el último fotograma en segundos.
      */
     public void handleInput(InputState input, CollisionManager collisionManager, float delta) {
         boolean isMoving = false;
@@ -163,7 +168,7 @@ public abstract class Personajes extends Actor {
             isMoving = true;
         }
 
-        // Limitar posición dentro del mapa
+        // Limitar posición dentro del mapa para evitar que el personaje salga de los límites
         x = Math.max(0, Math.min(x, collisionManager.getMapWidth() - getWidth()));
         y = Math.max(0, Math.min(y, collisionManager.getMapHeight() - getHeight()));
 
@@ -190,6 +195,11 @@ public abstract class Personajes extends Actor {
         }
     }
 
+    /**
+     * Establece la animación actual del personaje.
+     * Reinicia el tiempo de estado de la animación si la nueva animación es diferente a la actual.
+     * @param newAnimation La nueva animación a establecer.
+     */
     public void setCurrentAnimation(Animation<TextureRegion> newAnimation) {
         if (currentAnimation != newAnimation) {
             currentAnimation = newAnimation;
@@ -197,12 +207,9 @@ public abstract class Personajes extends Actor {
         }
     }
 
-
-
     /**
-     * Establece la animación actual del personaje.
-     * Reinicia el tiempo de estado de la animación si la nueva animación es diferente a la actual.
-     * @param newAnimation La nueva animación a establecer.
+     * Establece la animación actual del personaje basándose en un tipo de animación predefinido.
+     * @param animationType El tipo de animación a establecer (IDLE, RUN, JUMP, ROLL, ABILITY).
      */
     public void setAnimation(AnimationType animationType) {
         switch (animationType) {
@@ -210,35 +217,114 @@ public abstract class Personajes extends Actor {
             case RUN: setCurrentAnimation(runAnimation); break;
             case JUMP: setCurrentAnimation(jumpAnimation); break;
             case ROLL: setCurrentAnimation(rollAnimation); break;
-            // Añadir casos para animaciones específicas de cada personaje si es necesario
+            case ABILITY: /* Manejar animación de habilidad si es genérica, o dejar que la subclase la establezca */ break;
         }
     }
 
-    // Getters y Setters
     /**
      * Obtiene la posición X actual del personaje.
      * @return La posición X del personaje.
      */
     public float getX() { return x; }
+    /**
+     * Establece la posición X del personaje.
+     * @param x La nueva posición X.
+     */
     public void setPlayerX(float x) { this.x = x; }
+    /**
+     * Obtiene la posición Y actual del personaje.
+     * @return La posición Y del personaje.
+     */
     public float getY() { return y; }
+    /**
+     * Establece la posición Y del personaje.
+     * @param y La nueva posición Y.
+     */
     public void setPlayerY(float y) { this.y = y; }
+    /**
+     * Obtiene la posición X previa del personaje.
+     * @return La posición X previa del personaje.
+     */
     public float getPrevX() { return prevX; }
+    /**
+     * Obtiene la posición Y previa del personaje.
+     * @return La posición Y previa del personaje.
+     */
     public float getPrevY() { return prevY; }
+    /**
+     * Obtiene la velocidad de movimiento horizontal del personaje.
+     * @return La velocidad de movimiento.
+     */
     public float getMoveSpeed() { return moveSpeed; }
+    /**
+     * Establece la velocidad de movimiento horizontal del personaje.
+     * @param speed La nueva velocidad de movimiento.
+     */
     public void setMoveSpeed(float speed) { this.moveSpeed = speed; }
+    /**
+     * Verifica si el personaje está mirando a la derecha.
+     * @return true si el personaje mira a la derecha, false en caso contrario.
+     */
     public boolean isFacingRight() { return facingRight; }
+    /**
+     * Establece la dirección a la que mira el personaje.
+     * @param facingRight true para mirar a la derecha, false para mirar a la izquierda.
+     */
     public void setFacingRight(boolean facingRight) { this.facingRight = facingRight; }
+    /**
+     * Obtiene el ID del jugador asociado a este personaje.
+     * @return El ID del jugador.
+     */
     public int getPlayerId() { return playerId; }
+    /**
+     * Verifica si el personaje está en el suelo.
+     * @return true si el personaje está en el suelo, false en caso contrario.
+     */
     public boolean isGrounded() { return isGrounded; }
+    /**
+     * Establece si el personaje está en el suelo.
+     * @param grounded true si el personaje está en el suelo, false en caso contrario.
+     */
     public void setGrounded(boolean grounded) { isGrounded = grounded; }
+    /**
+     * Obtiene la velocidad vertical actual del personaje.
+     * @return La velocidad vertical.
+     */
     public float getVelocityY() { return velocityY; }
+    /**
+     * Establece la velocidad vertical del personaje.
+     * @param velocityY La nueva velocidad vertical.
+     */
     public void setVelocityY(float velocityY) { this.velocityY = velocityY; }
+    /**
+     * Verifica si el personaje puede saltar.
+     * @return true si el personaje puede saltar, false en caso contrario.
+     */
     public boolean getCanJump() { return canJump; }
+    /**
+     * Establece si el personaje puede saltar.
+     * @param canJump true si el personaje puede saltar, false en caso contrario.
+     */
     public void setCanJump(boolean canJump) { this.canJump = canJump; }
+    /**
+     * Obtiene la animación de inactividad.
+     * @return La animación de inactividad.
+     */
     public Animation<TextureRegion> getIdleAnimation() { return idleAnimation; }
+    /**
+     * Obtiene la animación de correr.
+     * @return La animación de correr.
+     */
     public Animation<TextureRegion> getRunAnimation() { return runAnimation; }
+    /**
+     * Obtiene la animación de salto.
+     * @return La animación de salto.
+     */
     public Animation<TextureRegion> getJumpAnimation() { return jumpAnimation; }
+    /**
+     * Obtiene la animación de rodar.
+     * @return La animación de rodar.
+     */
     public Animation<TextureRegion> getRollAnimation() { return rollAnimation; }
     /**
      * Establece la posición del personaje.
@@ -260,12 +346,25 @@ public abstract class Personajes extends Actor {
         this.prevY = y;
     }
 
+    /**
+     * Establece la posición predicha del personaje.
+     * @param x La posición X predicha.
+     * @param y La posición Y predicha.
+     */
     public void setPredictedPosition(float x, float y) {
         this.predictedX = x;
         this.predictedY = y;
     }
 
+    /**
+     * Obtiene la posición X predicha del personaje.
+     * @return La posición X predicha.
+     */
     public float getPredictedX() { return predictedX; }
+    /**
+     * Obtiene la posición Y predicha del personaje.
+     * @return La posición Y predicha.
+     */
     public float getPredictedY() { return predictedY; }
 
     /**
@@ -278,14 +377,15 @@ public abstract class Personajes extends Actor {
 
     /**
      * Devuelve el nombre de la animación actual.
-     * @return El nombre de la animación actual como String.
+     * @return El nombre de la animación actual como String (ej. "idle", "run").
      */
     public String getCurrentAnimationName() {
         if (currentAnimation == idleAnimation) return AnimationType.IDLE.name().toLowerCase();
         if (currentAnimation == runAnimation) return AnimationType.RUN.name().toLowerCase();
         if (currentAnimation == jumpAnimation) return AnimationType.JUMP.name().toLowerCase();
         if (currentAnimation == rollAnimation) return AnimationType.ROLL.name().toLowerCase();
-        return "unknown"; // O manejar de otra forma
+        // Si se añade una animación de habilidad, se podría añadir aquí
+        return "unknown"; // O manejar de otra forma si la animación no es reconocida
     }
 
     /**

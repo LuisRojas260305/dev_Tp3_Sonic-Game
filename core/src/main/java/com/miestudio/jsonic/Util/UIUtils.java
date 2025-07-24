@@ -29,6 +29,12 @@ public class UIUtils {
         return drawable;
     }
 
+    /**
+     * Crea un objeto {@link TextButton} con el texto y el Skin especificados.
+     * @param text El texto a mostrar en el botón.
+     * @param skin El Skin a utilizar para el estilo del botón.
+     * @return Un nuevo TextButton.
+     */
     public static TextButton createTextButton(String text, Skin skin) {
         return new TextButton(text, skin);
     }

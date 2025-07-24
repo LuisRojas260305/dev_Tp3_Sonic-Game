@@ -5,23 +5,35 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 
+/**
+ * Representa al personaje Robot en el juego, extendiendo las funcionalidades base de Personajes.
+ * Actualmente, esta clase utiliza animaciones de placeholder y su habilidad especial no está implementada.
+ */
 public class Robot extends Personajes {
 
+    /**
+     * Constructor para el personaje Robot.
+     * @param playerId El ID del jugador asociado a este Robot.
+     * @param atlas El TextureAtlas que contendrá las texturas del Robot (actualmente no utilizado para animaciones reales).
+     */
     public Robot(int playerId, TextureAtlas atlas) {
         this.playerId = playerId;
-        // Asumiendo que el atlas tiene regiones para el robot
-        // Por ahora, usaré animaciones genéricas o de placeholder
+        // El atlas no se usa directamente aquí ya que las animaciones son placeholders.
         cargarAnimaciones();
         setCurrentAnimation(idleAnimation);
         setPosition(0, 0);
     }
 
+    /**
+     * Carga las animaciones para el personaje Robot.
+     * Actualmente, utiliza animaciones de placeholder.
+     */
     private void cargarAnimaciones() {
-        // Placeholder animations for Robot
+        // Animaciones de placeholder para Robot
         Array<TextureRegion> idleFrames = new Array<>();
-        // Add robot specific frames here
-        // For now, using a dummy frame
-        idleFrames.add(new TextureRegion()); // Replace with actual robot texture
+        // Aquí se añadirían los frames específicos del robot si estuvieran disponibles.
+        // Por ahora, se usa un frame dummy.
+        idleFrames.add(new TextureRegion()); // Reemplazar con textura real del robot
         idleAnimation = new Animation<>(0.1f, idleFrames, Animation.PlayMode.LOOP);
 
         runAnimation = idleAnimation; // Placeholder
@@ -29,15 +41,21 @@ public class Robot extends Personajes {
         rollAnimation = idleAnimation; // Placeholder
     }
 
+    /**
+     * Libera los recursos específicos del Robot.
+     * Actualmente no hay recursos específicos que liberar directamente en esta clase.
+     */
     @Override
     public void dispose() {
-        // Dispose resources if any
+        // Disponer recursos si los hubiera
     }
 
+    /**
+     * Implementación de la habilidad especial del Robot.
+     * Actualmente no implementada.
+     */
     @Override
     public void useAbility() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        // Habilidad no implementada aún.
     }
-
-    
 }

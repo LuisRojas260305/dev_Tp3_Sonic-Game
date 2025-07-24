@@ -6,23 +6,16 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.miestudio.jsonic.Actores.Knockles;
-import com.miestudio.jsonic.Actores.Personajes;
-import com.miestudio.jsonic.Actores.Sonic;
-import com.miestudio.jsonic.Actores.Tails;
+import com.miestudio.jsonic.Actores.*;
 import com.miestudio.jsonic.JuegoSonic;
-
-import com.miestudio.jsonic.Util.Assets;
-import com.miestudio.jsonic.Util.CollisionManager;
-import com.miestudio.jsonic.Util.Constantes;
-import com.miestudio.jsonic.Util.GameState;
-import com.miestudio.jsonic.Util.InputState;
-import com.miestudio.jsonic.Util.PlayerState;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import com.miestudio.jsonic.Objetos.Anillo;
+import com.miestudio.jsonic.Objetos.CargarObjetos;
+import com.miestudio.jsonic.Objetos.Objetos;
+import com.miestudio.jsonic.Server.domain.InputState;
+import com.miestudio.jsonic.Util.*;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import com.miestudio.jsonic.Server.domain.*;
 
 public class GameServer {
 
@@ -30,11 +23,12 @@ public class GameServer {
     private final ConcurrentHashMap<Integer, Personajes> characters;
     private final ConcurrentHashMap<Integer, InputState> playerInputs;
     private final CollisionManager collisionManager;
-
+    private final CargarObjetos cargarObjetos;
+    private final ConcurrentHashMap<Integer, Objetos> gameObjects = new ConcurrentHashMap<>();
+    private int nextObjectId = 0;
     private final float mapWidth;
     private final float mapHeight;
     private final TiledMap map;
-
     private volatile boolean running = false;
     private long sequenceNumber = 0;
 
@@ -43,19 +37,55 @@ public class GameServer {
         this.playerInputs = playerInputs;
         this.map = map;
         this.collisionManager = collisionManager;
-
         this.mapWidth = mapWidth;
         this.mapHeight = mapHeight;
         this.characters = new ConcurrentHashMap<>();
-
+        this.cargarObjetos = new CargarObjetos(game.getAssets().objetosAtlas);
         initializeCharacters();
+        spawnGameObjects(-1, "Anillo", "SpawnObjetos");
+    }
+
+    private void spawnGameObjects(int count, String objectType, String layerName) {
+
+        List<Vector2> spawnPoints = MapUtil.findAllSpawnPoints(map, layerName, objectType);
+
+        if (spawnPoints.isEmpty()) {
+            Gdx.app.log("GameServer", "No spawn points found for " + objectType);
+            return;
+        }
+
+        if (count == -1 || count > spawnPoints.size()) {
+            count = spawnPoints.size();
+        }
+
+        MapLayer layer = map.getLayers().get(layerName);
+        float tileWigth = 32;
+        float tileHeight = 32;
+
+        if (layer instanceof TiledMapTileLayer) {
+            TiledMapTileLayer tileLayer = (TiledMapTileLayer) layer;
+            tileWigth = tileLayer.getTileWidth();
+            tileHeight = tileLayer.getTileHeight();
+        }
+
+        for (Vector2 spawnPoint : spawnPoints) {
+
+            float centeredX = spawnPoint.x + (tileWigth - 15f) / 2;
+            float centeredY = spawnPoint.y + (tileHeight - 15f) / 2;
+
+            if ("Anillo".equals(objectType)) {
+                Anillo anillo = new Anillo(centeredX, centeredY, cargarObjetos.animacionAnillo);
+                anillo.setId(nextObjectId++);
+                gameObjects.put(anillo.getId(), anillo);
+                cargarObjetos.agregarAnillo(anillo);
+                Gdx.app.log("GameServer", "Spawned " + objectType + " at " + spawnPoint);
+            }
+        }
     }
 
     private void initializeCharacters() {
         Assets assets = game.getAssets();
         Map<Integer, String> playerCharacterMap = game.networkManager.getSelectedCharacters();
-
-        Map<String, Vector2> spawnPoints = findSpawnPoints();
 
         for (Map.Entry<Integer, String> entry : playerCharacterMap.entrySet()) {
             int playerId = entry.getKey();
@@ -70,7 +100,7 @@ public class GameServer {
                     character = new Tails(playerId, assets.tailsAtlas);
                     break;
                 case "Knuckles":
-                    character = new Knockles(playerId, assets.knocklesAtlas);
+                    character = new Knuckles(playerId, assets.knucklesAtlas);
                     break;
                 default:
                     continue;
@@ -78,55 +108,15 @@ public class GameServer {
 
             if (character != null) {
                 characters.put(playerId, character);
-                Vector2 spawn = spawnPoints.getOrDefault(characterType, new Vector2(mapWidth * 0.1f + playerId * 50, mapHeight * 0.5f));
+                Vector2 spawn = MapUtil.findSpawnPoint(map, "SpawnEntidades", characterType);
+                if (spawn == null) {
+                    spawn = new Vector2(mapWidth * 0.1f + playerId * 50, mapHeight * 0.5f);
+                }
                 float groundY = collisionManager.getGroundY(new Rectangle(spawn.x, spawn.y, character.getWidth(), character.getHeight()));
                 character.setPosition(spawn.x, groundY >= 0 ? groundY : spawn.y);
                 character.setPreviousPosition(character.getX(), character.getY());
             }
         }
-
-
-    }
-
-    private Map<String, Vector2> findSpawnPoints() {
-        Map<String, Vector2> spawnPoints = new HashMap<>();
-        MapLayer layer = map.getLayers().get("SpawnJugadores");
-
-        if (layer == null || !(layer instanceof TiledMapTileLayer)) {
-            return spawnPoints;
-        }
-
-        TiledMapTileLayer tileLayer = (TiledMapTileLayer) layer;
-        float tileWidth = tileLayer.getTileWidth();
-        float tileHeight = tileLayer.getTileHeight();
-
-        for (int y = 0; y < tileLayer.getHeight(); y++) {
-            for (int x = 0; x < tileLayer.getWidth(); x++) {
-                TiledMapTileLayer.Cell cell = tileLayer.getCell(x, y);
-                if (cell == null || cell.getTile() == null) {
-                    continue;
-                }
-
-                com.badlogic.gdx.maps.MapProperties properties = cell.getTile().getProperties();
-                if (properties.get("Spawn", false, Boolean.class)) {
-                    String characterName = null;
-                    if (properties.get("Sonic", false, Boolean.class)) {
-                        characterName = "Sonic";
-                    } else if (properties.get("Tails", false, Boolean.class)) {
-                        characterName = "Tails";
-                    } else if (properties.get("Knuckles", false, Boolean.class)) {
-                        characterName = "Knuckles";
-                    }
-
-                    if (characterName != null) {
-                        float spawnX = x * tileWidth;
-                        float spawnY = y * tileHeight;
-                        spawnPoints.put(characterName, new Vector2(spawnX, spawnY));
-                    }
-                }
-            }
-        }
-        return spawnPoints;
     }
 
     public void start() {
@@ -149,7 +139,6 @@ public class GameServer {
             long now = System.nanoTime();
             float frameTime = (now - lastTime) / 1_000_000_000f;
             lastTime = now;
-
             accumulator += frameTime;
 
             while (accumulator >= FIXED_DELTA_TIME) {
@@ -170,25 +159,28 @@ public class GameServer {
     }
 
     private void updateGameState(float delta) {
-        // Actualizar todos los personajes
+        // Actualizar personajes
         for (Personajes character : characters.values()) {
             InputState input = playerInputs.get(character.getPlayerId());
             if (input != null) {
                 character.setPreviousPosition(character.getX(), character.getY());
                 character.update(delta, collisionManager);
                 character.handleInput(input, collisionManager, delta);
-
-                // Limitar dentro del mapa
                 float newX = Math.max(0, Math.min(character.getX(), mapWidth - character.getWidth()));
                 float newY = Math.max(0, Math.min(character.getY(), mapHeight - character.getHeight()));
                 character.setPosition(newX, newY);
             }
         }
 
-        // Crear nuevo estado del juego
+        // Actualizar objetos
+        cargarObjetos.actualizar(delta);
+
+        // Detectar colisiones
+        detectCollisions();
+
+        // Crear estados de jugadores
         ArrayList<PlayerState> playerStates = new ArrayList<>();
         for (Personajes character : characters.values()) {
-
             String characterType = game.networkManager.getSelectedCharacters().get(character.getPlayerId());
             playerStates.add(new PlayerState(
                 character.getPlayerId(),
@@ -200,10 +192,42 @@ public class GameServer {
             ));
         }
 
-        // Actualizar y transmitir el estado
-        GameState newGameState = new GameState(playerStates, sequenceNumber++);
+        // Crear estados de objetos
+        List<ObjectState> objectStates = new ArrayList<>();
+        for (Objetos obj : gameObjects.values()) {
+            if (obj instanceof Anillo) {
+                objectStates.add(new ObjectState(
+                    obj.getId(),
+                    obj.x,
+                    obj.y,
+                    obj.estaActivo(),
+                    "Anillo"
+                ));
+            }
+        }
+
+        // Actualizar y transmitir GameState
+        GameState newGameState = new GameState(playerStates, objectStates, sequenceNumber++);
         game.networkManager.setCurrentGameState(newGameState);
-        game.networkManager.broadcastUdpGameState(); // Nuevo método
+        game.networkManager.broadcastUdpGameState();
+    }
+
+    private void detectCollisions() {
+        for (Personajes character : characters.values()) {
+            Rectangle charHitbox = new Rectangle(
+                character.getX() - 5,
+                character.getY() - 5,
+                character.getWidth() + 10,
+                character.getHeight() + 10
+            );
+
+            for (Objetos obj : gameObjects.values()) {
+                if (obj.estaActivo() && charHitbox.overlaps(obj.getHitbox())) {
+                    obj.setActivo(false);
+                    Gdx.app.log("GameServer", "Anillo con ID: " + obj.getId() + " desactivado por el jugador " + character.getPlayerId());
+                }
+            }
+        }
     }
 
     public GameState getCurrentGameState() {
