@@ -17,9 +17,11 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Shape2D;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.miestudio.jsonic.Actores.Knockles;
 
-import com.miestudio.jsonic.Actores.Knuckles;
+
 import com.miestudio.jsonic.Actores.Personajes;
+import com.miestudio.jsonic.Actores.Robot;
 import com.miestudio.jsonic.Actores.Sonic;
 import com.miestudio.jsonic.Actores.Tails;
 import com.miestudio.jsonic.JuegoSonic;
@@ -192,7 +194,7 @@ public class GameScreen implements Screen {
                 character = new Tails(playerId, assets.tailsAtlas);
                 break;
             case "Knuckles":
-                character = new Knuckles(playerId, assets.knucklesAtlas);
+                character = new Knockles(playerId, assets.knucklesAtlas);
                 break;
             default:
                 // En caso de tipo desconocido, usar Sonic y registrar un error
@@ -241,6 +243,8 @@ public class GameScreen implements Screen {
                     Gdx.app.error("GameScreen", "Tipo de personaje desconocido para jugador " + playerId + ", usando Sonic por defecto.");
                 }
 
+                
+                
                 // Crear el personaje si aún no existe en el mapa de personajes
                 if (!characters.containsKey(playerId)) {
                     createCharacter(playerId, characterType);
@@ -250,6 +254,11 @@ public class GameScreen implements Screen {
                 // Si el personaje no se pudo crear o es nulo por alguna razón, saltar al siguiente
                 if (character == null) continue;
 
+                if (playerState.isFlying() && character instanceof Tails) {
+                    ((Tails) character).setFlying(true);
+                    character.setAnimation(Personajes.AnimationType.FLY);
+                }
+                
                 // Lógica de actualización para jugadores remotos (clientes) y para el host
                 if (isHost || playerId != localPlayerId) {
                     // Aplicar interpolación suave para un movimiento más fluido de los personajes remotos
@@ -373,6 +382,25 @@ public class GameScreen implements Screen {
         }
         batch.end();
     }
+    
+    private void renderRobots() {
+        batch.begin();
+        for (Personajes character : characters.values()) {
+            if (character instanceof Tails) {
+                Tails tails = (Tails) character;
+                for (Robot robot : tails.getActiveRobots()) {
+                    TextureRegion frame = robot.getTexture();
+                    if (!robot.isFacingRight() && !frame.isFlipX()) {
+                        frame.flip(true, false);
+                    } else if (robot.isFacingRight() && frame.isFlipX()) {
+                        frame.flip(true, false);
+                    }
+                    batch.draw(frame, robot.getX(), robot.getY());
+                }
+            }
+        }
+        batch.end();
+    }
 
     @Override
     public void render(float delta) {
@@ -388,7 +416,7 @@ public class GameScreen implements Screen {
 
         // 3. Obtener la instancia del personaje local para centrar la cámara
         Personajes localPlayer = characters.get(localPlayerId);
-
+        
         // 4. Actualizar la posición de la cámara
         if (localPlayer != null) {
             // Para centrar la cámara, se usa la posición predicha en clientes para suavizar el movimiento
@@ -407,7 +435,7 @@ public class GameScreen implements Screen {
         }
 
         renderParallaxBackground();
-
+        renderRobots();
         camera.update();
 
         // 5. Renderizar el mapa del juego

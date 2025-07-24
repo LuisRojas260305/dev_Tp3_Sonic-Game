@@ -1,61 +1,49 @@
 package com.miestudio.jsonic.Actores;
 
-import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.math.Rectangle;
+import com.miestudio.jsonic.Util.CollisionManager;
 
-/**
- * Representa al personaje Robot en el juego, extendiendo las funcionalidades base de Personajes.
- * Actualmente, esta clase utiliza animaciones de placeholder y su habilidad especial no esta implementada.
- */
-public class Robot extends Personajes {
+public class Robot {
+    public float x;
+    public float y;
+    public boolean facingRight;
+    private float speed;
+    private float distanceTraveled = 0;
+    private static final float MAX_DISTANCE = 500f;
+    private TextureRegion texture;
+    private boolean active = true;
 
-    /**
-     * Constructor para el personaje Robot.
-     * @param playerId El ID del jugador asociado a este Robot.
-     * @param atlas El TextureAtlas que contendrá las texturas del Robot (actualmente no utilizado para animaciones reales).
-     */
-    public Robot(int playerId, TextureAtlas atlas) {
-        this.playerId = playerId;
-        // El atlas no se usa directamente aquí ya que las animaciones son placeholders.
-        cargarAnimaciones();
-        setCurrentAnimation(idleAnimation);
-        setPosition(0, 0);
+    public Robot(float startX, float startY, boolean facingRight, float speed, TextureRegion texture) {
+        this.x = startX;
+        this.y = startY;
+        this.facingRight = facingRight;
+        this.speed = speed;
+        this.texture = texture;
     }
 
-    /**
-     * Carga las animaciones para el personaje Robot.
-     * Actualmente, utiliza animaciones de placeholder.
-     */
-    private void cargarAnimaciones() {
-        // Animaciones de placeholder para Robot
-        Array<TextureRegion> idleFrames = new Array<>();
-        // Aquí se añadirían los frames específicos del robot si estuvieran disponibles.
-        // Por ahora, se usa un frame dummy.
-        idleFrames.add(new TextureRegion()); // Reemplazar con textura real del robot
-        idleAnimation = new Animation<>(0.1f, idleFrames, Animation.PlayMode.LOOP);
-
-        runAnimation = idleAnimation; // Placeholder
-        jumpAnimation = idleAnimation; // Placeholder
-        rollAnimation = idleAnimation; // Placeholder
+    public void update(float delta, CollisionManager collisionManager) {
+        if (!active) return;
+        
+        float moveAmount = speed * delta;
+        x += facingRight ? moveAmount : -moveAmount;
+        distanceTraveled += moveAmount;
+        
+        Rectangle bounds = new Rectangle(x, y, 15, 15);
+        if (collisionManager.collides(bounds) || distanceTraveled >= MAX_DISTANCE) {
+            active = false;
+        }
     }
-
-    /**
-     * Libera los recursos específicos del Robot.
-     * Actualmente no hay recursos específicos que liberar directamente en esta clase.
-     */
-    @Override
-    public void dispose() {
-        // Disponer recursos si los hubiera
+    
+    public boolean isActive() {
+        return active;
     }
-
-    /**
-     * Implementacion de la habilidad especial del Robot.
-     * Actualmente no implementada.
-     */
-    @Override
-    public void useAbility() {
-        // Habilidad no implementada aún.
+    
+    public TextureRegion getTexture() {
+        return texture;
     }
+    
+    public float getX() { return x; }
+    public float getY() { return y; }
+    public boolean isFacingRight() { return facingRight; }
 }

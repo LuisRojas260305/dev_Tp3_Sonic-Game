@@ -121,7 +121,7 @@ public class GameServer {
                     character = new Tails(playerId, assets.tailsAtlas);
                     break;
                 case "Knuckles":
-                    character = new Knuckles(playerId, assets.knucklesAtlas);
+                    character = new Knockles(playerId, assets.knucklesAtlas);
                     break;
                 default:
                     continue;
@@ -223,10 +223,20 @@ public class GameServer {
                 character.isFacingRight(),
                 character.getCurrentAnimationName(),
                 character.getAnimationStateTime(),
-                characterType
+                characterType,
+                ((Tails) character).isFlying()
             ));
         }
 
+        for (Personajes character : characters.values()) {
+            if (character instanceof Tails) {
+                Tails tails = (Tails) character;
+                for (Robot robot : tails.getActiveRobots()) {
+                    robot.update(delta, collisionManager);
+                }
+            }
+        }
+        
         // Crear estados de objetos
         List<ObjectState> objectStates = new ArrayList<>();
         for (Objetos obj : gameObjects.values()) {

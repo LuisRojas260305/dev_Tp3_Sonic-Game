@@ -35,6 +35,7 @@ public class PlayerState implements Serializable {
      */
     private String characterType; /** El tipo de personaje que el jugador está usando (ej. "Sonic", "Tails"). */
 
+    private boolean flying;
     /**
      * Constructor para crear un nuevo PlayerState.
      *
@@ -46,7 +47,7 @@ public class PlayerState implements Serializable {
      * @param animationStateTime   El tiempo de estado de la animacion actual del jugador.
      * @param characterType        El tipo de personaje que el jugador esta usando.
      */
-    public PlayerState(int playerId, float x, float y, boolean facingRight, String currentAnimationName, float animationStateTime, String characterType) {
+    public PlayerState(int playerId, float x, float y, boolean facingRight, String currentAnimationName, float animationStateTime, String characterType, boolean flying) {
         this.playerId = playerId;
         this.x = x;
         this.y = y;
@@ -54,6 +55,7 @@ public class PlayerState implements Serializable {
         this.currentAnimationName = currentAnimationName;
         this.animationStateTime = animationStateTime;
         this.characterType = characterType;
+        this.flying = flying;
     }
 
     /**
@@ -65,6 +67,10 @@ public class PlayerState implements Serializable {
         return playerId;
     }
 
+    public boolean isFlying() {
+    return flying;
+}
+    
     /**
      * Obtiene la coordenada X de la posicion del jugador.
      *
