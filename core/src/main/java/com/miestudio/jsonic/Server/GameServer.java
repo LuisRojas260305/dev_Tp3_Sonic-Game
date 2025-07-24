@@ -17,21 +17,35 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import com.miestudio.jsonic.Server.domain.*;
 
+/**
+ * Clase GameServer que gestiona la logica del juego en el lado del servidor (host).
+ * Se encarga de la actualizacion del estado del juego, la gestion de personajes,
+ * la creacion de objetos, la deteccion de colisiones y la sincronizacion de red.
+ */
 public class GameServer {
 
-    private final JuegoSonic game;
-    private final ConcurrentHashMap<Integer, Personajes> characters;
-    private final ConcurrentHashMap<Integer, InputState> playerInputs;
-    private final CollisionManager collisionManager;
-    private final CargarObjetos cargarObjetos;
-    private final ConcurrentHashMap<Integer, Objetos> gameObjects = new ConcurrentHashMap<>();
-    private int nextObjectId = 0;
-    private final float mapWidth;
-    private final float mapHeight;
-    private final TiledMap map;
-    private volatile boolean running = false;
-    private long sequenceNumber = 0;
+    private final JuegoSonic game; /** Referencia a la instancia principal del juego. */
+    private final ConcurrentHashMap<Integer, Personajes> characters; /** Mapa de personajes activos en el juego, indexados por ID de jugador. */
+    private final ConcurrentHashMap<Integer, InputState> playerInputs; /** Mapa de estados de entrada de los jugadores. */
+    private final CollisionManager collisionManager; /** Gestor de colisiones del juego. */
+    private final CargarObjetos cargarObjetos; /** Gestor para cargar y manejar objetos del juego. */
+    private final ConcurrentHashMap<Integer, Objetos> gameObjects = new ConcurrentHashMap<>(); /** Mapa de objetos del juego activos, indexados por ID de objeto. */
+    private int nextObjectId = 0; /** Contador para asignar IDs unicos a los nuevos objetos del juego. */
+    private final float mapWidth; /** Ancho del mapa del juego en pixeles. */
+    private final float mapHeight; /** Altura del mapa del juego en pixeles. */
+    private final TiledMap map; /** El mapa de tiles del juego. */
+    private volatile boolean running = false; /** Indica si el bucle principal del servidor esta en ejecucion. */
+    private long sequenceNumber = 0; /** Numero de secuencia para el estado del juego, utilizado para la sincronizacion. */
 
+    /**
+     * Constructor de GameServer.
+     * @param game La instancia principal del juego.
+     * @param playerInputs Mapa concurrente de inputs de los jugadores.
+     * @param map El mapa de tiles del juego.
+     * @param collisionManager El gestor de colisiones del juego.
+     * @param mapWidth El ancho del mapa en pixeles.
+     * @param mapHeight La altura del mapa en pixeles.
+     */
     public GameServer(JuegoSonic game, ConcurrentHashMap<Integer, InputState> playerInputs, TiledMap map, CollisionManager collisionManager, float mapWidth, float mapHeight) {
         this.game = game;
         this.playerInputs = playerInputs;
@@ -42,10 +56,15 @@ public class GameServer {
         this.characters = new ConcurrentHashMap<>();
         this.cargarObjetos = new CargarObjetos(game.getAssets().objetosAtlas);
         initializeCharacters();
-        spawnGameObjects(-1, "Anillo", "SpawnObjetos");
+        spawnGameObjects("Anillo", "SpawnObjetos");
     }
 
-    private void spawnGameObjects(int count, String objectType, String layerName) {
+    /**
+     * Genera objetos del juego en puntos de spawn definidos en el mapa.
+     * @param objectType El tipo de objeto a generar (ej. "Anillo").
+     * @param layerName El nombre de la capa del mapa donde buscar los puntos de spawn.
+     */
+    private void spawnGameObjects(String objectType, String layerName) {
 
         List<Vector2> spawnPoints = MapUtil.findAllSpawnPoints(map, layerName, objectType);
 
@@ -54,9 +73,7 @@ public class GameServer {
             return;
         }
 
-        if (count == -1 || count > spawnPoints.size()) {
-            count = spawnPoints.size();
-        }
+        
 
         MapLayer layer = map.getLayers().get(layerName);
         float tileWigth = 32;
@@ -78,11 +95,15 @@ public class GameServer {
                 anillo.setId(nextObjectId++);
                 gameObjects.put(anillo.getId(), anillo);
                 cargarObjetos.agregarAnillo(anillo);
-                Gdx.app.log("GameServer", "Spawned " + objectType + " at " + spawnPoint);
             }
         }
+        Gdx.app.log("GameServer", "Se han creado " + spawnPoints.size() + " " + objectType + "s.");
     }
 
+    /**
+     * Inicializa los personajes de los jugadores basandose en los personajes seleccionados
+     * y los posiciona en sus respectivos puntos de spawn en el mapa.
+     */
     private void initializeCharacters() {
         Assets assets = game.getAssets();
         Map<Integer, String> playerCharacterMap = game.networkManager.getSelectedCharacters();
@@ -119,6 +140,9 @@ public class GameServer {
         }
     }
 
+    /**
+     * Inicia el bucle principal del servidor en un nuevo hilo.
+     */
     public void start() {
         running = true;
         Thread gameLoopThread = new Thread(this::serverGameLoop);
@@ -126,10 +150,16 @@ public class GameServer {
         gameLoopThread.start();
     }
 
+    /**
+     * Detiene el bucle principal del servidor.
+     */
     public void stop() {
         running = false;
     }
 
+    /**
+     * El bucle principal del servidor que actualiza el estado del juego a una tasa fija.
+     */
     private void serverGameLoop() {
         final float FIXED_DELTA_TIME = 1f / 60f;
         long lastTime = System.nanoTime();
@@ -158,6 +188,11 @@ public class GameServer {
         }
     }
 
+    /**
+     * Actualiza el estado del juego, incluyendo la logica de personajes, objetos y colisiones.
+     * Luego, crea y transmite el GameState a todos los clientes.
+     * @param delta El tiempo transcurrido desde el ultimo fotograma en segundos (delta fijo).
+     */
     private void updateGameState(float delta) {
         // Actualizar personajes
         for (Personajes character : characters.values()) {
@@ -212,6 +247,9 @@ public class GameServer {
         game.networkManager.broadcastUdpGameState();
     }
 
+    /**
+     * Detecta y maneja las colisiones entre personajes y objetos del juego.
+     */
     private void detectCollisions() {
         for (Personajes character : characters.values()) {
             Rectangle charHitbox = new Rectangle(
@@ -230,6 +268,10 @@ public class GameServer {
         }
     }
 
+    /**
+     * Obtiene el estado actual del juego.
+     * @return El objeto GameState actual.
+     */
     public GameState getCurrentGameState() {
         return game.networkManager.getCurrentGameState();
     }

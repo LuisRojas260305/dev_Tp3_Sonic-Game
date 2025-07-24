@@ -10,22 +10,22 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Clase principal del juego que extiende la clase Game de LibGDX.
- * Controla la gestión global del juego, inicializa el NetworkManager
+ * Controla la gestion global del juego, inicializa el NetworkManager
  * y establece la pantalla inicial.
  */
 public class JuegoSonic extends Game {
 
-    /** Gestor de red para manejar la creación del host y la conexión de clientes. */
+    /** Gestor de red para manejar la creacion del host y la conexion de clientes. */
     public NetworkManager networkManager;
     /** Gestor de assets para cargar y liberar recursos. */
     private Assets assets;
 
-    /** Almacena el estado de selección de personajes (true si está tomado, false si está disponible). */
+    /** Almacena el estado de seleccion de personajes (true si esta tomado, false si esta disponible). */
     public ConcurrentHashMap<String, Boolean> selectedCharacters;
 
     /**
-     * Método principal de inicialización del juego.
-     * Se llama una vez al crear la aplicación. Aquí se inicializan los recursos y gestores principales.
+     * Metodo principal de inicializacion del juego.
+     * Se llama una vez al crear la aplicacion. Aqui se inicializan los recursos y gestores principales.
      */
     @Override
     public void create() {
@@ -44,7 +44,7 @@ public class JuegoSonic extends Game {
     }
 
     /**
-     * Libera todos los recursos del juego cuando la aplicación es destruida.
+     * Libera todos los recursos del juego cuando la aplicacion es destruida.
      * Es crucial para evitar fugas de memoria y asegurar un cierre limpio.
      */
     @Override
@@ -73,16 +73,16 @@ public class JuegoSonic extends Game {
     /**
      * Verifica si un personaje ya ha sido seleccionado.
      * @param characterType El tipo de personaje (ej. "Sonic", "Tails").
-     * @return true si el personaje ya está tomado, false en caso contrario.
+     * @return true si el personaje ya esta tomado, false en caso contrario.
      */
     public boolean isCharacterTaken(String characterType) {
         return selectedCharacters.getOrDefault(characterType, false);
     }
 
     /**
-     * Establece el estado de selección de un personaje.
+     * Establece el estado de seleccion de un personaje.
      * @param characterType El tipo de personaje.
-     * @param taken true si el personaje está tomado, false si está disponible.
+     * @param taken true si el personaje esta tomado, false si esta disponible.
      */
     public void setCharacterTaken(String characterType, boolean taken) {
         selectedCharacters.put(characterType, taken);

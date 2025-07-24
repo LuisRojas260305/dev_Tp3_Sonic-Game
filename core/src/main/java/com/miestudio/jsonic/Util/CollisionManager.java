@@ -10,17 +10,17 @@ import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.Array;
 
 /**
- * Gestiona las colisiones en el juego, incluyendo la detección de colisiones con el mapa
- * y la determinación de si un personaje está en el suelo.
+ * Gestiona las colisiones en el juego, incluyendo la deteccion de colisiones con el mapa
+ * y la determinacion de si un personaje esta en el suelo.
  */
 public class CollisionManager {
     private static final float FEET_SENSOR_Y_OFFSET_GROUNDED = -10f;
     /**
-     * Desplazamiento Y para el sensor de pies al verificar si está en el suelo.
+     * Desplazamiento Y para el sensor de pies al verificar si esta en el suelo.
      */
     private static final float FEET_SENSOR_HEIGHT_GROUNDED = 15f;
     /**
-     * Altura del sensor de pies al verificar si está en el suelo.
+     * Altura del sensor de pies al verificar si esta en el suelo.
      */
     private static final float FEET_SENSOR_Y_OFFSET_GROUNDY = -20f;
     /**
@@ -33,13 +33,13 @@ public class CollisionManager {
 
     private Array<Shape2D> collisionShapes;
     /**
-     * Colección de formas 2D que representan las áreas de colisión.
+     * Coleccion de formas 2D que representan las areas de colision.
      */
     private final float mapWidth;
     /**
-     * Ancho del mapa del juego en píxeles.
+     * Ancho del mapa del juego en pixeles.
      */
-    private final float mapHeight; /** Altura del mapa del juego en píxeles. */
+    private final float mapHeight; /** Altura del mapa del juego en pixeles. */
 
     /**
      * Constructor de CollisionManager.
@@ -67,7 +67,7 @@ public class CollisionManager {
     /**
      * Añade las colisiones definidas en los tiles de una capa de tiles.
      * Los tiles deben tener una propiedad booleana llamada "Colisiones" establecida a true.
-     * Este método debe ser llamado después de crear CollisionManager si se utilizan colisiones de tiles.
+     * Este metodo debe ser llamado despues de crear CollisionManager si se utilizan colisiones de tiles.
      *
      * @param map           El mapa de tiles del juego.
      * @param tileLayerName El nombre de la capa de tiles que contiene las colisiones.
@@ -108,11 +108,11 @@ public class CollisionManager {
     }
 
     /**
-     * Verifica si un rectángulo dado colisiona con alguna de las formas de colisión del mapa
-     * o con los límites del mapa.
+     * Verifica si un rectangulo dado colisiona con alguna de las formas de colision del mapa
+     * o con los limites del mapa.
      *
-     * @param rect El rectángulo a verificar.
-     * @return true si hay colisión, false en caso contrario.
+     * @param rect El rectangulo a verificar.
+     * @return true si hay colision, false en caso contrario.
      */
     public boolean collides(Rectangle rect) {
         // Verificar bordes del mapa
@@ -132,11 +132,11 @@ public class CollisionManager {
     }
 
     /**
-     * Verifica si un rectángulo de personaje está en el suelo.
-     * Utiliza un sensor de pies ligeramente más grande para una detección precisa.
+     * Verifica si un rectangulo de personaje esta en el suelo.
+     * Utiliza un sensor de pies ligeramente mas grande para una deteccion precisa.
      *
-     * @param characterRect El rectángulo que representa los límites del personaje.
-     * @return true si el personaje está en el suelo, false en caso contrario.
+     * @param characterRect El rectangulo que representa los limites del personaje.
+     * @return true si el personaje esta en el suelo, false en caso contrario.
      */
     public boolean isOnGround(Rectangle characterRect) {
         // Área de detección más grande para mejor precisión
@@ -151,9 +151,9 @@ public class CollisionManager {
     }
 
     /**
-     * Obtiene la posición Y más alta del suelo debajo de un rectángulo de personaje.
+     * Obtiene la posicion Y mas alta del suelo debajo de un rectangulo de personaje.
      *
-     * @param characterRect El rectángulo que representa los límites del personaje.
+     * @param characterRect El rectangulo que representa los limites del personaje.
      * @return La coordenada Y del suelo, o -1 si no se detecta suelo.
      */
     public float getGroundY(Rectangle characterRect) {
@@ -192,7 +192,7 @@ public class CollisionManager {
     /**
      * Obtiene el ancho del mapa.
      *
-     * @return El ancho del mapa en píxeles.
+     * @return El ancho del mapa en pixeles.
      */
     public float getMapWidth() {
         return mapWidth;
@@ -201,16 +201,16 @@ public class CollisionManager {
     /**
      * Obtiene la altura del mapa.
      *
-     * @return La altura del mapa en píxeles.
+     * @return La altura del mapa en pixeles.
      */
     public float getMapHeight() {
         return mapHeight;
     }
 
     /**
-     * Obtiene la colección de formas de colisión. Útil para depuración visual.
+     * Obtiene la coleccion de formas de colision. Util para depuracion visual.
      *
-     * @return Un Array de Shape2D que representa las formas de colisión.
+     * @return Un Array de Shape2D que representa las formas de colision.
      */
     public Array<Shape2D> getCollisionShapes() {
         return collisionShapes;

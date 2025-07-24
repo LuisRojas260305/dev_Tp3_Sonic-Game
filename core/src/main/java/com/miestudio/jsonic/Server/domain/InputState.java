@@ -10,7 +10,7 @@ public class InputState implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private boolean up, down, left, right, ability; /** Estado de los botones de dirección y habilidad. */
+    private boolean up, down, left, right, ability; /** Estado de los botones de direccion y habilidad. */
     private int playerId; /** ID del jugador al que pertenecen estos inputs. */
 
     /**
@@ -24,57 +24,57 @@ public class InputState implements Serializable {
      */
     public void setPlayerId(int playerId) { this.playerId = playerId; }
     /**
-     * Verifica si el botón 'arriba' está presionado.
-     * @return true si el botón 'arriba' está presionado, false en caso contrario.
+     * Verifica si el boton 'arriba' esta presionado.
+     * @return true si el boton 'arriba' esta presionado, false en caso contrario.
      */
     public boolean isUp() { return up; }
     /**
-     * Establece el estado del botón 'arriba'.
-     * @param up true si el botón 'arriba' está presionado, false en caso contrario.
+     * Establece el estado del boton 'arriba'.
+     * @param up true si el boton 'arriba' esta presionado, false en caso contrario.
      */
     public void setUp(boolean up) { this.up = up; }
 
     /**
-     * Verifica si el botón 'abajo' está presionado.
-     * @return true si el botón 'abajo' está presionado, false en caso contrario.
+     * Verifica si el boton 'abajo' esta presionado.
+     * @return true si el boton 'abajo' esta presionado, false en caso contrario.
      */
     public boolean isDown() { return down; }
     /**
-     * Establece el estado del botón 'abajo'.
-     * @param down true si el botón 'abajo' está presionado, false en caso contrario.
+     * Establece el estado del boton 'abajo'.
+     * @param down true si el boton 'abajo' esta presionado, false en caso contrario.
      */
     public void setDown(boolean down) { this.down = down; }
 
     /**
-     * Verifica si el botón 'izquierda' está presionado.
-     * @return true si el botón 'izquierda' está presionado, false en caso contrario.
+     * Verifica si el boton 'izquierda' esta presionado.
+     * @return true si el boton 'izquierda' esta presionado, false en caso contrario.
      */
     public boolean isLeft() { return left; }
     /**
-     * Establece el estado del botón 'izquierda'.
-     * @param left true si el botón 'izquierda' está presionado, false en caso contrario.
+     * Establece el estado del boton 'izquierda'.
+     * @param left true si el boton 'izquierda' esta presionado, false en caso contrario.
      */
     public void setLeft(boolean left) { this.left = left; }
 
     /**
-     * Verifica si el botón 'derecha' está presionado.
-     * @return true si el botón 'derecha' está presionado, false en caso contrario.
+     * Verifica si el boton 'derecha' esta presionado.
+     * @return true si el boton 'derecha' esta presionado, false en caso contrario.
      */
     public boolean isRight() { return right; }
     /**
-     * Establece el estado del botón 'derecha'.
-     * @param right true si el botón 'derecha' está presionado, false en caso contrario.
+     * Establece el estado del boton 'derecha'.
+     * @param right true si el boton 'derecha' esta presionado, false en caso contrario.
      */
     public void setRight(boolean right) { this.right = right; }
 
     /**
-     * Verifica si el botón de 'habilidad' está presionado.
-     * @return true si el botón de 'habilidad' está presionado, false en caso contrario.
+     * Verifica si el boton de 'habilidad' esta presionado.
+     * @return true si el boton de 'habilidad' esta presionado, false en caso contrario.
      */
     public boolean isAbility() { return ability; }
     /**
-     * Establece el estado del botón de 'habilidad'.
-     * @param ability true si el botón de 'habilidad' está presionado, false en caso contrario.
+     * Establece el estado del boton de 'habilidad'.
+     * @param ability true si el boton de 'habilidad' esta presionado, false en caso contrario.
      */
     public void setAbility(boolean ability) { this.ability = ability; }
 }

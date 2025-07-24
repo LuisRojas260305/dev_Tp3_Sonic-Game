@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 /**
  * Paquete de red utilizado para notificar que un personaje ha sido tomado o liberado.
- * Implementa {@link Serializable} para poder ser enviado a través de la red.
+ * Implementa {@link Serializable} para poder ser enviado a traves de la red.
  */
 public class CharacterTakenPacket implements Serializable {
     private static final long serialVersionUID = 1L;

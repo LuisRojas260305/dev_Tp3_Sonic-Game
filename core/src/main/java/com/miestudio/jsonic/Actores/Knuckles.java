@@ -10,17 +10,17 @@ import com.miestudio.jsonic.Util.CollisionManager;
 
 /**
  * Representa al personaje Knuckles en el juego, extendiendo las funcionalidades base de Personajes.
- * Incluye animaciones específicas y la lógica para su habilidad especial de puñetazo cargado.
+ * Incluye animaciones especificas y la logica para su habilidad especial de punetazo cargado.
  */
 public class Knuckles extends Personajes {
     private TextureAtlas atlasKnuckles; /** Atlas de texturas específico para Knuckles. */
-    /** Animación de puñetazo cargado de Knuckles. */
+    /** Animacion de punetazo cargado de Knuckles. */
     public Animation<TextureRegion> PunchAnimation;
-    /** Indica si Knuckles está realizando un puñetazo cargado. */
+    /** Indica si Knuckles esta realizando un punetazo cargado. */
     public boolean isPunching = false;
-    /** El poder actual acumulado del puñetazo cargado. */
+    /** El poder actual acumulado del punetazo cargado. */
     public float PunchPower = 0;
-    /** El poder máximo que puede alcanzar el puñetazo cargado. */
+    /** El poder maximo que puede alcanzar el punetazo cargado. */
     private final float MAX_PUNCH_POWER = 500f;
 
     /**
@@ -38,8 +38,8 @@ public class Knuckles extends Personajes {
     }
 
     /**
-     * Activa la habilidad especial de puñetazo cargado de Knuckles.
-     * Solo se puede activar si está en el suelo y no hay otra habilidad activa.
+     * Activa la habilidad especial de punetazo cargado de Knuckles.
+     * Solo se puede activar si esta en el suelo y no hay otra habilidad activa.
      */
     @Override
     public void useAbility() {
@@ -53,7 +53,7 @@ public class Knuckles extends Personajes {
 
     /**
      * Actualiza el estado de Knuckles en cada fotograma.
-     * Incluye la lógica para cargar y liberar el puñetazo cargado.
+     * Incluye la logica para cargar y liberar el punetazo cargado.
      * @param delta El tiempo transcurrido desde el último fotograma en segundos.
      * @param collisionManager El gestor de colisiones para interactuar con el entorno.
      */
@@ -73,7 +73,7 @@ public class Knuckles extends Personajes {
                 isPunching = false;
                 isAbilityActive = false;
 
-                // Transición suave a la animación de inactividad o rodar después de la habilidad.
+                // Transicion suave a la animacion de inactividad o rodar despues de la habilidad.
                 if (isGrounded) {
                     setCurrentAnimation(isRolling ? rollAnimation : idleAnimation);
                 }

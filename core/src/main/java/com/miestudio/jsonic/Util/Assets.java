@@ -8,7 +8,7 @@ import com.badlogic.gdx.utils.Array;
 
 /**
  * Clase para gestionar la carga y descarga de todos los assets del juego.
- * Centraliza la gestión de recursos para una mejor organización y mantenimiento.
+ * Centraliza la gestion de recursos para una mejor organizacion y mantenimiento.
  */
 public class Assets {
 
@@ -31,7 +31,7 @@ public class Assets {
 
     /**
      * Carga todos los assets del juego.
-     * Este método debe ser llamado al inicio de la aplicación para precargar los recursos.
+     * Este metodo debe ser llamado al inicio de la aplicacion para precargar los recursos.
      */
     public void load() {
         try {
@@ -53,7 +53,7 @@ public class Assets {
 
     /**
      * Libera todos los assets cargados.
-     * Este método debe ser llamado al finalizar la aplicación para evitar fugas de memoria.
+     * Este metodo debe ser llamado al finalizar la aplicacion para evitar fugas de memoria.
      */
     public void dispose() {
         if (sonicAtlas != null) sonicAtlas.dispose();

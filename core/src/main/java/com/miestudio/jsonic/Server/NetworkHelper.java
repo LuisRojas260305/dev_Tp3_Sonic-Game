@@ -5,14 +5,14 @@ import java.net.NetworkInterface;
 import java.util.Enumeration;
 
 /**
- * Clase de utilidad para operaciones relacionadas con la red, como la obtención de la dirección IP local.
- * Proporciona métodos estáticos para facilitar la configuración de la red en el juego.
+ * Clase de utilidad para operaciones relacionadas con la red, como la obtencion de la direccion IP local.
+ * Proporciona metodos estaticos para facilitar la configuracion de la red en el juego.
  */
 public class NetworkHelper {
     /**
-     * Obtiene la dirección IP local no-loopback de la máquina.
-     * Busca entre todas las interfaces de red activas y devuelve la primera dirección IP de sitio local encontrada.
-     * @return La dirección IP local como una cadena (String), o "127.0.0.1" si no se puede determinar una dirección de sitio local.
+     * Obtiene la direccion IP local no-loopback de la maquina.
+     * Busca entre todas las interfaces de red activas y devuelve la primera direccion IP de sitio local encontrada.
+     * @return La direccion IP local como una cadena (String), o "127.0.0.1" si no se puede determinar una direccion de sitio local.
      */
     public static String getIpLocal(){
         try{

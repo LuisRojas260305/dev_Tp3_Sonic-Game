@@ -39,14 +39,14 @@ public class NetworkManager {
 
     private final JuegoSonic game; /** Referencia a la instancia principal del juego. */
     private ServerSocket serverTcpSocket; /** Socket TCP para el servidor (solo host). */
-    private DatagramSocket udpSocket; /** Socket UDP para el envío y recepción de datagramas. */
+    private DatagramSocket udpSocket; /** Socket UDP para el envio y recepcion de datagramas. */
     private final List<ClientConnection> clientConnections = Collections.synchronizedList(new ArrayList<>()); /** Lista de conexiones de clientes (solo host). */
     private final AtomicInteger nextPlayerId = new AtomicInteger(1); /** Generador de IDs para nuevos jugadores. */
     private volatile GameState currentGameState; /** El estado actual del juego, sincronizado entre host y clientes. */
-    private Socket clientTcpSocket; /** Socket TCP para la conexión al servidor (solo cliente). */
+    private Socket clientTcpSocket; /** Socket TCP para la conexion al servidor (solo cliente). */
     private ObjectOutputStream clientTcpOut; /** Stream de salida TCP para el cliente. */
     private ObjectInputStream clientTcpIn; /** Stream de entrada TCP para el cliente. */
-    private InetAddress serverAddress; /** Dirección IP del servidor al que el cliente está conectado. */
+    private InetAddress serverAddress; /** Direccion IP del servidor al que el cliente esta conectado. */
     private int serverUdpPort; /** Puerto UDP del servidor. */
 
     private final ConcurrentHashMap<Integer, InputState> playerInputs = new ConcurrentHashMap<>(); /** Inputs de los jugadores, indexados por ID de jugador. */
@@ -55,9 +55,9 @@ public class NetworkManager {
     private int localPlayerId = -1; /** ID del jugador local. */
     private String selectedCharacterType; /** Tipo de personaje seleccionado por el jugador local. */
 
-    private Thread hostDiscoveryThread; /** Hilo para la detección de host. */
-    private Thread clientTcpReceiveThread; /** Hilo para la recepción de mensajes TCP del servidor (solo cliente). */
-    private Thread udpReceiveThread; /** Hilo para la recepción de mensajes UDP. */
+    private Thread hostDiscoveryThread; /** Hilo para la deteccion de host. */
+    private Thread clientTcpReceiveThread; /** Hilo para la recepcion de mensajes TCP del servidor (solo cliente). */
+    private Thread udpReceiveThread; /** Hilo para la recepcion de mensajes UDP. */
 
     private GameServer gameServer; /** Instancia del GameServer (solo host). */
 
@@ -70,9 +70,9 @@ public class NetworkManager {
     }
 
     /**
-     * Inicia el proceso de verificación de estado de la red.
+     * Inicia el proceso de verificacion de estado de la red.
      * Intenta descubrir un host existente; si no lo encuentra, inicia uno nuevo.
-     * Luego, transiciona a la pantalla de selección de personaje.
+     * Luego, transiciona a la pantalla de seleccion de personaje.
      */
     public void checkNetworkStatus() {
         Thread networkThread = new Thread(() -> {
@@ -88,8 +88,8 @@ public class NetworkManager {
     }
 
     /**
-     * Envía la selección de personaje del jugador local al servidor.
-     * Si es cliente, envía un paquete TCP. Si es host, procesa la selección directamente.
+     * Envia la seleccion de personaje del jugador local al servidor.
+     * Si es cliente, envia un paquete TCP. Si es host, procesa la seleccion directamente.
      * @param characterType El tipo de personaje seleccionado (ej. "Sonic", "Tails").
      */
     public void sendCharacterSelection(String characterType) {
@@ -102,7 +102,7 @@ public class NetworkManager {
     }
 
     /**
-     * Envía un mensaje TCP al servidor. Solo para clientes.
+     * Envia un mensaje TCP al servidor. Solo para clientes.
      * @param message El objeto Serializable a enviar.
      */
     public void sendTcpMessageToServer(Object message) {
@@ -117,8 +117,8 @@ public class NetworkManager {
     }
 
     /**
-     * Procesa la selección de un personaje, marcándolo como tomado y notificando a los demás clientes.
-     * @param playerId El ID del jugador que seleccionó el personaje.
+     * Procesa la seleccion de un personaje, marcandolo como tomado y notificando a los demas clientes.
+     * @param playerId El ID del jugador que selecciono el personaje.
      * @param characterType El tipo de personaje seleccionado.
      */
     private void processCharacterSelection(int playerId, String characterType) {
@@ -153,6 +153,11 @@ public class NetworkManager {
         }
     }
 
+    /**
+     * Intenta descubrir un servidor existente en la red local enviando un paquete de difusion UDP.
+     * Espera una respuesta durante un tiempo limitado.
+     * @return La direccion IP del servidor si se encuentra, o null si no se encuentra ninguno.
+     */
     private String discoverServer() {
         try (DatagramSocket discoverySocket = new DatagramSocket(Constantes.DISCOVERY_PORT)) {
             discoverySocket.setSoTimeout(2000);
@@ -168,6 +173,10 @@ public class NetworkManager {
         }
     }
 
+    /**
+     * Inicia el servidor del juego, configurando los sockets TCP y UDP,
+     * y comenzando los hilos para anunciar el servidor y aceptar clientes.
+     */
     public void startHost() {
         isHost = true;
         try {
@@ -189,6 +198,14 @@ public class NetworkManager {
         }
     }
 
+    /**
+     * Inicializa la instancia de GameServer en el host.
+     * Este metodo se llama una vez que el mapa y el gestor de colisiones estan listos.
+     * @param map El mapa de tiles del juego.
+     * @param collisionManager El gestor de colisiones del juego.
+     * @param mapWidth El ancho del mapa en pixeles.
+     * @param mapHeight La altura del mapa en pixeles.
+     */
     public void initializeGameServer(TiledMap map, CollisionManager collisionManager, float mapWidth, float mapHeight) {
         if (gameServer == null) {
             gameServer = new GameServer(game, playerInputs, map, collisionManager, mapWidth, mapHeight);
@@ -196,6 +213,10 @@ public class NetworkManager {
         }
     }
 
+    /**
+     * Anuncia la presencia del servidor en la red local a traves de paquetes UDP de difusion.
+     * Este metodo se ejecuta en un hilo separado.
+     */
     private void announceServer() {
         try (DatagramSocket socket = new DatagramSocket()) {
             socket.setBroadcast(true);
@@ -211,6 +232,10 @@ public class NetworkManager {
         }
     }
 
+    /**
+     * Acepta nuevas conexiones de clientes TCP. Se ejecuta en un hilo separado.
+     * Limita el numero de clientes conectados a {@link Constantes#MAX_PLAYERS}.
+     */
     private void acceptClients() {
         while (isHost && !serverTcpSocket.isClosed()) {
             try {
@@ -236,6 +261,11 @@ public class NetworkManager {
         }
     }
 
+    /**
+     * Conecta esta instancia como cliente a un servidor existente.
+     * @param ip La direccion IP del servidor.
+     * @param port El puerto TCP del servidor.
+     */
     public void connectAsClient(String ip, int port) {
         isHost = false;
         try {
@@ -270,6 +300,11 @@ public class NetworkManager {
         }
     }
 
+    /**
+     * Inicia un hilo para escuchar mensajes TCP entrantes del servidor (solo para clientes).
+     * @param clientTcpIn El ObjectInputStream para leer mensajes del servidor.
+     * @param playerId El ID del jugador local.
+     */
     private void startClientTcpListener(ObjectInputStream clientTcpIn, int playerId) {
         clientTcpReceiveThread = new Thread(() -> {
             try {
@@ -292,6 +327,10 @@ public class NetworkManager {
         clientTcpReceiveThread.start();
     }
 
+    /**
+     * Inicia un hilo para escuchar mensajes UDP entrantes.
+     * Si es host, escucha inputs de clientes. Si es cliente, escucha GameStates del servidor.
+     */
     private void startUdpListener() {
         try {
             udpSocket.setSoTimeout(1000); // Timeout de 1 segundo para no bloquear indefinidamente
@@ -323,12 +362,7 @@ public class NetworkManager {
                         // Host recibe inputs de los clientes
                         if (obj instanceof InputState) {
                             InputState input = (InputState) obj;
-                            Gdx.app.log("NetworkManager",
-                                "Input recibido - Jugador: " + input.getPlayerId() +
-                                    ", Izq: " + input.isLeft() +
-                                    ", Der: " + input.isRight() +
-                                    ", Salto: " + input.isUp()
-                            );
+                            
 
                             // Guardar input para procesamiento en el game loop del servidor
                             playerInputs.put(input.getPlayerId(), input);
@@ -352,7 +386,7 @@ public class NetworkManager {
                     if (!udpSocket.isClosed()) {
                         Gdx.app.error("NetworkManager", "Error de socket UDP: " + e.getMessage());
                     }
-                    break; // Salir si el socket se cerró inesperadamente
+                    break; // Salir si el socket se cerro inesperadamente
                 } catch (IOException e) {
                     Gdx.app.error("NetworkManager", "Error IO UDP: " + e.getMessage());
                 } catch (ClassNotFoundException e) {
@@ -368,8 +402,8 @@ public class NetworkManager {
     }
 
     /**
-     * Inicia la partida. Solo el host puede llamar a este método.
-     * Envía un mensaje TCP a todos los clientes para que transicionen a la GameScreen.
+     * Inicia la partida. Solo el host puede llamar a este metodo.
+     * Envia un mensaje TCP a todos los clientes para que transicionen a la GameScreen.
      */
     public void startGame() {
         if (isHost) {
@@ -379,7 +413,7 @@ public class NetworkManager {
     }
 
     /**
-     * Envía un mensaje TCP a todos los clientes conectados (solo host).
+     * Envia un mensaje TCP a todos los clientes conectados (solo host).
      * @param message El objeto Serializable a enviar.
      */
     public void broadcastTcpMessage(Object message) {
@@ -391,7 +425,7 @@ public class NetworkManager {
     }
 
     /**
-     * Transmite el estado actual del juego a todos los clientes a través de UDP (solo host).
+     * Transmite el estado actual del juego a todos los clientes a traves de UDP (solo host).
      * Se llama en cada tick del GameServer.
      */
     public void broadcastUdpGameState() {
@@ -421,7 +455,7 @@ public class NetworkManager {
     }
 
     /**
-     * Envía el estado de input del jugador local al servidor a través de UDP (solo cliente).
+     * Envia el estado de input del jugador local al servidor a traves de UDP (solo cliente).
      * @param inputState El objeto InputState con el estado actual de los inputs del jugador.
      */
     public void sendInputState(InputState inputState) {
@@ -482,7 +516,7 @@ public class NetworkManager {
 
     /**
      * Libera todos los recursos de red y detiene los hilos.
-     * Se llama al cerrar la aplicación.
+     * Se llama al cerrar la aplicacion.
      */
     public void dispose() {
         if (isHost) {
@@ -518,14 +552,14 @@ public class NetworkManager {
     }
 
     /**
-     * Clase interna que representa la conexión de un cliente individual en el lado del host.
-     * Maneja la comunicación TCP con ese cliente.
+     * Clase interna que representa la conexion de un cliente individual en el lado del host.
+     * Maneja la comunicacion TCP con ese cliente.
      */
     private class ClientConnection implements Runnable {
-        private final Socket tcpSocket; /** Socket TCP para la comunicación con este cliente. */
+        private final Socket tcpSocket; /** Socket TCP para la comunicacion con este cliente. */
         private final int playerId; /** ID del jugador asociado a esta conexión. */
         private ObjectOutputStream tcpOut; /** Stream de salida TCP para enviar mensajes al cliente. */
-        private InetAddress clientAddress; /** Dirección IP del cliente. */
+        private InetAddress clientAddress; /** Direccion IP del cliente. */
         private int clientUdpPort; /** Puerto UDP del cliente para enviar GameStates. */
 
         /**
@@ -540,7 +574,7 @@ public class NetworkManager {
         }
 
         /**
-         * Método principal del hilo de ClientConnection.
+         * Metodo principal del hilo de ClientConnection.
          * Lee mensajes TCP del cliente y los procesa.
          */
         @Override
@@ -577,7 +611,7 @@ public class NetworkManager {
 
             } catch (IOException | ClassNotFoundException | InterruptedException e) {
                 Gdx.app.error("NetworkManager", "Error en ClientConnection para jugador " + playerId + ": " + e.getMessage());
-                // Desconexión del cliente (se manejará en el bloque finally)
+                // Desconexion del cliente (se manejara en el bloque finally)
             } finally {
                 // Eliminar la conexión de la lista y cerrar el socket
                 clientConnections.remove(this);
@@ -592,7 +626,7 @@ public class NetworkManager {
         }
 
         /**
-         * Envía un mensaje TCP a este cliente específico.
+         * Envia un mensaje TCP a este cliente especifico.
          * @param message El objeto Serializable a enviar.
          */
         void sendTcpMessage(Object message) {
@@ -608,8 +642,8 @@ public class NetworkManager {
         }
 
         /**
-         * Obtiene la dirección IP del cliente.
-         * @return La dirección IP del cliente.
+         * Obtiene la direccion IP del cliente.
+         * @return La direccion IP del cliente.
          */
         public InetAddress getClientAddress() {
             return clientAddress;

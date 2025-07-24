@@ -8,20 +8,30 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 
 
+/**
+ * Clase para cargar, gestionar y actualizar los objetos del juego, como los anillos.
+ */
 public class CargarObjetos {
-    public Array<Objetos> objetos;
-    private TextureAtlas atlasObjetos;
-    public Animation<TextureRegion> animacionAnillo;
+    public Array<Objetos> objetos; /** Lista de todos los objetos activos en el juego. */
+    private TextureAtlas atlasObjetos; /** Atlas de texturas para los objetos. */
+    public Animation<TextureRegion> animacionAnillo; /** Animacion especifica para los anillos. */
 
+    /**
+     * Constructor de CargarObjetos.
+     * @param atlasObjetos El TextureAtlas que contiene las texturas de los objetos.
+     */
     public CargarObjetos(TextureAtlas atlasObjetos) {
         objetos = new Array<>();
         this.atlasObjetos = atlasObjetos;
         cargarRecursos();
     }
 
+    /**
+     * Carga los recursos necesarios para los objetos, como las animaciones.
+     */
     private void cargarRecursos() {
 
-        // Cargar animación de anillos
+        // Cargar animacion de anillos
         Array<TextureRegion> framesAnillo = new Array<>();
         for (int i = 0; i < 5; i++) {
             framesAnillo.add(atlasObjetos.findRegion("ObjA" + i));
@@ -29,14 +39,28 @@ public class CargarObjetos {
         animacionAnillo = new Animation<>(0.15f, framesAnillo, Animation.PlayMode.LOOP);
     }
 
+    /**
+     * Agrega un nuevo anillo al juego en las coordenadas especificadas.
+     * @param x Posicion X del anillo.
+     * @param y Posicion Y del anillo.
+     */
     public void agregarAnillo(float x, float y) {
         objetos.add(new Anillo(x, y, animacionAnillo));
     }
 
+    /**
+     * Agrega un objeto Anillo existente a la lista de objetos del juego.
+     * @param anillo El objeto Anillo a agregar.
+     */
     public void agregarAnillo(Anillo anillo) {
         objetos.add(anillo);
     }
 
+    /**
+     * Actualiza el estado de todos los objetos en el juego.
+     * Elimina los objetos que ya no estan activos.
+     * @param delta El tiempo transcurrido desde el ultimo fotograma en segundos.
+     */
     public void actualizar(float delta) {
         for (Objetos objeto : objetos) {
             objeto.actualizar(delta);
@@ -50,16 +74,27 @@ public class CargarObjetos {
         }
     }
 
+    /**
+     * Renderiza todos los objetos activos en el juego.
+     * @param batch El SpriteBatch utilizado para el renderizado.
+     */
     public void renderizar(SpriteBatch batch) {
         for (Objetos objeto : objetos) {
             objeto.renderizar(batch);
         }
     }
 
+    /**
+     * Obtiene la lista de todos los objetos activos en el juego.
+     * @return Un Array de objetos del juego.
+     */
     public Array<Objetos> getObjetos() {
         return objetos;
     }
 
+    /**
+     * Libera los recursos utilizados por el gestor de objetos.
+     */
     public void dispose() {
         atlasObjetos.dispose();
     }

@@ -7,10 +7,10 @@ import com.badlogic.gdx.utils.Array;
 
 /**
  * Representa al personaje Tails en el juego, extendiendo las funcionalidades base de Personajes.
- * Incluye animaciones específicas para Tails.
+ * Incluye animaciones especificas para Tails.
  */
 public class Tails extends Personajes {
-    private TextureAtlas AtlasTails; /** Atlas de texturas específico para Tails. */
+    private TextureAtlas AtlasTails; /** Atlas de texturas especifico para Tails. */
 
     /**
      * Constructor para el personaje Tails.
@@ -26,7 +26,7 @@ public class Tails extends Personajes {
     }
 
     /**
-     * Carga todas las animaciones específicas de Tails desde su TextureAtlas.
+     * Carga todas las animaciones especificas de Tails desde su TextureAtlas.
      */
     private void cargarAnimaciones() {
         Array<TextureRegion> idleFrames = new Array<>();
@@ -58,8 +58,8 @@ public class Tails extends Personajes {
     }
 
     /**
-     * Libera los recursos específicos de Tails.
-     * En este caso, el TextureAtlas se gestiona centralmente en la clase Assets, por lo que no se libera aquí.
+     * Libera los recursos especificos de Tails.
+     * En este caso, el TextureAtlas se gestiona centralmente en la clase Assets, por lo que no se libera aqui.
      */
     @Override
     public void dispose() {
@@ -67,7 +67,7 @@ public class Tails extends Personajes {
     }
 
     /**
-     * Implementación de la habilidad especial de Tails.
+     * Implementacion de la habilidad especial de Tails.
      * Actualmente no implementada.
      */
     @Override

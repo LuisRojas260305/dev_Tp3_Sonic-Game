@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 /**
  * Paquete de red utilizado para notificar que un nuevo jugador se ha conectado al servidor.
- * Implementa {@link Serializable} para poder ser enviado a través de la red.
+ * Implementa {@link Serializable} para poder ser enviado a traves de la red.
  */
 public class PlayerConnectedPacket implements Serializable {
     private static final long serialVersionUID = 1L;

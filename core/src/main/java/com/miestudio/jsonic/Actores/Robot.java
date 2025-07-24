@@ -7,7 +7,7 @@ import com.badlogic.gdx.utils.Array;
 
 /**
  * Representa al personaje Robot en el juego, extendiendo las funcionalidades base de Personajes.
- * Actualmente, esta clase utiliza animaciones de placeholder y su habilidad especial no está implementada.
+ * Actualmente, esta clase utiliza animaciones de placeholder y su habilidad especial no esta implementada.
  */
 public class Robot extends Personajes {
 
@@ -51,7 +51,7 @@ public class Robot extends Personajes {
     }
 
     /**
-     * Implementación de la habilidad especial del Robot.
+     * Implementacion de la habilidad especial del Robot.
      * Actualmente no implementada.
      */
     @Override

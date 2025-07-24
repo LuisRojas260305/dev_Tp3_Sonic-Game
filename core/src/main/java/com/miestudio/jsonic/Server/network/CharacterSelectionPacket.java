@@ -3,8 +3,8 @@ package com.miestudio.jsonic.Server.network;
 import java.io.Serializable;
 
 /**
- * Paquete de red utilizado para comunicar la selección de personaje de un jugador.
- * Implementa {@link Serializable} para poder ser enviado a través de la red.
+ * Paquete de red utilizado para comunicar la seleccion de personaje de un jugador.
+ * Implementa {@link Serializable} para poder ser enviado a traves de la red.
  */
 public class CharacterSelectionPacket implements Serializable {
     private static final long serialVersionUID = 1L;

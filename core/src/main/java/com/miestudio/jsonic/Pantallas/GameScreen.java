@@ -39,8 +39,8 @@ import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Pantalla principal del juego donde se desarrolla la acción. Gestiona la lógica de renderizado,
- * la entrada del jugador, la actualización del estado del juego y la sincronización de red.
+ * Pantalla principal del juego donde se desarrolla la accion. Gestiona la logica de renderizado,
+ * la entrada del jugador, la actualizacion del estado del juego y la sincronizacion de red.
  */
 public class GameScreen implements Screen {
 
@@ -61,14 +61,14 @@ public class GameScreen implements Screen {
 
     private float mapWidth, mapHeight; /** Dimensiones del mapa en píxeles. */
 
-    private Texture[] parallaxLayers;
-    private float[] parallaxSpeeds;
-    private float parallaxWidth;
-    private float parallaxHeight;
+    private Texture[] parallaxLayers; /** Capas de textura para el efecto parallax de fondo. */
+    private float[] parallaxSpeeds; /** Velocidades de desplazamiento para cada capa parallax. */
+    private float parallaxWidth; /** Ancho de las capas parallax. */
+    private float parallaxHeight; /** Altura de las capas parallax. */
 
-    private final ConcurrentHashMap<Integer, Objetos> clientObjects = new ConcurrentHashMap<>();
-    private TextureRegion anilloTexture;
-    private float objectStateTime = 0;
+    private final ConcurrentHashMap<Integer, Objetos> clientObjects = new ConcurrentHashMap<>(); /** Mapa de objetos del juego en el cliente, indexados por ID de objeto. */
+    private TextureRegion anilloTexture; /** Textura del anillo (no utilizada directamente, se obtiene de Assets). */
+    private float objectStateTime = 0; /** Tiempo de estado para la animacion de los objetos. */
 
     /**
      * Constructor de la pantalla de juego.
@@ -95,7 +95,7 @@ public class GameScreen implements Screen {
         mapWidth = layer.getWidth() * layer.getTileWidth();
         mapHeight = layer.getHeight() * layer.getTileHeight();
 
-        // Configurar la cámara del juego
+        // Configurar la camara del juego
         this.camera = new OrthographicCamera();
         camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.update();
@@ -112,6 +112,9 @@ public class GameScreen implements Screen {
         initParallaxBackground();
     }
 
+    /**
+     * Inicializa las capas y propiedades para el efecto de fondo parallax.
+     */
     private void initParallaxBackground() {
 
         parallaxLayers = new Texture[] {
@@ -132,6 +135,10 @@ public class GameScreen implements Screen {
         }
     }
 
+    /**
+     * Renderiza las capas de fondo parallax, ajustando su posicion segun la camara
+     * para crear el efecto de profundidad.
+     */
     private void renderParallaxBackground() {
         if (parallaxLayers == null) return;
 
@@ -160,8 +167,8 @@ public class GameScreen implements Screen {
     }
 
     /**
-     * Crea una instancia de personaje para un jugador dado, si aún no existe.
-     * @param playerId El ID del jugador para el que se creará el personaje.
+     * Crea una instancia de personaje para un jugador dado, si aun no existe.
+     * @param playerId El ID del jugador para el que se creara el personaje.
      * @param characterType El tipo de personaje a crear (ej. "Sonic", "Tails", "Knuckles").
      */
     private void createCharacter(int playerId, String characterType) {
@@ -208,8 +215,8 @@ public class GameScreen implements Screen {
     }
 
     /**
-     * Actualiza el estado de todos los personajes en la pantalla de juego basándose en el GameState
-     * recibido del servidor. Realiza interpolación para jugadores remotos y reconciliación
+     * Actualiza el estado de todos los personajes en la pantalla de juego basandose en el GameState
+     * recibido del servidor. Realiza interpolacion para jugadores remotos y reconciliacion
      * para el jugador local en el cliente.
      */
     private void updateFromGameState() {
@@ -228,7 +235,7 @@ public class GameScreen implements Screen {
                     characterType = game.networkManager.getSelectedCharacterType();
                 }
 
-                // Si aún no se tiene un tipo de personaje, usar "Sonic" como valor por defecto
+                // Si aun no se tiene un tipo de personaje, usar "Sonic" como valor por defecto
                 if (characterType == null) {
                     characterType = "Sonic";
                     Gdx.app.error("GameScreen", "Tipo de personaje desconocido para jugador " + playerId + ", usando Sonic por defecto.");
@@ -262,7 +269,7 @@ public class GameScreen implements Screen {
                         character.setAnimation(animation);
                     } catch (IllegalArgumentException e) {
                         // Si el nombre de la animación no es válido, establecer la animación de inactividad
-                        Gdx.app.error("GameScreen", "Animación desconocida: " + playerState.getCurrentAnimationName() + ", estableciendo IDLE.");
+                        Gdx.app.error("GameScreen", "Animacion desconocida: " + playerState.getCurrentAnimationName() + ", estableciendo IDLE.");
                         character.setAnimation(Personajes.AnimationType.IDLE);
                     }
                 }
@@ -284,7 +291,7 @@ public class GameScreen implements Screen {
                         character.setAnimation(animation);
                     } catch (IllegalArgumentException e) {
                         // Si el nombre de la animación no es válido, establecer la animación de inactividad
-                        Gdx.app.error("GameScreen", "Animación desconocida: " + playerState.getCurrentAnimationName() + ", estableciendo IDLE.");
+                        Gdx.app.error("GameScreen", "Animacion desconocida: " + playerState.getCurrentAnimationName() + ", estableciendo IDLE.");
                         character.setAnimation(Personajes.AnimationType.IDLE);
                     }
                 }
@@ -292,6 +299,10 @@ public class GameScreen implements Screen {
         }
     }
 
+    /**
+     * Actualiza el estado de los objetos del juego en el cliente basandose en el GameState
+     * recibido del servidor. Agrega nuevos objetos, actualiza existentes y elimina los que ya no estan activos.
+     */
     private void updateObjectsFromGameState() {
         GameState gameState = game.networkManager.getCurrentGameState();
         if (gameState == null) return;
@@ -335,6 +346,10 @@ public class GameScreen implements Screen {
         }
     }
 
+    /**
+     * Actualiza la logica de los objetos del juego en el cliente.
+     * @param delta El tiempo transcurrido desde el ultimo fotograma en segundos.
+     */
     private void updateObjects(float delta){
         objectStateTime += delta;
         synchronized (clientObjects) {
@@ -344,6 +359,9 @@ public class GameScreen implements Screen {
         }
     }
 
+    /**
+     * Renderiza todos los objetos del juego en el cliente.
+     */
     private void renderObjects() {
         batch.begin();
         synchronized (clientObjects) {
@@ -483,9 +501,9 @@ public class GameScreen implements Screen {
     }
 
     /**
-     * Renderiza las formas de colisión para depuración visual.
-     * Este método es opcional y solo debe usarse para fines de depuración.
-     * Se recomienda mantenerlo comentado en versiones de producción.
+     * Renderiza las formas de colision para depuracion visual.
+     * Este metodo es opcional y solo debe usarse para fines de depuracion.
+     * Se recomienda mantenerlo comentado en versiones de produccion.
      */
     private void debugRenderCollisions(){
         shapeRenderer.setProjectionMatrix(camera.combined);
@@ -508,7 +526,7 @@ public class GameScreen implements Screen {
 
     /**
      * Se llama cuando la pantalla del juego cambia de tamaño.
-     * Ajusta el viewport de la cámara para mantener la relación de aspecto del mapa.
+     * Ajusta el viewport de la camara para mantener la relacion de aspecto del mapa.
      * @param width El nuevo ancho de la pantalla.
      * @param height La nueva altura de la pantalla.
      */
@@ -534,7 +552,7 @@ public class GameScreen implements Screen {
 
     /**
      * Libera todos los recursos utilizados por la pantalla de juego.
-     * Este método es llamado automáticamente cuando la pantalla es destruida.
+     * Este metodo es llamado automaticamente cuando la pantalla es destruida.
      */
     @Override
     public void dispose() {

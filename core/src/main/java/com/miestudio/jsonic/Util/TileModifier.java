@@ -13,19 +13,19 @@ import com.badlogic.gdx.utils.ObjectMap;
 import java.util.Random;
 
 /**
- * Clase de utilidad para modificar visualmente los tiles de un mapa en tiempo de ejecución.
+ * Clase de utilidad para modificar visualmente los tiles de un mapa en tiempo de ejecucion.
  * Permite aplicar tintes y efectos de "suciedad" a los tiles.
  */
 public class TileModifier {
     private static final ObjectMap<String, TextureRegion> cacheTexturas = new ObjectMap<>();
     /**
-     * Caché para almacenar texturas de tiles modificadas y reutilizarlas.
+     * Cache para almacenar texturas de tiles modificadas y reutilizarlas.
      */
-    private static final Random random = new Random(); /** Generador de números aleatorios para efectos visuales. */
+    private static final Random random = new Random(); /** Generador de numeros aleatorios para efectos visuales. */
 
     /**
-     * Modifica visualmente un tile específico en una capa del mapa, aplicando un tinte de color.
-     * Si el tile modificado ya está en caché, se reutiliza la textura.
+     * Modifica visualmente un tile especifico en una capa del mapa, aplicando un tinte de color.
+     * Si el tile modificado ya esta en cache, se reutiliza la textura.
      *
      * @param map       El mapa de tiles a modificar.
      * @param layerName El nombre de la capa donde se encuentra el tile.
@@ -38,10 +38,10 @@ public class TileModifier {
         TiledMapTileLayer.Cell cell = layer.getCell(tileX, tileY);
 
         if (cell != null && cell.getTile() != null) {
-            // Generar una clave única para la caché basada en el tile original y el tinte
+            // Generar una clave unica para la cache basada en el tile original y el tinte
             String cacheKey = cell.getTile().toString() + tint.toString();
 
-            // Si la textura modificada no está en caché, crearla y añadirla
+            // Si la textura modificada no esta en cache, crearla y añadirla
             if (!cacheTexturas.containsKey(cacheKey)) {
                 TextureRegion original = cell.getTile().getTextureRegion();
                 TextureRegion modificada = tintTexture(original, tint);
@@ -62,7 +62,7 @@ public class TileModifier {
      * @return Una nueva TextureRegion con el tinte y el efecto de suciedad aplicados.
      */
     private static TextureRegion tintTexture(TextureRegion original, Color tint) {
-        // Obtener Pixmap de la textura original para manipulación de píxeles
+        // Obtener Pixmap de la textura original para manipulacion de pixeles
         Pixmap originalPixmap = new Pixmap(
             original.getRegionWidth(),
             original.getRegionHeight(),
@@ -81,13 +81,13 @@ public class TileModifier {
             original.getRegionWidth(), original.getRegionHeight()
         );
 
-        // Aplicar tintado píxel por píxel
+        // Aplicar tintado pixel por pixel
         for (int x = 0; x < originalPixmap.getWidth(); x++) {
             for (int y = 0; y < originalPixmap.getHeight(); y++) {
                 Color color = new Color();
                 Color.rgba8888ToColor(color, originalPixmap.getPixel(x, y));
 
-                // Mezclar el color del píxel con el color de tinte
+                // Mezclar el color del pixel con el color de tinte
                 color.mul(tint);
 
                 originalPixmap.setColor(color);
@@ -108,13 +108,13 @@ public class TileModifier {
 
     /**
      * Añade un efecto de "suciedad" aleatorio a un Pixmap.
-     * La densidad y el color de la suciedad varían según el color base.
+     * La densidad y el color de la suciedad varian segun el color base.
      *
-     * @param pixmap    El Pixmap al que se le añadirá el efecto de suciedad.
-     * @param baseColor El color base utilizado para determinar la variación de la suciedad.
+     * @param pixmap    El Pixmap al que se le añadira el efecto de suciedad.
+     * @param baseColor El color base utilizado para determinar la variacion de la suciedad.
      */
     private static void addDirtEffect(Pixmap pixmap, Color baseColor) {
-        // Calcular la densidad de la suciedad (más sucio cuanto más oscuro sea el color base)
+        // Calcular la densidad de la suciedad (mas sucio cuanto mas oscuro sea el color base)
         int densidad = 15 + (int) ((1 - baseColor.r) * 30);
 
         for (int i = 0; i < densidad; i++) {
@@ -127,7 +127,7 @@ public class TileModifier {
             Color dirtColor = varyColor(baseColor);
             pixmap.setColor(dirtColor);
 
-            // Dibujar diferentes formas de suciedad (círculos o rectángulos) aleatoriamente
+            // Dibujar diferentes formas de suciedad (circulos o rectangulos) aleatoriamente
             if (random.nextFloat() > 0.7f) {
                 pixmap.fillCircle(x, y, size);
             } else {
@@ -137,10 +137,10 @@ public class TileModifier {
     }
 
     /**
-     * Varia ligeramente un color dado para crear un efecto de suciedad más natural.
+     * Varia ligeramente un color dado para crear un efecto de suciedad mas natural.
      *
      * @param base El color base a variar.
-     * @return Un nuevo Color con una ligera variación.
+     * @return Un nuevo Color con una ligera variacion.
      */
     private static Color varyColor(Color base) {
         float variation = 0.15f; // Magnitud de la variación

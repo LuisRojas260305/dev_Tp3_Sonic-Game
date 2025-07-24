@@ -2,17 +2,17 @@ package com.miestudio.jsonic.Util;
 
 /**
  * Clase que contiene todas las constantes utilizadas a lo largo del proyecto.
- * Centraliza valores como puertos de red, límites de jugadores, rutas de assets y constantes físicas
- * para facilitar su gestión y modificación.
+ * Centraliza valores como puertos de red, limites de jugadores, rutas de assets y constantes fisicas
+ * para facilitar su gestion y modificacion.
  */
 public class Constantes {
 
     /** Puerto UDP utilizado para el descubrimiento de servidores en la red local. */
     public static final int DISCOVERY_PORT = 8888;
-    /** Puerto TCP y UDP principal para la comunicación del juego. */
+    /** Puerto TCP y UDP principal para la comunicacion del juego. */
     public static final int GAME_PORT = 7777;
 
-    /** Número máximo de jugadores permitidos en una partida. */
+    /** Numero maximo de jugadores permitidos en una partida. */
     public static final int MAX_PLAYERS = 3;
 
     /** Ruta base para los archivos de assets de personajes. */
@@ -29,8 +29,8 @@ public class Constantes {
     /** Fuerza aplicada a los personajes al realizar un salto. */
     public static final float JUMP_FORCE = 200f;
 
-    /** Tamaño estándar de un tile en el mapa del juego en píxeles. */
+    /** Tamaño estandar de un tile en el mapa del juego en pixeles. */
     public static final int TILE_SIZE = 32;
 
-    public static final float OBJECT_COLLISION_OFFSET = 5f;
+    public static final float OBJECT_COLLISION_OFFSET = 5f; /** Desplazamiento para la deteccion de colisiones de objetos. */
 }
