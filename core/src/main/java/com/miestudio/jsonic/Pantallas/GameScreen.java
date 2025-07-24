@@ -118,11 +118,11 @@ public class GameScreen implements Screen {
     private void initParallaxBackground() {
 
         parallaxLayers = new Texture[] {
-            new Texture(Gdx.files.internal(Constantes.BACKGROUND_PATH + "Background5.png")),
-            new Texture(Gdx.files.internal(Constantes.BACKGROUND_PATH + "Background4.png")),
-            new Texture(Gdx.files.internal(Constantes.BACKGROUND_PATH + "Background3.png")),
-            new Texture(Gdx.files.internal(Constantes.BACKGROUND_PATH + "Background2.png")),
-            new Texture(Gdx.files.internal(Constantes.BACKGROUND_PATH + "Background1.png"))
+            new Texture(Gdx.files.internal(Constantes.BACKGROUND_GAMESCREEN_PATH + "Background5.png")),
+            new Texture(Gdx.files.internal(Constantes.BACKGROUND_GAMESCREEN_PATH + "Background4.png")),
+            new Texture(Gdx.files.internal(Constantes.BACKGROUND_GAMESCREEN_PATH + "Background3.png")),
+            new Texture(Gdx.files.internal(Constantes.BACKGROUND_GAMESCREEN_PATH + "Background2.png")),
+            new Texture(Gdx.files.internal(Constantes.BACKGROUND_GAMESCREEN_PATH + "Background1.png"))
         };
 
         parallaxSpeeds = new float[] {0.1f, 0.25f, 0.5f, 0.75f, 1.0f};

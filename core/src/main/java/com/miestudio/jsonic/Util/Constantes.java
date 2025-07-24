@@ -19,8 +19,10 @@ public class Constantes {
     public static final String PERSONAJES_PATH = "Personajes/";
     /** Ruta base para los archivos de assets de mapas. */
     public static final String MAPA_PATH = "Mapa/";
-    /** Ruta base para los archivos de assets de background */
-    public static final String BACKGROUND_PATH = "Background/";
+    /** Ruta base para los archivos de assets de background GameScreen*/
+    public static final String BACKGROUND_GAMESCREEN_PATH = "Background/GameScreen/";
+    /** Ruta base para los archivos de assets de backgroud MainScreen*/
+    public static final String BACKGROUND_MAINSCREEN_PATH = "Background/MainScreen/";
     /** Reta base para los archivos de assets de objetos */
     public static final String OBJECT_PATCH = "Objetos/";
 

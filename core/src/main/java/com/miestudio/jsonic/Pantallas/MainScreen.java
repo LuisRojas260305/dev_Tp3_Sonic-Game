@@ -5,12 +5,15 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.miestudio.jsonic.JuegoSonic;
+import com.miestudio.jsonic.Util.Constantes;
+import com.miestudio.jsonic.Util.ScrollingBackground;
 import com.miestudio.jsonic.Util.UIUtils;
 
 /**
@@ -21,6 +24,8 @@ public class MainScreen implements Screen {
 
     private final JuegoSonic game; /** Referencia a la instancia principal del juego. */
     private final Stage stage; /** Escenario de Scene2D para la gestion de la UI. */
+    private final SpriteBatch batch;
+    private final ScrollingBackground background;
 
     /**
      * Constructor de MainScreen.
@@ -29,6 +34,9 @@ public class MainScreen implements Screen {
     public MainScreen(JuegoSonic game) {
         this.game = game;
         this.stage = new Stage(new ScreenViewport());
+        this.batch = new SpriteBatch();
+        this.background = new ScrollingBackground(Constantes.BACKGROUND_MAINSCREEN_PATH + "Background.png", 50);
+
         Gdx.input.setInputProcessor(stage);
 
         setupUI();
@@ -90,6 +98,11 @@ public class MainScreen implements Screen {
         Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+        background.update(delta);
+        batch.begin();
+        background.render(batch);
+        batch.end();
+
         stage.act(delta);
         stage.draw();
     }
@@ -97,10 +110,14 @@ public class MainScreen implements Screen {
     @Override
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, true);
+        background.updateRenderSize();
+        background.reset();
     }
 
     @Override
     public void dispose() {
+        batch.dispose();
+        background.dispose();
         stage.dispose();
     }
 
