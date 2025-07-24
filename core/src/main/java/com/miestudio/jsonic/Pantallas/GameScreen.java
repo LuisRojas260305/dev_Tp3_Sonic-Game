@@ -387,15 +387,19 @@ public class GameScreen implements Screen {
         batch.begin();
         for (Personajes character : characters.values()) {
             if (character instanceof Tails) {
-                Tails tails = (Tails) character;
-                for (Robot robot : tails.getActiveRobots()) {
-                    TextureRegion frame = robot.getTexture();
-                    if (!robot.isFacingRight() && !frame.isFlipX()) {
-                        frame.flip(true, false);
-                    } else if (robot.isFacingRight() && frame.isFlipX()) {
-                        frame.flip(true, false);
+                if (character.getClass().equals(Tails.class)) {
+                    Tails tails = (Tails) character;
+                    for (Robot robot : tails.getActiveRobots()) {
+                        TextureRegion frame = robot.getTexture();
+                        if (!robot.isFacingRight() && !frame.isFlipX()) {
+                            frame.flip(true, false);
+                        } else if (robot.isFacingRight() && frame.isFlipX()) {
+                            frame.flip(true, false);
+                        }
+                        batch.draw(frame, robot.getX(), robot.getY());
                     }
-                    batch.draw(frame, robot.getX(), robot.getY());
+                } else {
+                    Gdx.app.error("GameScreen", "Error de tipo inesperado en renderRobots: " + character.getClass().getName() + " no puede ser casteado a Tails.");
                 }
             }
         }

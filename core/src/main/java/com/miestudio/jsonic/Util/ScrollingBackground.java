@@ -9,25 +9,28 @@ public class ScrollingBackground {
     private final float speed;
     private float x1, x2;
     private float renderHeight;
-    private float renderWidth;
 
     public ScrollingBackground(String path, float speed) {
         this.texture = new Texture(Gdx.files.internal(path));
         this.speed = speed;
-        updateRenderSize();
+        updateRenderHeight();
         reset();
     }
 
-    // Actualiza el tamaño de renderizado cuando cambia el tamaño de la pantalla
-    public void updateRenderSize() {
+    // Actualiza la altura de renderizado para que coincida con la pantalla
+    public void updateRenderHeight() {
         renderHeight = Gdx.graphics.getHeight();
-        float aspectRatio = (float) texture.getWidth() / texture.getHeight();
-        renderWidth = renderHeight * aspectRatio;
     }
 
     public void reset() {
         this.x1 = 0;
-        this.x2 = renderWidth; // Usar el ancho calculado
+        this.x2 = getRenderWidth(); // Usar el ancho calculado
+    }
+
+    // Calcula el ancho manteniendo la relación de aspecto
+    private float getRenderWidth() {
+        float aspectRatio = (float) texture.getWidth() / texture.getHeight();
+        return renderHeight * aspectRatio;
     }
 
     public void update(float delta) {
@@ -35,6 +38,7 @@ public class ScrollingBackground {
         x2 -= speed * delta;
 
         // Reiniciar posición cuando una textura sale completamente de la pantalla
+        float renderWidth = getRenderWidth();
         if (x1 + renderWidth <= 0) {
             x1 = x2 + renderWidth;
         }
@@ -44,7 +48,9 @@ public class ScrollingBackground {
     }
 
     public void render(SpriteBatch batch) {
-        // Dibujar las dos copias del fondo con el tamaño calculado
+        float renderWidth = getRenderWidth();
+
+        // Dibujar las dos copias del fondo con la altura exacta de la pantalla
         batch.draw(texture, x1, 0, renderWidth, renderHeight);
         batch.draw(texture, x2, 0, renderWidth, renderHeight);
     }

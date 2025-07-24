@@ -224,15 +224,20 @@ public class GameServer {
                 character.getCurrentAnimationName(),
                 character.getAnimationStateTime(),
                 characterType,
-                ((Tails) character).isFlying()
+                (character instanceof Tails) ? ((Tails) character).isFlying() : false
             ));
         }
 
         for (Personajes character : characters.values()) {
             if (character instanceof Tails) {
-                Tails tails = (Tails) character;
-                for (Robot robot : tails.getActiveRobots()) {
-                    robot.update(delta, collisionManager);
+                // Asegurarse de que el personaje es realmente una instancia de Tails
+                if (character.getClass().equals(Tails.class)) {
+                    Tails tails = (Tails) character;
+                    for (Robot robot : tails.getActiveRobots()) {
+                        robot.update(delta, collisionManager);
+                    }
+                } else {
+                    Gdx.app.error("GameServer", "Error de tipo inesperado: " + character.getClass().getName() + " no puede ser casteado a Tails.");
                 }
             }
         }
