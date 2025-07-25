@@ -1,0 +1,11 @@
+AtlasEgman.png
+size:84,40
+repeat:none
+EgE0
+bounds:43,2,39,36
+EgE1
+bounds:43,2,39,36
+EgE2
+bounds:43,2,39,36
+EgE3
+bounds:2,2,39,36

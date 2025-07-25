@@ -6,6 +6,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -17,6 +18,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Shape2D;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.miestudio.jsonic.Actores.Egman;
 import com.miestudio.jsonic.Actores.Knockles;
 
 
@@ -72,6 +74,8 @@ public class GameScreen implements Screen {
     private TextureRegion anilloTexture; /** Textura del anillo (no utilizada directamente, se obtiene de Assets). */
     private float objectStateTime = 0; /** Tiempo de estado para la animacion de los objetos. */
 
+    private Array<Egman> egmans = new Array<>();
+    
     /**
      * Constructor de la pantalla de juego.
      * @param game La instancia principal del juego.
@@ -111,6 +115,7 @@ public class GameScreen implements Screen {
             game.networkManager.initializeGameServer(map, collisionManager, mapWidth, mapHeight);
         }
 
+        initEnemies();
         initParallaxBackground();
     }
 
@@ -449,6 +454,9 @@ public class GameScreen implements Screen {
         updateObjectsFromGameState();
         updateObjects(delta);
         renderObjects();
+        
+        updateEnemies(delta);
+        renderEnemies();
 
         // 6. Renderizar todos los personajes
         batch.setProjectionMatrix(camera.combined);
@@ -580,6 +588,43 @@ public class GameScreen implements Screen {
         camera.viewportHeight = viewportHeight;
         camera.position.set(camera.viewportWidth / 2, camera.viewportHeight / 2, 0);
         camera.update();
+    }
+
+    private void initEnemies() {
+        // Cargar animaciones
+        Animation<TextureRegion> egmanWalk = new Animation<>(
+            0.1f, 
+            game.getAssets().AtlasEgman.findRegions("EgE0"),
+            Animation.PlayMode.LOOP
+        );
+
+        
+
+        
+        egmans.add(new Egman(800, 1200, 250, egmanWalk, 60));
+    }
+
+    private void updateEnemies(float delta) {
+        for (Egman egman : egmans) {
+            egman.update(delta, collisionManager);
+        }
+    }
+
+    private void renderEnemies() {
+        batch.begin();
+        for (Egman egman : egmans) {
+            TextureRegion frame = egman.getCurrentFrame();
+
+            // Voltear la animación según la dirección
+            if (!egman.isMovingRight() && !frame.isFlipX()) {
+                frame.flip(true, false);
+            } else if (egman.isMovingRight() && frame.isFlipX()) {
+                frame.flip(true, false);
+            }
+
+            batch.draw(frame, egman.getX(), egman.getY());
+        }
+        batch.end();
     }
 
     /**

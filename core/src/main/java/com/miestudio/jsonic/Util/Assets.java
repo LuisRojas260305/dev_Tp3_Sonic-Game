@@ -28,7 +28,8 @@ public class Assets {
     public TextureAtlas objetosAtlas;
 
     public Animation<TextureRegion> anilloAnimation;
-
+    
+    public TextureAtlas AtlasEgman;
     /**
      * Carga todos los assets del juego.
      * Este metodo debe ser llamado al inicio de la aplicacion para precargar los recursos.
@@ -39,7 +40,8 @@ public class Assets {
             tailsAtlas = new TextureAtlas(Gdx.files.internal(Constantes.PERSONAJES_PATH + "AtlasTails.txt"));
             knucklesAtlas = new TextureAtlas(Gdx.files.internal(Constantes.PERSONAJES_PATH + "AtlasKnuckles.txt"));
             objetosAtlas = new TextureAtlas(Gdx.files.internal(Constantes.OBJECT_PATCH + "Objetos.txt"));
-
+            AtlasEgman = new TextureAtlas(Gdx.files.internal("Personajes/AtlasEgman.txt"));
+            
             Array<TextureRegion> framesAnillo = new Array<>();
             for (int i = 0; i < 5; i++) {
                 framesAnillo.add(objetosAtlas.findRegion("ObjA" + i));
@@ -60,5 +62,6 @@ public class Assets {
         if (tailsAtlas != null) tailsAtlas.dispose();
         if (knucklesAtlas != null) knucklesAtlas.dispose();
         if (objetosAtlas != null) objetosAtlas.dispose();
+        AtlasEgman.dispose();
     }
 }
