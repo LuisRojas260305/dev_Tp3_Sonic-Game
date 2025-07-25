@@ -546,7 +546,8 @@ public class GameScreen implements Screen {
         }
 
         gameHub.update(delta);
-        gameHub.render();
+        
+        
         
         renderParallaxBackground();
         renderRobots();
@@ -567,6 +568,7 @@ public class GameScreen implements Screen {
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
         synchronized (characters) {
+            gameHub.render();
             for (Personajes character : characters.values()) {
                 // Para el jugador local en el cliente, usar la posición predicha para el renderizado
                 if (!isHost && character.getPlayerId() == localPlayerId) {

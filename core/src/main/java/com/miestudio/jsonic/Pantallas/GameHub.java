@@ -64,7 +64,7 @@ public class GameHub implements Disposable {
         }
         
         public void render(SpriteBatch batch) {
-            batch.begin();
+           
             // Dibujar fondo
             batch.draw(backgroundTexture, 
                       backgroundRect.x, backgroundRect.y,
@@ -89,7 +89,7 @@ public class GameHub implements Disposable {
                      backgroundRect.x, 
                      backgroundRect.y + backgroundRect.height/2 + 10, 
                      backgroundRect.width, 1, true);
-            batch.end();
+           
         }
         
         public void setPosition(float x, float y) {
@@ -175,6 +175,8 @@ public class GameHub implements Disposable {
             comp.render(batch);
         }
     }
+    
+    
     
     // Métodos para actualizar valores del juego
     public void addRings(int count) { rings += count; }
