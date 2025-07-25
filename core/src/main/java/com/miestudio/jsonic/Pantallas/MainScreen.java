@@ -72,8 +72,7 @@ public class MainScreen implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 Gdx.app.log("MainScreen", "Boton Ayuda presionado.");
-                // Transición a pantalla de ayuda
-                //game.setScreen(new HelpScreen(game));
+                game.setScreen(new HelpScreen(game));
             }
         });
 

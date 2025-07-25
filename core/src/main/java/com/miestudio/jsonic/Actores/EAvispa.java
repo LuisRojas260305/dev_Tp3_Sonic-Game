@@ -1,76 +1,99 @@
 package com.miestudio.jsonic.Actores;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 import com.miestudio.jsonic.Util.CollisionManager;
 
 public class EAvispa extends Personajes {
-    private Vector2 targetPosition; // Posición del árbol objetivo
-    private float speed = 100f; // Velocidad de movimiento de la avispa
-    private float destroyTimer = 0; // Temporizador para autodestrucción
-    private static final float DESTROY_DELAY = 2.0f; // Retraso antes de autodestruirse
+    private TextureAtlas atlasEnemy;
+    private Vector2 target;
+    private float speed = 150f; // Velocidad de movimiento de la avispa
 
-    public EAvispa(float x, float y, TextureAtlas atlas, Vector2 targetPosition) {
+    public EAvispa(float x, float y, TextureAtlas atlas, Vector2 target) {
         this.x = x;
         this.y = y;
-        this.targetPosition = targetPosition;
-        this.stateTime = 0;
-        cargarAnimaciones(atlas);
-        setCurrentAnimation(idleAnimation); // O una animación de vuelo si existe
+        this.atlasEnemy = atlas;
+        this.target = target;
+        cargarAnimaciones();
+        setCurrentAnimation(idleAnimation); // Animación inicial
     }
 
-    private void cargarAnimaciones(TextureAtlas atlas) {
-        // Se asume que el TextureAtlas proporcionado contiene regiones de textura con el prefijo "Enemy" seguido de un índice.
-        // Por ejemplo, "Enemy0", "Enemy1", etc. Si los nombres de las regiones son diferentes, esto causará un NullPointerException.
+    private void cargarAnimaciones() {
+        // Animación de volar (EnemiVespoid1 a EnemiVespoid2)
         Array<TextureRegion> flyFrames = new Array<>();
-        for (int i = 0; i < 2; i++) { // Ajusta el número de frames según tu atlas
-            flyFrames.add(atlas.findRegion("Enemy" + i)); // Usar "Enemy" como prefijo
-        }
-        idleAnimation = new Animation<>(0.1f, flyFrames, Animation.PlayMode.LOOP); // Usar idleAnimation como animación de vuelo
+        flyFrames.add(atlasEnemy.findRegion("EnemiVespoid1"));
+        flyFrames.add(atlasEnemy.findRegion("EnemiVespoid2"));
+        flyAnimation = new Animation<>(0.1f, flyFrames, Animation.PlayMode.LOOP);
+
+        // Animación de estar quieta (EnemiVespoid4 a EnemiVespoid5)
+        Array<TextureRegion> idleFrames = new Array<>();
+        idleFrames.add(atlasEnemy.findRegion("EnemiVespoid4"));
+        idleFrames.add(atlasEnemy.findRegion("EnemiVespoid5"));
+        idleAnimation = new Animation<>(0.15f, idleFrames, Animation.PlayMode.LOOP);
+
+        // Establecer las animaciones por defecto
+        this.currentAnimation = idleAnimation;
+        this.jumpAnimation = idleAnimation; // No salta
+        this.runAnimation = flyAnimation; // Usar volar como correr
+        this.rollAnimation = idleAnimation; // No rueda
+        this.abilityAnimation = idleAnimation; // No tiene habilidad
     }
 
     @Override
     public void update(float delta, CollisionManager collisionManager) {
-        super.update(delta, collisionManager);
+        super.update(delta, collisionManager); // Llama al update de Personajes para la física básica
 
         // Mover hacia el objetivo
-        if (Vector2.dst(x, y, targetPosition.x, targetPosition.y) > 5) { // Si no ha llegado al objetivo
-            Vector2 direction = new Vector2(targetPosition.x - x, targetPosition.y - y).nor();
-            x += direction.x * speed * delta;
-            y += direction.y * speed * delta;
+        if (target != null) {
+            float dx = target.x - x;
+            float dy = target.y - y;
+            float distance = (float) Math.sqrt(dx * dx + dy * dy);
 
-            // Actualizar dirección para renderizado
-            if (direction.x > 0) facingRight = true;
-            else if (direction.x < 0) facingRight = false;
-        } else {
-            // Ha llegado al objetivo, iniciar temporizador de autodestrucción
-            destroyTimer += delta;
-            if (destroyTimer >= DESTROY_DELAY) {
-                this.setActivo(false); // Marcar para destrucción
-                Gdx.app.log("EAvispa", "Avispa destruida en " + targetPosition.x + ", " + targetPosition.y);
+            if (distance > 5) { // Si la distancia es mayor a un umbral, moverse
+                float moveX = (dx / distance) * speed * delta;
+                float moveY = (dy / distance) * speed * delta;
+                x += moveX;
+                y += moveY;
+
+                // Actualizar la dirección para el flip de la textura
+                if (moveX > 0) {
+                    facingRight = true;
+                } else if (moveX < 0) {
+                    facingRight = false;
+                }
+                setCurrentAnimation(flyAnimation); // Usar animación de volar cuando se mueve
+            } else {
+                setCurrentAnimation(idleAnimation); // Usar animación de quieta cuando llega al objetivo
             }
         }
+    }
+
+    @Override
+    public void useAbility() {
+        // La avispa no tiene una habilidad especial
+    }
+
+    @Override
+    public void dispose() {
+        // El atlas se gestiona en la clase Assets
+    }
+
+    public void setTarget(Vector2 target) {
+        this.target = target;
     }
 
     public void setPlayerId(int playerId) {
         this.playerId = playerId;
     }
 
-    @Override
-    public void useAbility() {
-        // Las avispas no poseen una habilidad especial activa. Este método se mantiene para cumplir con la interfaz de Personajes.
+    public Vector2 getTarget() {
+        return target;
     }
 
-    @Override
-    public void dispose() {
-        // No hay recursos propios que liberar aquí, el atlas se gestiona en Assets
-    }
-
-    public Vector2 getTargetPosition() {
-        return targetPosition;
+    public boolean isAvispa() {
+        return true;
     }
 }

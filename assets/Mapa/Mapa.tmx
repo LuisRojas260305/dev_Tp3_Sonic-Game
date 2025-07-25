@@ -11,7 +11,7 @@
    eJzt2d0OwiAMhmFi5u7/ko0HJKRpRztxK+N9ku/IsR8oMLUUAAAAAACe7dWkZ2+itdcij8ccPPVQybr4tt2aRM5VvTvJSKv/p/M+az1mK3obbW2RrDrYi6+951yR+7nKLPU/Un1OuX7IMdH65syak7F/2z20+qUms9TzVaw5HBnnWede++xyT6r78uhrYS2Rd7N/7qfWd487WXNPfs7cGcvqz1HviFnW/4z3tJqjWrpzXvd+k9HeKzEnz5p2dIy2R1nZnJHXxRrkeEfrBQCy8+6XhETS+8+LkDP5AMbdB68=
   </data>
  </layer>
- <layer id="3" name="SpawnEntidades" width="150" height="20" visible="0">
+ <layer id="3" name="SpawnEntidades" width="150" height="20">
   <data encoding="base64" compression="zlib">
    eJztzqENACAQBEGqIQEU9F8c5hWaPCGZMWtOXCkAAAAAAAAAAACQZ70+wNdatEdHdB67mnMHgMs2oooBCA==
   </data>

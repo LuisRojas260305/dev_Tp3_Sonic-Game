@@ -53,6 +53,13 @@ public class Assets {
             hubFont = new BitmapFont(Gdx.files.internal("ui/default.fnt"));
             trashTexture = new Texture(Gdx.files.internal("ui/HubB.png"));
             maquinaAtlas = new TextureAtlas(Gdx.files.internal(Constantes.OBJECTS_PATH + "AtlasMaquina.txt"));
+            // Verificar si las regiones de MaquinaReciclaje se cargan correctamente
+            if (maquinaAtlas.findRegion("MReciclaje0") == null) {
+                Gdx.app.error("Assets", "MReciclaje0 no encontrado en AtlasMaquina.txt");
+            }
+            if (maquinaAtlas.findRegion("MReciclaje5") == null) {
+                Gdx.app.error("Assets", "MReciclaje5 no encontrado en AtlasMaquina.txt");
+            }
             enemyAtlas = new TextureAtlas(Gdx.files.internal(Constantes.PERSONAJES_PATH + "AtlasEnemy.atlas"));
             treeTexture = new Texture(Gdx.files.internal(Constantes.OBJECTS_PATH + "Arbol.png"));
             rockTexture = new Texture(Gdx.files.internal(Constantes.OBJECTS_PATH + "Roca.png"));

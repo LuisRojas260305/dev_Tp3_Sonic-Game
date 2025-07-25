@@ -69,6 +69,7 @@ public abstract class Personajes extends Actor {
     public Animation<TextureRegion> rollAnimation;
     /** Animación de habilidad especial. */
     public Animation<TextureRegion> abilityAnimation;
+    public Animation<TextureRegion> flyAnimation;
 
     /** Velocidad vertical del personaje. */
     protected float velocityY = 0;
@@ -272,6 +273,7 @@ public abstract class Personajes extends Actor {
             case JUMP: setCurrentAnimation(jumpAnimation); break;
             case ROLL: setCurrentAnimation(rollAnimation); break;
             case ABILITY: setCurrentAnimation(abilityAnimation); break;
+            case FLY: setCurrentAnimation(flyAnimation); break;
         }
     }
 

@@ -117,8 +117,8 @@ public class GameScreen implements Screen {
 
         // Configurar la camara del juego
         this.camera = new OrthographicCamera();
-        float zoomLevel = 0.00025f;
-        camera.setToOrtho(false, Gdx.graphics.getWidth() * zoomLevel, Gdx.graphics.getHeight() * zoomLevel);
+        camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        camera.zoom = 1.0f; // Un valor mayor que 1.0f aleja la vista. Ajusta este valor a tu gusto.
         camera.update();
 
         // Inicializar el gestor de colisiones con el mapa y la capa de colisiones
@@ -172,8 +172,15 @@ public class GameScreen implements Screen {
             Texture layer = parallaxLayers[i];
             float speed = parallaxSpeeds[i];
 
+            // Asumiendo que el piso del mapa está en Y = 0
+            float mapFloorY = 64f; // 2 tiles * 32 pixeles/tile
+            // La parte superior del viewport de la cámara
+            float cameraTopY = camera.position.y + camera.viewportHeight / 2;
+            // La altura que el fondo parallax debe cubrir
+            float parallaxRenderHeight = cameraTopY - mapFloorY;
+
             float x = -camera.position.x * speed % parallaxWidth;
-            float y = camera.position.y - camera.viewportHeight/2;
+            float y = mapFloorY; // La posición Y para dibujar debe ser el piso del mapa
 
             for (float offsetx = x; offsetx < camera.viewportWidth; offsetx += parallaxWidth) {
                 batch.draw(
@@ -181,7 +188,7 @@ public class GameScreen implements Screen {
                     offsetx,
                     y,
                     parallaxWidth,
-                    camera.viewportHeight
+                    parallaxRenderHeight // Usar la altura calculada
                 );
             }
         }
@@ -331,6 +338,7 @@ public class GameScreen implements Screen {
             for (PlayerState playerState : gameState.getPlayers()) {
                 int playerId = playerState.getPlayerId();
                 String characterType = playerState.getCharacterType();
+                Personajes character = characters.get(playerId);
 
                 // Si el tipo de personaje no está en el PlayerState (versiones antiguas o error),
                 // intentar obtenerlo del NetworkManager para el jugador local.
@@ -344,15 +352,33 @@ public class GameScreen implements Screen {
                     Gdx.app.error("GameScreen", "Tipo de personaje desconocido para jugador " + playerId + ", usando Sonic por defecto.");
                 }
 
-
-
-                // Crear el personaje si aún no existe en el mapa de personajes
-                if (!characters.containsKey(playerId)) {
-                    createCharacter(playerId, characterType);
+                // Si es una avispa, crearla y actualizarla
+                if (playerState.isAvispa()) {
+                    if (character == null) {
+                        character = new EAvispa(
+                            playerState.getX(),
+                            playerState.getY(),
+                            game.getAssets().enemyAtlas,
+                            new Vector2(playerState.getTargetX(), playerState.getTargetY())
+                        );
+                        ((EAvispa) character).setPlayerId(playerId);
+                        characters.put(playerId, character);
+                    }
+                    EAvispa avispa = (EAvispa) character;
+                    avispa.setPosition(playerState.getX(), playerState.getY());
+                    avispa.setFacingRight(playerState.isFacingRight());
+                    avispa.setAnimationStateTime(playerState.getAnimationStateTime());
+                    avispa.setActivo(playerState.isActive()); // Sincronizar estado activo
+                    continue; // Pasar al siguiente playerState
                 }
 
-                Personajes character = characters.get(playerId);
-                // Si el personaje no se pudo crear o es nulo por alguna razón, saltar al siguiente
+                // Lógica para personajes de jugador (Sonic, Tails, Knuckles)
+                // Crear el personaje si aún no existe en el mapa de personajes
+                if (character == null) {
+                    createCharacter(playerId, characterType);
+                    character = characters.get(playerId); // Obtener el personaje recién creado
+                }
+
                 if (character == null) continue;
 
                 if (playerState.isFlying() && character instanceof Tails) {
@@ -372,43 +398,25 @@ public class GameScreen implements Screen {
                     character.setAnimationStateTime(playerState.getAnimationStateTime());
 
                     // Actualizar la animación del personaje
-                try {
-                    Personajes.AnimationType animation = Personajes.AnimationType.valueOf(
-                        playerState.getCurrentAnimationName().toUpperCase()
-                    );
-                    character.setAnimation(animation);
-                } catch (IllegalArgumentException e) {
-                    // Si el nombre de la animación no es válido, establecer la animación de inactividad
-                    Gdx.app.error("GameScreen", "Animacion desconocida: " + playerState.getCurrentAnimationName() + ", estableciendo IDLE.");
-                    character.setAnimation(Personajes.AnimationType.IDLE);
-                }
-
-                // Actualizar los coleccionables del personaje
-                for (Map.Entry<CollectibleType, Integer> entry : playerState.getCollectibles().entrySet()) {
-                    character.setCollectibleCount(entry.getKey(), entry.getValue());
-                }
-                character.setLives(playerState.getLives()); // Sincronizar vidas
-                } else if (playerState.isAvispa()) {
-                    // Si es una avispa, actualizar su estado
-                    if (!characters.containsKey(playerId)) {
-                        // Crear la avispa si no existe
-                        EAvispa avispa = new EAvispa(
-                            playerState.getX(),
-                            playerState.getY(),
-                            game.getAssets().enemyAtlas,
-                            new Vector2(playerState.getTargetX(), playerState.getTargetY())
+                    try {
+                        Personajes.AnimationType animation = Personajes.AnimationType.valueOf(
+                            playerState.getCurrentAnimationName().toUpperCase()
                         );
-                        avispa.setPlayerId(playerId);
-                        characters.put(playerId, avispa);
+                        character.setAnimation(animation);
+                    } catch (IllegalArgumentException e) {
+                        // Si el nombre de la animación no es válido, establecer la animación de inactividad
+                        Gdx.app.error("GameScreen", "Animacion desconocida: " + playerState.getCurrentAnimationName() + ", estableciendo IDLE.");
+                        character.setAnimation(Personajes.AnimationType.IDLE);
                     }
-                    EAvispa avispa = (EAvispa) characters.get(playerId);
-                    avispa.setPosition(playerState.getX(), playerState.getY());
-                    avispa.setFacingRight(playerState.isFacingRight());
-                    avispa.setAnimationStateTime(playerState.getAnimationStateTime());
-                    avispa.setActivo(playerState.isActive()); // Sincronizar estado activo
+
+                    // Actualizar los coleccionables del personaje
+                    for (Map.Entry<CollectibleType, Integer> entry : playerState.getCollectibles().entrySet()) {
+                        character.setCollectibleCount(entry.getKey(), entry.getValue());
+                    }
+                    character.setLives(playerState.getLives()); // Sincronizar vidas
                 }
                 // Lógica de reconciliación para el jugador local en el cliente
-                else if (!isHost) {
+                else { // Esto implica que playerId == localPlayerId && !isHost
                     // Corregir la posición del jugador local solo si hay una discrepancia significativa
                     if (Vector2.dst(character.getX(), character.getY(),
                         playerState.getX(), playerState.getY()) > 10f) { // Umbral de 10 píxeles
@@ -739,24 +747,7 @@ public class GameScreen implements Screen {
      */
     @Override
     public void resize(int width, int height) {
-        // Mantener el zoom actual al redimensionar
-        float currentZoom = camera.zoom;
-
-        // Calcular la relación de aspecto del mapa
-        float aspectRatio = mapWidth / mapHeight;
-        float viewportWidth = width * currentZoom;
-        float viewportHeight = width * currentZoom / aspectRatio;
-
-        // Ajustar el viewport para que el mapa se ajuste a la pantalla sin distorsión
-        if (viewportHeight > height * currentZoom) {
-            viewportHeight = height * currentZoom;
-            viewportWidth = height * aspectRatio * currentZoom;
-        }
-
-        // Actualizar la cámara con las nuevas dimensiones del viewport y centrarla
-        camera.viewportWidth = viewportWidth;
-        camera.viewportHeight = viewportHeight;
-        camera.position.set(camera.viewportWidth / 2, camera.viewportHeight / 2, 0);
+        camera.setToOrtho(false, width, height);
         camera.update();
     }
 

@@ -23,6 +23,8 @@ public class Constantes {
     public static final String BACKGROUND_GAMESCREEN_PATH = "Background/GameScreen/";
     /** Ruta base para los archivos de assets de backgroud MainScreen*/
     public static final String BACKGROUND_MAINSCREEN_PATH = "Background/MainScreen/";
+    /** Ruta base para los archivos de assets de background HelpScreen*/
+    public static final String BACKGROUND_HELP_PATH = "Background/HelpScreen/";
     /** Reta base para los archivos de assets de objetos */
     public static final String OBJECTS_PATH = "Objetos/";
 

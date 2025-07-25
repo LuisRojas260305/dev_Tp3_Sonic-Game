@@ -301,24 +301,15 @@ public class GameServer {
                 (character instanceof Tails) ? ((Tails) character).isFlying() : false,
                 character.getCollectibles(),
                 (character instanceof EAvispa), // isAvispa
-                (character instanceof EAvispa) ? ((EAvispa) character).getTargetPosition().x : 0f, // targetX
-                (character instanceof EAvispa) ? ((EAvispa) character).getTargetPosition().y : 0f, // targetY
+                (character instanceof EAvispa) ? ((EAvispa) character).getTarget().x : 0f, // targetX
+                (character instanceof EAvispa) ? ((EAvispa) character).getTarget().y : 0f, // targetY
                 character.estaActivo(), // active
                 character.getLives() // lives
             ));
         }
 
-        for (Personajes character : characters.values()) {
-            if (character instanceof EAvispa) {
-                EAvispa avispa = (EAvispa) character;
-                avispa.update(delta, collisionManager);
-                if (!avispa.estaActivo()) {
-                    // Avispa se autodestruyó, spawnear árbol
-                    spawnTree(avispa.getTargetPosition());
-                    characters.remove(avispa.getPlayerId()); // Eliminar avispa del mapa de personajes
-                }
-            }
-        }
+        // Eliminar avispas inactivas
+        characters.entrySet().removeIf(entry -> entry.getValue() instanceof EAvispa && !entry.getValue().estaActivo());
 
         // Actualizar robots activos
         for (int i = activeRobots.size - 1; i >= 0; i--) {
