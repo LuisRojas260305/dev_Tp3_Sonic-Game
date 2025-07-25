@@ -37,6 +37,7 @@ public class Assets {
     public TextureAtlas enemyAtlas;
     public Texture treeTexture;
     public Texture rockTexture;
+    public Texture screenTexture;
     
     public BitmapFont  hubFont;
     /**
@@ -63,6 +64,7 @@ public class Assets {
             enemyAtlas = new TextureAtlas(Gdx.files.internal(Constantes.PERSONAJES_PATH + "AtlasEnemy.atlas"));
             treeTexture = new Texture(Gdx.files.internal(Constantes.OBJECTS_PATH + "Arbol.png"));
             rockTexture = new Texture(Gdx.files.internal(Constantes.OBJECTS_PATH + "Roca.png"));
+            screenTexture = new Texture(Gdx.files.internal(Constantes.OBJECTS_PATH + "Pantalla.png"));
             
             Array<TextureRegion> framesAnillo = new Array<>();
             for (int i = 0; i < 5; i++) {
@@ -90,5 +92,6 @@ public class Assets {
         if (enemyAtlas != null) enemyAtlas.dispose();
         if (treeTexture != null) treeTexture.dispose();
         if (rockTexture != null) rockTexture.dispose();
+        if (screenTexture != null) screenTexture.dispose();
     }
 }

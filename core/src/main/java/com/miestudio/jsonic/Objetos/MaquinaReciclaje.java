@@ -4,6 +4,12 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.miestudio.jsonic.Util.Assets;
 
 public class MaquinaReciclaje extends Objetos {
     private Animation<TextureRegion> idleAnimation;
@@ -12,12 +18,16 @@ public class MaquinaReciclaje extends Objetos {
     private float stateTime;
     private boolean isActive;
     private int totalCollectedTrash = 0;
+    private Texture screenTexture;
+    private BitmapFont font;
 
-    public MaquinaReciclaje(float x, float y, TextureAtlas atlas) {
+    public MaquinaReciclaje(float x, float y, TextureAtlas atlas, Assets assets) {
         super(x, y, atlas.findRegion("MReciclaje0")); // Textura inicial
         cargarAnimaciones(atlas);
         this.isActive = false;
         this.stateTime = 0;
+        this.screenTexture = assets.screenTexture;
+        this.font = assets.hubFont;
     }
 
     private void cargarAnimaciones(TextureAtlas atlas) {
@@ -62,6 +72,33 @@ public class MaquinaReciclaje extends Objetos {
         } else {
             textura = idleAnimation.getKeyFrame(stateTime); // Volver a la inactiva
         }
+    }
+
+    @Override
+    public void renderizar(SpriteBatch batch) {
+        super.renderizar(batch); // Renderiza la animación de la máquina
+
+        // Dibujar la pantalla de la máquina
+        float screenX = x + 8; // Coordenada X de la pantalla dentro de la máquina
+        float screenY = y + 21; // Coordenada Y de la pantalla dentro de la máquina
+        float screenWidth = 39; // Ancho de la pantalla
+        float screenHeight = 38; // Alto de la pantalla
+
+        batch.draw(screenTexture, screenX, screenY, screenWidth, screenHeight);
+
+        // Dibujar el texto de la basura recolectada
+        String trashText = String.valueOf(totalCollectedTrash);
+        font.setColor(Color.GREEN);
+
+        GlyphLayout layout = new GlyphLayout(font, trashText);
+
+        // Calcular la posición para centrar el texto en la pantalla
+        // Las coordenadas internas de la imagen son 8:21 y 26:3
+        // Esto significa que el área de texto es de 18x18 píxeles (26-8 = 18, 21-3 = 18)
+        float textX = x + 8 + (screenWidth - layout.width) / 2; // Centrar horizontalmente
+        float textY = y + 21 + (screenHeight + layout.height) / 2; // Centrar verticalmente
+
+        font.draw(batch, trashText, textX, textY);
     }
 
     public void activate() {

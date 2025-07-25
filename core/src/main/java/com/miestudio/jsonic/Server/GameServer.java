@@ -14,6 +14,7 @@ import com.miestudio.jsonic.Objetos.Objetos;
 import com.miestudio.jsonic.Objetos.MaquinaReciclaje;
 import com.miestudio.jsonic.Objetos.Arbol;
 import com.miestudio.jsonic.Server.domain.InputState;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 import com.miestudio.jsonic.Util.*;
@@ -40,17 +41,32 @@ public class GameServer {
     private final TiledMap map; /** El mapa de tiles del juego. */
     private volatile boolean running = false; /** Indica si el bucle principal del servidor esta en ejecucion. */
     private long sequenceNumber = 0; /** Numero de secuencia para el estado del juego, utilizado para la sincronizacion. */
-    private static final int TRASH_EVENT_THRESHOLD = 50; // Cantidad de basura para activar el evento
+    private float gameTimeRemaining = 600f; // 10 minutos en segundos
+    private static final int TRASH_EVENT_THRESHOLD = 5; // Cantidad de basura para activar el evento
     private final List<Vector2> treeSpawnPoints = new ArrayList<>();
     private final Map<Vector2, Boolean> treeSpawnPointsOccupancy = new HashMap<>(); // true si está ocupado
     private int treesOnMap = 0;
+    private int totalTreeSpawnPoints = 0;
+    private boolean egmanEventTriggered = false;
     private final List<Vector2> trashSpawnPoints = new ArrayList<>();
     private final Map<Vector2, Boolean> trashSpawnPointsOccupancy = new HashMap<>();
     private float trashSpawnTimer = 0f;
     private static final float INITIAL_TRASH_DELAY = 90f; // 1 minuto y 30 segundos
     private static final float TRASH_SPAWN_INTERVAL = 2f; // 2 segundos
+    private static final float TRASH_SPAWN_ACCELERATION_TIME = 300f; // 5 minutos en segundos
     private boolean initialTrashSpawned = false;
+    private boolean trashSpawnAccelerated = false;
+    private int totalTrashSpawnPoints; // Total de puntos de spawn de basura
+    private int occupiedTrashSpawnPoints; // Puntos de spawn de basura ocupados
     private final Array<Robot> activeRobots = new Array<>();
+    private Egman egman; // Referencia a Egman
+    private List<MapUtil.EgmanPathPoint> egmanPath;
+    private int currentPathIndex;
+    private boolean egmanMoving;
+    private Vector2 egmanTargetPosition;
+    private static final float EGMAN_SPEED = 100f; // Velocidad de Egman
+    private Random random = new Random();
+    private GameState.GameStatus currentGameStatus = GameState.GameStatus.PLAYING;
 
     /**
      * Constructor de GameServer.
@@ -76,11 +92,81 @@ public class GameServer {
         spawnGameObjects("Maquina", "SpawnEntidades");
         spawnGameObjects("Roca", "SpawnObjetos");
         initializeTreeSpawnPoints();
+
+        // Instanciar Egman fuera de la vista
+        Animation<TextureRegion> egmanWalk = new Animation<>(
+            0.1f,
+            game.getAssets().egmanAtlas.findRegions("EgE0"),
+            Animation.PlayMode.LOOP
+        );
+        egman = new Egman(mapWidth + 100f, mapWidth + 200f, 100f, egmanWalk, 60f); // Posición inicial fuera de la vista
+        egmanMoving = false;
+        initializeEgmanPath();
+    }
+
+    private void initializeEgmanPath() {
+        List<MapUtil.EgmanPathPoint> allPoints = MapUtil.findAllEgmanPathPoints(map, "Egman");
+        egmanPath = new ArrayList<>();
+
+        // Encontrar el punto de inicio
+        MapUtil.EgmanPathPoint startPoint = null;
+        for (MapUtil.EgmanPathPoint point : allPoints) {
+            if ("Inicio".equals(point.type)) {
+                startPoint = point;
+                break;
+            }
+        }
+
+        if (startPoint == null) {
+            Gdx.app.error("GameServer", "No se encontró el punto de inicio de Egman.");
+            return;
+        }
+        egmanPath.add(startPoint);
+
+        // Añadir puntos de recorrido
+        List<MapUtil.EgmanPathPoint> routePoints = new ArrayList<>();
+        for (MapUtil.EgmanPathPoint point : allPoints) {
+            if ("Recorrido".equals(point.type)) {
+                routePoints.add(point);
+            }
+        }
+        // Ordenar los puntos de recorrido si es necesario (por ejemplo, por X o Y si la ruta es lineal)
+        // Por ahora, los añadimos tal cual
+        egmanPath.addAll(routePoints);
+
+        // Encontrar el punto final
+        MapUtil.EgmanPathPoint endPoint = null;
+        for (MapUtil.EgmanPathPoint point : allPoints) {
+            if ("Fin".equals(point.type)) {
+                endPoint = point;
+                break;
+            }
+        }
+
+        if (endPoint == null) {
+            Gdx.app.error("GameServer", "No se encontró el punto final de Egman.");
+            return;
+        }
+        egmanPath.add(endPoint);
+
+        Gdx.app.log("GameServer", "Ruta de Egman inicializada con " + egmanPath.size() + " puntos.");
+    }
+
+    private void triggerEgmanEvent() {
+        Gdx.app.log("GameServer", "Evento de Egman activado. Egman añadido a characters.");
+        egmanMoving = true;
+        currentPathIndex = 0;
+        egman.setPosition(egmanPath.get(currentPathIndex).position.x, egmanPath.get(currentPathIndex).position.y);
+        egmanTargetPosition = egmanPath.get(currentPathIndex).position;
+        characters.put(egman.getPlayerId(), egman); // Añadir Egman a los personajes activos
     }
 
     private void initializeTrashSpawn() {
         List<Vector2> allTrashSpawns = MapUtil.findAllSpawnPoints(map, "SpawnObjetos", "Basura");
         Collections.shuffle(allTrashSpawns);
+
+        totalTrashSpawnPoints = allTrashSpawns.size();
+        occupiedTrashSpawnPoints = 0;
 
         int numToSpawn = allTrashSpawns.size() / 2; // 50% de la basura
 
@@ -90,6 +176,7 @@ public class GameServer {
             if (i < numToSpawn) {
                 spawnTrash(spawnPoint);
                 trashSpawnPointsOccupancy.put(spawnPoint, true);
+                occupiedTrashSpawnPoints++;
             } else {
                 trashSpawnPointsOccupancy.put(spawnPoint, false);
             }
@@ -162,7 +249,7 @@ public class GameServer {
             } else if ("Basura".equals(objectType)) {
                 // La basura ahora se spawnea a través de initializeTrashSpawn y spawnTrash
             } else if ("Maquina".equals(objectType)) {
-                MaquinaReciclaje maquina = new MaquinaReciclaje(centeredX, finalY, game.getAssets().maquinaAtlas);
+                MaquinaReciclaje maquina = new MaquinaReciclaje(centeredX, finalY, game.getAssets().maquinaAtlas, game.getAssets());
                 maquina.setId(nextObjectId++);
                 gameObjects.put(maquina.getId(), maquina);
                 cargarObjetos.agregarObjeto(maquina);
@@ -187,6 +274,7 @@ public class GameServer {
             treeSpawnPoints.add(spawn);
             treeSpawnPointsOccupancy.put(spawn, false); // Inicialmente desocupado
         }
+        totalTreeSpawnPoints = treeSpawnPoints.size();
         Gdx.app.log("GameServer", "Puntos de spawn de árboles inicializados: " + treeSpawnPoints.size());
     }
 
@@ -301,6 +389,26 @@ public class GameServer {
         // Actualizar objetos
         cargarObjetos.actualizar(delta);
 
+        // Decrementar tiempo de juego
+        gameTimeRemaining -= delta;
+        if (gameTimeRemaining < 0) {
+            gameTimeRemaining = 0; // Asegurarse de que no sea negativo
+        }
+
+        // Lógica de victoria/derrota
+        if (currentGameStatus == GameState.GameStatus.PLAYING) {
+            if (treesOnMap == totalTreeSpawnPoints && gameTimeRemaining > 0) {
+                currentGameStatus = GameState.GameStatus.WON;
+                Gdx.app.log("GameServer", "¡VICTORIA! Todos los árboles plantados a tiempo.");
+            } else if (gameTimeRemaining <= 0 && treesOnMap < totalTreeSpawnPoints) {
+                currentGameStatus = GameState.GameStatus.LOST;
+                Gdx.app.log("GameServer", "¡DERROTA! Tiempo agotado y no todos los árboles plantados.");
+            } else if (occupiedTrashSpawnPoints == totalTrashSpawnPoints) {
+                currentGameStatus = GameState.GameStatus.LOST;
+                Gdx.app.log("GameServer", "¡DERROTA! Todos los puntos de basura están llenos.");
+            }
+        }
+
         // Lógica de aparición gradual de basura
         trashSpawnTimer += delta;
         if (!initialTrashSpawned) {
@@ -310,9 +418,60 @@ public class GameServer {
                 Gdx.app.log("GameServer", "Inicio de aparición gradual de basura.");
             }
         } else {
-            if (trashSpawnTimer >= TRASH_SPAWN_INTERVAL) {
-                spawnRandomTrash();
+            if (!trashSpawnAccelerated && gameTimeRemaining <= (600f - TRASH_SPAWN_ACCELERATION_TIME)) { // 5 minutos restantes
+                trashSpawnAccelerated = true;
+                Gdx.app.log("GameServer", "Acelerando aparición de basura.");
+            }
+
+            float currentSpawnInterval = trashSpawnAccelerated ? 1.0f : TRASH_SPAWN_INTERVAL; // 1 segundo si acelerado, 2 segundos si no
+            int spawnCount = trashSpawnAccelerated ? 2 : 1; // 2 basuras si acelerado, 1 si no
+
+            if (trashSpawnTimer >= currentSpawnInterval) {
+                spawnTrashAtRandomAvailablePoints(spawnCount);
                 trashSpawnTimer = 0; // Reiniciar para el próximo intervalo
+            }
+        }
+
+        // Lógica de activación del evento de Egman
+        Gdx.app.log("EgmanEvent", "treesOnMap: " + treesOnMap + ", totalTreeSpawnPoints: " + totalTreeSpawnPoints + ", egmanEventTriggered: " + egmanEventTriggered);
+        if (!egmanEventTriggered && totalTreeSpawnPoints > 0 && (float) treesOnMap / totalTreeSpawnPoints >= 0.75f) {
+            triggerEgmanEvent();
+            egmanEventTriggered = true;
+        }
+
+        // Lógica de movimiento de Egman
+        if (egmanMoving && egman != null) {
+            float oldX = egman.getX();
+            float oldY = egman.getY();
+
+            Vector2 currentTarget = egmanPath.get(currentPathIndex).position;
+            float distance = Vector2.dst(egman.getX(), egman.getY(), currentTarget.x, currentTarget.y);
+
+            if (distance > EGMAN_SPEED * delta) {
+                Vector2 direction = currentTarget.cpy().sub(egman.getX(), egman.getY()).nor();
+                egman.setPosition(egman.getX() + direction.x * EGMAN_SPEED * delta, egman.getY() + direction.y * EGMAN_SPEED * delta);
+            } else {
+                egman.setPosition(currentTarget.x, currentTarget.y);
+                currentPathIndex++;
+                if (currentPathIndex < egmanPath.size()) {
+                    egmanTargetPosition = egmanPath.get(currentPathIndex).position;
+                } else {
+                    // Egman ha llegado al final de su ruta
+                    egmanMoving = false;
+                    egman.setActivo(false); // Desactivar Egman
+                    characters.remove(egman.getPlayerId()); // Eliminar de la lista de personajes activos
+                    Gdx.app.log("GameServer", "Egman ha completado su ruta y ha sido desactivado.");
+                }
+            }
+
+            // Lógica de destrucción de árboles al pasar por un spawnpoint
+            for (Map.Entry<Vector2, Boolean> entry : treeSpawnPointsOccupancy.entrySet()) {
+                if (entry.getValue() && egman.getBounds().contains(entry.getKey())) { // Si el spawnpoint está ocupado y Egman lo pisa
+                    if (random.nextFloat() < 0.35f) { // 35% de probabilidad
+                        destroyTreeAtSpawnPoint(entry.getKey());
+                        spawnTrashAtRandomAvailablePoints((int) (trashSpawnPoints.size() * 0.20f)); // 20% de los puntos de basura totales
+                    }
+                }
             }
         }
 
@@ -403,7 +562,7 @@ public class GameServer {
         }
 
         // Actualizar y transmitir GameState
-        GameState newGameState = new GameState(playerStates, objectStates, sequenceNumber++);
+        GameState newGameState = new GameState(playerStates, objectStates, sequenceNumber++, gameTimeRemaining, currentGameStatus);
         game.networkManager.setCurrentGameState(newGameState);
         game.networkManager.broadcastUdpGameState();
     }
@@ -427,9 +586,13 @@ public class GameServer {
                         obj.setActivo(false);
                         Gdx.app.log("GameServer", "Anillo con ID: " + obj.getId() + " desactivado por el jugador " + character.getPlayerId());
                     } else if (obj.getTexture().getTexture() == game.getAssets().trashTexture) {
-                        character.addCollectible(CollectibleType.TRASH);
-                        obj.setActivo(false);
-                        Gdx.app.log("GameServer", "Basura con ID: " + obj.getId() + " desactivado por el jugador " + character.getPlayerId());
+                        if (character.getCollectibleCount(CollectibleType.TRASH) < 50) {
+                            character.addCollectible(CollectibleType.TRASH);
+                            obj.setActivo(false);
+                            Gdx.app.log("GameServer", "Basura con ID: " + obj.getId() + " desactivado por el jugador " + character.getPlayerId());
+                        } else {
+                            Gdx.app.log("GameServer", "Jugador " + character.getPlayerId() + " tiene la basura llena. No puede recoger más.");
+                        }
                     } else if (obj instanceof MaquinaReciclaje) {
                         MaquinaReciclaje maquina = (MaquinaReciclaje) obj;
                         int playerTrash = character.getCollectibleCount(CollectibleType.TRASH);
@@ -611,35 +774,56 @@ public class GameServer {
         gameObjects.put(basura.getId(), basura);
         cargarObjetos.agregarObjeto(basura);
         Gdx.app.log("GameServer", "Basura spawneada en " + position);
+        occupiedTrashSpawnPoints++;
     }
 
     private void freeTrashSpawnPoint(Vector2 position) {
         if (trashSpawnPointsOccupancy.containsKey(position)) {
             trashSpawnPointsOccupancy.put(position, false);
             Gdx.app.log("GameServer", "Punto de spawn de basura liberado: " + position);
-        }
-    }
-
-    private void spawnRandomTrash() {
-        List<Vector2> availableSpawns = new ArrayList<>();
-        for (Map.Entry<Vector2, Boolean> entry : trashSpawnPointsOccupancy.entrySet()) {
-            if (!entry.getValue()) {
-                availableSpawns.add(entry.getKey());
-            }
-        }
-
-        if (!availableSpawns.isEmpty()) {
-            Vector2 spawnPoint = availableSpawns.get(new Random().nextInt(availableSpawns.size()));
-            spawnTrash(spawnPoint);
-            trashSpawnPointsOccupancy.put(spawnPoint, true);
-        } else {
-            Gdx.app.log("GameServer", "No hay puntos de spawn de basura disponibles para la aparición gradual.");
+            occupiedTrashSpawnPoints--;
         }
     }
 
     public void addTrashToMachine(MaquinaReciclaje machine, int amount) {
         machine.addTrash(amount);
         Gdx.app.log("GameServer", "Robot entregó " + amount + " de basura a la máquina. Total: " + machine.getTotalCollectedTrash());
+    }
+
+    private void destroyTreeAtSpawnPoint(Vector2 spawnPoint) {
+        Objetos treeToDestroy = null;
+        for (Objetos obj : gameObjects.values()) {
+            if (obj instanceof Arbol && obj.x == spawnPoint.x && obj.y == spawnPoint.y) {
+                treeToDestroy = obj;
+                break;
+            }
+        }
+
+        if (treeToDestroy != null) {
+            removeGameObject(treeToDestroy.getId());
+            freeTreeSpawnPoint(spawnPoint);
+            treesOnMap--;
+            Gdx.app.log("GameServer", "Árbol destruido en " + spawnPoint + ". Árboles restantes: " + treesOnMap);
+        }
+    }
+
+    private void spawnTrashAtRandomAvailablePoints(int count) {
+        List<Vector2> availableSpawns = new ArrayList<>();
+        for (Map.Entry<Vector2, Boolean> entry : trashSpawnPointsOccupancy.entrySet()) {
+            if (!entry.getValue()) {
+                availableSpawns.add(entry.getKey());
+            }
+        }
+        Collections.shuffle(availableSpawns);
+
+        int spawnedCount = 0;
+        for (Vector2 spawnPoint : availableSpawns) {
+            if (spawnedCount >= count) break;
+            spawnTrash(spawnPoint);
+            trashSpawnPointsOccupancy.put(spawnPoint, true);
+            spawnedCount++;
+        }
+        Gdx.app.log("GameServer", "Spawneada " + spawnedCount + " basura adicional.");
     }
 
     public Array<Robot> getActiveRobots() {

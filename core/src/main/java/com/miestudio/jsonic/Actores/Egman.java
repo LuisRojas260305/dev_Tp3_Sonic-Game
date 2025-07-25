@@ -4,26 +4,17 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.miestudio.jsonic.Util.CollisionManager;
+import com.badlogic.gdx.Gdx;
 
 /**
  * Clase que representa al enemigo Egman en el juego.
  * Se desplaza horizontalmente a una altura fija.
  */
-public class Egman {
+public class Egman extends Personajes {
 
-    // Propiedades del enemigo
-    private float x;
-    private float y;
-    private float width;
-    private float height;
     private float velocityX;
     private float startX;
     private float endX;
-    private boolean movingRight;
-    
-    // Animaciones
-    private Animation<TextureRegion> walkAnimation;
-    private float stateTime;
     
     // Estado
     private boolean isAttacking;
@@ -35,24 +26,24 @@ public class Egman {
      * @param endX Posición X final (límite de patrulla)
      * @param y Altura fija en la que se desplaza
      * @param walkAnimation Animación de caminata
-     * @param attackAnimation Animación de ataque
      * @param speed Velocidad de movimiento
      */
     public Egman(float startX, float endX, float y, 
                  Animation<TextureRegion> walkAnimation, 
                  float speed) {
-        this.x = startX;
-        this.y = y;
+        // No llamar a super() con argumentos, ya que Personajes no tiene un constructor con argumentos
+        this.setPosition(startX, y);
         this.startX = startX;
         this.endX = endX;
-        this.walkAnimation = walkAnimation;
+        this.idleAnimation = walkAnimation; // Usar la animación de caminata como idle por simplicidad
+        this.currentAnimation = idleAnimation;
         this.velocityX = speed;
-        this.movingRight = true;
+        this.facingRight = true; // Inicializar facingRight
         
-        // Calcular dimensiones basadas en la primera animación
+        // Las dimensiones se obtienen de la animación
         TextureRegion firstFrame = walkAnimation.getKeyFrame(0);
-        this.width = firstFrame.getRegionWidth();
-        this.height = firstFrame.getRegionHeight();
+        setWidth(firstFrame.getRegionWidth());
+        setHeight(firstFrame.getRegionHeight());
     }
 
     /**
@@ -62,20 +53,20 @@ public class Egman {
      * @param collisionManager Gestor de colisiones
      */
     public void update(float delta, CollisionManager collisionManager) {
-        stateTime += delta;
+        super.update(delta, collisionManager); // Llama a la lógica de física de Personajes
         
         // Actualizar posición
-        if (movingRight) {
+        if (facingRight) {
             x += velocityX * delta;
             if (x >= endX) {
                 x = endX;
-                movingRight = false;
+                facingRight = false;
             }
         } else {
             x -= velocityX * delta;
             if (x <= startX) {
                 x = startX;
-                movingRight = true;
+                facingRight = true;
             }
         }
         
@@ -95,29 +86,13 @@ public class Egman {
         isAttacking = false; // Implementar lógica real según requerimientos
     }
 
-    /**
-     * Obtiene la región de textura actual para renderizar.
-     * 
-     * @return La textura correspondiente al estado actual
-     */
-    public TextureRegion getCurrentFrame() {
-        
-        return walkAnimation.getKeyFrame(stateTime, true);
+    @Override
+    public void useAbility() {
+        // Egman no tiene una habilidad especial de jugador
     }
 
-    /**
-     * Obtiene los límites del enemigo para detección de colisiones.
-     * 
-     * @return Rectángulo que representa los límites
-     */
-    public Rectangle getBounds() {
-        return new Rectangle(x, y, width, height);
+    @Override
+    public void dispose() {
+        // No hay recursos específicos de Egman que liberar aquí, ya que las animaciones se gestionan en Assets
     }
-
-    // Getters
-    public float getX() { return x; }
-    public float getY() { return y; }
-    public float getWidth() { return width; }
-    public float getHeight() { return height; }
-    public boolean isMovingRight() { return movingRight; }
 }

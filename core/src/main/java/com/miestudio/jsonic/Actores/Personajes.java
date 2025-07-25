@@ -442,4 +442,8 @@ public abstract class Personajes extends Actor {
     public Map<CollectibleType, Integer> getCollectibles() {
         return collectibles;
     }
+
+    public Vector2 getPosition() {
+        return new Vector2(x, y);
+    }
 }

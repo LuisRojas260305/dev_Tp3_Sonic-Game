@@ -7,6 +7,12 @@
    <property name="To" value="Arbol"/>
   </properties>
  </tile>
+ <tile id="33">
+  <properties>
+   <property name="Spawn" type="bool" value="true"/>
+   <property name="To" value="Pantalla"/>
+  </properties>
+ </tile>
  <tile id="34">
   <properties>
    <property name="Colision" type="bool" value="true"/>

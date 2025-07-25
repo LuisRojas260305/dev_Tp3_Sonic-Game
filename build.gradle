@@ -68,6 +68,11 @@ subprojects {
     maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots/' }
     maven { url 'https://jitpack.io' }
   }
+
+  dependencies {
+    // Add gdx-freetype for FreeTypeFontGenerator
+    api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion" // Check your gdxVersion in gradle.properties or similar
+  }
 }
 
 eclipse.project.name = 'J-Sonic' + '-parent'

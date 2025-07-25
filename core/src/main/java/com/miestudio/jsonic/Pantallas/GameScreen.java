@@ -20,7 +20,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Shape2D;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import com.miestudio.jsonic.Actores.Egman;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.miestudio.jsonic.Actores.Knuckles;
 
 
@@ -82,11 +82,10 @@ public class GameScreen implements Screen {
     private TextureRegion anilloTexture; /** Textura del anillo (no utilizada directamente, se obtiene de Assets). */
     private float objectStateTime = 0; /** Tiempo de estado para la animacion de los objetos. */
 
-    private Array<Egman> egmans = new Array<>();
-
     private GameHub gameHub;
     private Vector2 cameraPosition = new Vector2();
     private Vector2 viewportSize = new Vector2();
+    private BitmapFont messageFont; // Fuente para mensajes de victoria/derrota
 
     /**
      *
@@ -130,8 +129,11 @@ public class GameScreen implements Screen {
         }
 
         initGameHub();
-        initEnemies();
         initParallaxBackground();
+
+        messageFont = new BitmapFont();
+        messageFont.getData().setScale(2.0f);
+        messageFont.setColor(Color.WHITE);
     }
 
     /**
@@ -210,7 +212,7 @@ public class GameScreen implements Screen {
         // Tiempo (arriba a la izquierda)
         GameHub.HubComponent timeComp = new GameHub.HubComponent(
             GameHub.ComponentType.TIME,
-            0.87f, 0.9f, // 5% desde izquierda, 90% desde abajo
+            0.05f, 0.9f, // 5% desde derecha, 90% desde abajo
             200, 40,
             40,
             bgTexture,
@@ -221,7 +223,7 @@ public class GameScreen implements Screen {
         // Anillos (a la derecha del tiempo)
         GameHub.HubComponent ringsComp = new GameHub.HubComponent(
             GameHub.ComponentType.RINGS,
-            0.87f, 0.8f, // 20% desde izquierda, 90% desde abajo
+            0.05f, 0.8f, // 5% desde derecha, 80% desde abajo
             200, 40,
             40,
             bgTexture,
@@ -232,7 +234,7 @@ public class GameScreen implements Screen {
         // Basura (a la derecha de anillos)
         GameHub.HubComponent trashComp = new GameHub.HubComponent(
             GameHub.ComponentType.TRASH,
-            0.87f, 0.7f, // 35% desde izquierda, 90% desde abajo
+            0.05f, 0.7f, // 5% desde derecha, 70% desde abajo
             200, 40,
             40,
             bgTexture,
@@ -243,7 +245,7 @@ public class GameScreen implements Screen {
         // Récord (arriba a la derecha)
         GameHub.HubComponent recordComp = new GameHub.HubComponent(
             GameHub.ComponentType.RECORD,
-            0.87f, 0.6f, // 75% desde izquierda, 90% desde abajo
+            0.05f, 0.6f, // 5% desde derecha, 60% desde abajo
             200, 40,
             40,
             bgTexture,
@@ -254,7 +256,7 @@ public class GameScreen implements Screen {
         // Vidas (a la izquierda del récord)
         GameHub.HubComponent livesComp = new GameHub.HubComponent(
             GameHub.ComponentType.LIVES,
-            0.87f, 0.5f, // 60% desde izquierda, 90% desde abajo
+            0.05f, 0.5f, // 5% desde derecha, 50% desde abajo
             200, 40,
             40,
             bgTexture,
@@ -453,7 +455,7 @@ public class GameScreen implements Screen {
                         clientObjects.put(obj.getId(), obj);
                         Gdx.app.log("GameScreen", "Nueva basura creada: " + obj.getId());
                     } else if ("MaquinaReciclaje".equals(objState.getType())) {
-                        obj = new MaquinaReciclaje(objState.getX(), objState.getY(), game.getAssets().maquinaAtlas);
+                        obj = new MaquinaReciclaje(objState.getX(), objState.getY(), game.getAssets().maquinaAtlas, game.getAssets());
                         obj.setId(objState.getId());
                         clientObjects.put(obj.getId(), obj);
                         Gdx.app.log("GameScreen", "Nueva MaquinaReciclaje creada: " + obj.getId());
@@ -558,6 +560,12 @@ public class GameScreen implements Screen {
         // 1. Actualizar el estado del juego a partir del GameState recibido (crea/actualiza personajes)
         updateFromGameState();
 
+        // Actualizar el tiempo en el GameHub
+        GameState currentGameState = game.networkManager.getCurrentGameState();
+        if (currentGameState != null) {
+            gameHub.updateTime(currentGameState.getGameTimeRemaining());
+        }
+
         // 2. Procesar la entrada del jugador local
         processInput(delta);
 
@@ -608,9 +616,6 @@ public class GameScreen implements Screen {
         updateObjects(delta);
         renderObjects();
 
-        updateEnemies(delta);
-        renderEnemies();
-
         // 6. Renderizar todos los personajes
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
@@ -644,6 +649,27 @@ public class GameScreen implements Screen {
 
         // 7. Renderizar colisiones para depuración (descomentar para activar)
         // debugRenderCollisions();
+
+        // Mostrar mensaje de victoria/derrota
+        if (currentGameState != null && currentGameState.getGameStatus() != GameState.GameStatus.PLAYING) {
+            String message = "";
+            Color textColor = Color.WHITE;
+            if (currentGameState.getGameStatus() == GameState.GameStatus.WON) {
+                message = "¡VICTORIA!";
+                textColor = Color.GREEN;
+            } else if (currentGameState.getGameStatus() == GameState.GameStatus.LOST) {
+                message = "¡DERROTA!";
+                textColor = Color.RED;
+            }
+
+            batch.begin();
+            messageFont.setColor(textColor);
+            GlyphLayout layout = new GlyphLayout(messageFont, message);
+            messageFont.draw(batch, message,
+                             Gdx.graphics.getWidth() / 2 - layout.width / 2,
+                             Gdx.graphics.getHeight() / 2 + layout.height / 2);
+            batch.end();
+        }
     }
 
     /**
@@ -730,43 +756,6 @@ public class GameScreen implements Screen {
         camera.update();
     }
 
-    private void initEnemies() {
-        // Cargar animaciones
-        Animation<TextureRegion> egmanWalk = new Animation<>(
-            0.1f,
-            game.getAssets().egmanAtlas.findRegions("EgE0"),
-            Animation.PlayMode.LOOP
-        );
-
-
-
-
-        egmans.add(new Egman(800f, 1200f, 250f, egmanWalk, 60f));
-    }
-
-    private void updateEnemies(float delta) {
-        for (Egman egman : egmans) {
-            egman.update(delta, collisionManager);
-        }
-    }
-
-    private void renderEnemies() {
-        batch.begin();
-        for (Egman egman : egmans) {
-            TextureRegion frame = egman.getCurrentFrame();
-
-            // Voltear la animación según la dirección
-            if (!egman.isMovingRight() && !frame.isFlipX()) {
-                frame.flip(true, false);
-            } else if (egman.isMovingRight() && frame.isFlipX()) {
-                frame.flip(true, false);
-            }
-
-            batch.draw(frame, egman.getX(), egman.getY());
-        }
-        batch.end();
-    }
-
     /**
      * Libera todos los recursos utilizados por la pantalla de juego.
      * Este metodo es llamado automaticamente cuando la pantalla es destruida.
@@ -787,6 +776,7 @@ public class GameScreen implements Screen {
         }
 
         gameHub.dispose();
+        messageFont.dispose();
     }
 
     /**

@@ -16,9 +16,9 @@
    eJztzqENACAQBEGqIQEU9F8c5hWaPCGZMWtOXCkAAAAAAAAAAACQZ70+wNdatEdHdB67mnMHgMs2oooBCA==
   </data>
  </layer>
- <layer id="4" name="SpawnObjetos" width="150" height="20" visible="0">
+ <layer id="4" name="SpawnObjetos" width="150" height="20">
   <data encoding="base64" compression="zlib">
-   eJztmEsOwyAMRHOTrrpO7n+6ripZlo3HfAIk8yRUBWwwYQA3x0EIIYQQQkieU5QW31Ihe5FZN2ut/7+XKKX+PL1cQVlRX2/Sf+1c5dpZPrpePl9OX1Yfray0dpb+n4i3/z09SDvto/vtccf1INPfG86RkUTvrmYf7bD39Jy1juUeOQ2bmvGeoNMnzGE0lo7uuJMyOeRKOZi+u57KrPdujZeJJbofvNxrRD6AxK3zYS/XmaH9Gg1EPq3tPUDH1m2RjTcWEkdJL63jtJLZe4jtCF2N9m8BeWeofWST1WX0XWYU3hkf2ZVsVyO7F+6KJWsjn0foBZn/rDtwRfS+KbV7NjNZaR2pq/7s9m0zOtNKOTkKeo9l84HINpOvRXHUEOXZaDyWjrL/ldA2JA9BcndEV181H623jxGLrJf2NXV6DK8t66vnYsVRAzLHUr0Vt7f2qH9p3VDfvw4QXRFCyC78ABLTUH4=
+   eJztmNkKxCAMRfsnAwPz3P7/181TIYQsNy51aQ7IUE001qtmehxJkiRJkiRJEuckpcbXKslaRNZNWuv79yLF6k/Ty+WUGfX1Jv2XzpWuneTD6+nzpfQl9VHLTGsn6X9HtP2v6YHacR/eb4s7rgWR/t5wjvTEe3cl+2iFvcfnzHVM98gp2JSMt4NOd5hDbyQdPXEnRXLImXIwfnftyqj3Lo0XicW7H7Tcq0c+gMTN82Et1xmh/RINeD617S1Ax+Ztno02FhKHpZfacWqJ7D3EtoeuevvXgLwz1N6zierS+y7TC+2M9+ws29mI7oWnYona0OceekHmP+oOnBG+b6x2zWYkM61j6qo9q33b9M40KydHQe+xaD7g2UbyNS+OErw8G41H0lH0vxLahuQhSO6O6OrH5sP19hFiofXUvqSOj6G1RX35XKQ4EL7sGZmjVS/Fra096m+tG+p76wDRVZIkySr8AdbbUKA=
   </data>
  </layer>
  <layer id="5" name="Egman" width="150" height="20" visible="0">

@@ -69,7 +69,7 @@ public class GameHub implements Disposable {
         
         public void render(SpriteBatch batch, Vector2 cameraPosition, Vector2 viewportSize) {
             // Calcular posición absoluta basada en posición relativa y cámara
-            float absX = cameraPosition.x - viewportSize.x/2 + relativePosition.x * viewportSize.x;
+            float absX = cameraPosition.x + viewportSize.x/2 - (relativePosition.x * viewportSize.x) - backgroundRect.width;
             float absY = cameraPosition.y - viewportSize.y/2 + relativePosition.y * viewportSize.y;
             
             backgroundRect.setPosition(absX, absY);
@@ -103,7 +103,6 @@ public class GameHub implements Disposable {
     }
     
     public void update(float delta) {
-        updateValues(delta);
     }
 
     private final Array<HubComponent> components = new Array<>();
@@ -130,21 +129,19 @@ public class GameHub implements Disposable {
     
     
     
-    private void updateValues(float delta) {
-        elapsedTime += delta;
-        for(HubComponent comp : components) {
-            if(comp.type == ComponentType.TIME) {
-                comp.value = formatTime(elapsedTime);
-            }
+    public void updateTime(float seconds) {
+        HubComponent comp = getComponent(ComponentType.TIME);
+        if (comp != null) {
+            comp.value = formatTime(seconds);
         }
     }
-    
+
     private String formatTime(float seconds) {
         int minutes = (int)(seconds / 60);
         int secs = (int)(seconds % 60);
         return String.format("%02d:%02d", minutes, secs);
     }
-    
+
     public void render(SpriteBatch batch, Vector2 cameraPosition, Vector2 viewportSize) {
         for(HubComponent comp : components) {
             comp.render(batch, cameraPosition, viewportSize);
@@ -154,7 +151,11 @@ public class GameHub implements Disposable {
     public void updateCollectibleCount(ComponentType type, int count) {
         HubComponent comp = getComponent(type);
         if (comp != null) {
-            comp.value = String.valueOf(count);
+            if (type == ComponentType.TRASH) {
+                comp.value = count + "/50";
+            } else {
+                comp.value = String.valueOf(count);
+            }
         }
     }
 

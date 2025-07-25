@@ -131,19 +131,34 @@ public class CollisionManager {
 
         // Verificar colisiones con objetos
         for (CollisionShape collisionShape : collisionShapes) {
-            if (collisionShape.shape instanceof Rectangle) {
+            if (!collisionShape.isPlatform && collisionShape.shape instanceof Rectangle) { // Solo bloques sólidos
                 Rectangle collisionRect = (Rectangle) collisionShape.shape;
                 if (characterRect.overlaps(collisionRect)) {
-                    if (collisionShape.isPlatform) {
-                        // Si es una plataforma, solo colisiona si el personaje está cayendo sobre ella
-                        // (la parte inferior del personaje está por encima de la parte superior de la plataforma)
-                        // o si ya está encima (para evitar que la atraviese al caer)
-                        if (characterRect.y >= collisionRect.y + collisionRect.height - 5) { // Pequeño umbral
-                            return true; // Colisión desde arriba o ya encima
-                        }
-                    } else {
-                        return true; // Colisión con un bloque sólido
-                    }
+                    return true; // Colisión con un bloque sólido
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Verifica si un rectangulo dado colisiona con una plataforma de manera que deba detener al personaje.
+     * Solo detecta colisiones si el personaje esta cayendo sobre la plataforma.
+     *
+     * @param characterRect El rectangulo a verificar.
+     * @param velocityY La velocidad vertical del personaje.
+     * @return true si hay colision con una plataforma que debe detener al personaje, false en caso contrario.
+     */
+    public boolean checkPlatformCollision(Rectangle characterRect, float velocityY) {
+        if (velocityY > 0) return false; // Ignorar colisiones con plataformas si el personaje se mueve hacia arriba
+
+        for (CollisionShape collisionShape : collisionShapes) {
+            if (collisionShape.isPlatform && collisionShape.shape instanceof Rectangle) {
+                Rectangle platformRect = (Rectangle) collisionShape.shape;
+                // Verificar si el personaje esta cayendo y su parte inferior esta por encima de la parte superior de la plataforma
+                // y si hay una superposicion horizontal
+                if (characterRect.overlaps(platformRect) && characterRect.y >= platformRect.y + platformRect.height - 5) {
+                    return true;
                 }
             }
         }
@@ -166,7 +181,22 @@ public class CollisionManager {
             FEET_SENSOR_HEIGHT_GROUNDED  // Mayor altura para mejor detección
         );
 
-        return collides(feetSensor);
+        // Verificar colisiones con bloques sólidos y plataformas (solo si el personaje está cayendo sobre ellas)
+        for (CollisionShape collisionShape : collisionShapes) {
+            if (collisionShape.shape instanceof Rectangle) {
+                Rectangle collisionRect = (Rectangle) collisionShape.shape;
+                if (feetSensor.overlaps(collisionRect)) {
+                    if (collisionShape.isPlatform) {
+                        if (characterRect.y >= collisionRect.y + collisionRect.height - 5) { // Pequeño umbral
+                            return true; // Colisión desde arriba o ya encima
+                        }
+                    } else {
+                        return true; // Colisión con un bloque sólido
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     /**

@@ -31,7 +31,7 @@ public class Constantes {
     /** Constante de gravedad aplicada a los personajes y objetos en el juego. */
     public static final float GRAVITY = -500f;
     /** Fuerza aplicada a los personajes al realizar un salto. */
-    public static final float JUMP_FORCE = 200f;
+    public static final float JUMP_FORCE = 100f;
 
     /** Tamaño estandar de un tile en el mapa del juego en pixeles. */
     public static final int TILE_SIZE = 32;

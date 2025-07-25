@@ -15,6 +15,17 @@ import java.util.List;
  * Proporciona metodos para encontrar puntos de spawn y otras utilidades de mapa.
  */
 public class MapUtil {
+
+    public static class EgmanPathPoint {
+        public Vector2 position;
+        public String type; // "Inicio", "Recorrido", "Fin"
+
+        public EgmanPathPoint(Vector2 position, String type) {
+            this.position = position;
+            this.type = type;
+        }
+    }
+
     /**
      * Encuentra un punto de spawn especifico para un tipo de personaje en una capa dada del mapa.
      * Los puntos de spawn se definen como tiles con la propiedad "Spawn" establecida a true,
@@ -91,5 +102,32 @@ public class MapUtil {
             }
         }
         return spawnPoints;
+    }
+
+    public static List<EgmanPathPoint> findAllEgmanPathPoints(TiledMap map, String layerName) {
+        List<EgmanPathPoint> pathPoints = new ArrayList<>();
+        MapLayer layer = map.getLayers().get(layerName);
+        if (layer == null) return pathPoints;
+        if (!(layer instanceof TiledMapTileLayer)) return pathPoints;
+
+        TiledMapTileLayer tileLayer = (TiledMapTileLayer) layer;
+        for (int y = 0; y < tileLayer.getHeight(); y++) {
+            for (int x = 0; x < tileLayer.getWidth(); x++) {
+                TiledMapTileLayer.Cell cell = tileLayer.getCell(x, y);
+                if (cell == null || cell.getTile() == null) continue;
+
+                MapProperties props = cell.getTile().getProperties();
+                boolean isSpawn = props.get("Spawn", false, Boolean.class);
+                String toValue = props.get("To", String.class);
+                String typeValue = props.get("Tipo", String.class);
+
+                if (isSpawn && "Egman".equals(toValue) && typeValue != null) {
+                    float spawnX = x * tileLayer.getTileWidth();
+                    float spawnY = y * tileLayer.getTileHeight();
+                    pathPoints.add(new EgmanPathPoint(new Vector2(spawnX, spawnY), typeValue));
+                }
+            }
+        }
+        return pathPoints;
     }
 }
