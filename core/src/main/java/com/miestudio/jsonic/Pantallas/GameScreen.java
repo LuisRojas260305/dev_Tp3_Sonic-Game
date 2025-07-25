@@ -3,10 +3,12 @@ package com.miestudio.jsonic.Pantallas;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -76,7 +78,10 @@ public class GameScreen implements Screen {
 
     private Array<Egman> egmans = new Array<>();
     
+    private GameHub gameHub;
+    
     /**
+     * 
      * Constructor de la pantalla de juego.
      * @param game La instancia principal del juego.
      * @param localPlayerId El ID del jugador local (0 para el host, >0 para clientes).
@@ -114,7 +119,8 @@ public class GameScreen implements Screen {
         if (isHost) {
             game.networkManager.initializeGameServer(map, collisionManager, mapWidth, mapHeight);
         }
-
+        
+        initGameHub();
         initEnemies();
         initParallaxBackground();
     }
@@ -173,6 +179,102 @@ public class GameScreen implements Screen {
         batch.end();
     }
 
+    private void initGameHub() {
+        gameHub = new GameHub(batch);
+        
+        // Cargar texturas (deberías tener estas texturas en tu Assets)
+        Texture bgTexture = new Texture(Gdx.files.internal("ui/Hub0.png"));
+        Texture timeIcon = new Texture(Gdx.files.internal("ui/HubT.png"));
+        Texture ringsIcon = new Texture(Gdx.files.internal("ui/HubR.png"));
+        Texture trashIcon = new Texture(Gdx.files.internal("ui/HubB.png"));
+        Texture recordIcon = new Texture(Gdx.files.internal("ui/HubE.png"));
+        Texture livesIcon = new Texture(Gdx.files.internal("ui/HubLS.png"));
+        
+        BitmapFont hubFont = game.getAssets().hubFont; // Asume que tienes una fuente en Assets
+        
+        // Crear componentes con posiciones relativas
+        float margin = 20;
+        float componentWidth = 120;
+        float componentHeight = 80;
+        float spacing = 30;
+        
+        // Tiempo (arriba a la izquierda)
+        GameHub.HubComponent timeComp = new GameHub.HubComponent(
+            GameHub.ComponentType.TIME,
+            margin,
+            Gdx.graphics.getHeight() - componentHeight - margin,
+            componentWidth,
+            componentHeight,
+            40, // tamaño del icono
+            bgTexture,
+            timeIcon,
+            hubFont
+        );
+        
+        // Anillos (a la derecha del tiempo)
+        GameHub.HubComponent ringsComp = new GameHub.HubComponent(
+            GameHub.ComponentType.RINGS,
+            margin + componentWidth + spacing,
+            Gdx.graphics.getHeight() - componentHeight - margin,
+            componentWidth,
+            componentHeight,
+            40,
+            bgTexture,
+            ringsIcon,
+            hubFont
+        );
+        
+        // Basura (a la derecha de anillos)
+        GameHub.HubComponent trashComp = new GameHub.HubComponent(
+            GameHub.ComponentType.TRASH,
+            margin + 2*(componentWidth + spacing),
+            Gdx.graphics.getHeight() - componentHeight - margin,
+            componentWidth,
+            componentHeight,
+            40,
+            bgTexture,
+            trashIcon,
+            hubFont
+        );
+        
+        // Récord (arriba a la derecha)
+        GameHub.HubComponent recordComp = new GameHub.HubComponent(
+            GameHub.ComponentType.RECORD,
+            Gdx.graphics.getWidth() - componentWidth - margin,
+            Gdx.graphics.getHeight() - componentHeight - margin,
+            componentWidth,
+            componentHeight,
+            40,
+            bgTexture,
+            recordIcon,
+            hubFont
+        );
+        
+        // Vidas (a la izquierda del récord)
+        GameHub.HubComponent livesComp = new GameHub.HubComponent(
+            GameHub.ComponentType.LIVES,
+            Gdx.graphics.getWidth() - 2*(componentWidth + spacing) - margin,
+            Gdx.graphics.getHeight() - componentHeight - margin,
+            componentWidth,
+            componentHeight,
+            40,
+            bgTexture,
+            livesIcon,
+            hubFont
+        );
+        livesComp.valueColor = Color.GREEN;
+        
+        // Agregar componentes al hub
+        gameHub.addComponent(timeComp);
+        gameHub.addComponent(ringsComp);
+        gameHub.addComponent(trashComp);
+        gameHub.addComponent(recordComp);
+        gameHub.addComponent(livesComp);
+        
+        // Establecer valores iniciales
+        gameHub.setRecord(1500); // Ejemplo de récord
+    }
+    
     /**
      * Crea una instancia de personaje para un jugador dado, si aun no existe.
      * @param playerId El ID del jugador para el que se creara el personaje.
@@ -443,6 +545,9 @@ public class GameScreen implements Screen {
             camera.position.set((int)cameraX, (int)cameraY, 0);
         }
 
+        gameHub.update(delta);
+        gameHub.render();
+        
         renderParallaxBackground();
         renderRobots();
         camera.update();
@@ -645,6 +750,8 @@ public class GameScreen implements Screen {
         if (isHost) {
             map.dispose();
         }
+        
+        gameHub.dispose();
     }
 
     /**

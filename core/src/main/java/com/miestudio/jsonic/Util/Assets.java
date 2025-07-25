@@ -2,6 +2,7 @@ package com.miestudio.jsonic.Util;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
@@ -30,6 +31,8 @@ public class Assets {
     public Animation<TextureRegion> anilloAnimation;
     
     public TextureAtlas AtlasEgman;
+    
+    public BitmapFont  hubFont;
     /**
      * Carga todos los assets del juego.
      * Este metodo debe ser llamado al inicio de la aplicacion para precargar los recursos.
@@ -41,6 +44,7 @@ public class Assets {
             knucklesAtlas = new TextureAtlas(Gdx.files.internal(Constantes.PERSONAJES_PATH + "AtlasKnuckles.txt"));
             objetosAtlas = new TextureAtlas(Gdx.files.internal(Constantes.OBJECT_PATCH + "Objetos.txt"));
             AtlasEgman = new TextureAtlas(Gdx.files.internal("Personajes/AtlasEgman.txt"));
+            hubFont = new BitmapFont(Gdx.files.internal("ui/default.fnt"));
             
             Array<TextureRegion> framesAnillo = new Array<>();
             for (int i = 0; i < 5; i++) {
