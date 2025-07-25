@@ -300,16 +300,15 @@ public class GameServer {
                 characterType,
                 (character instanceof Tails) ? ((Tails) character).isFlying() : false,
                 character.getCollectibles(),
-                (character instanceof EAvispa), // isAvispa
-                (character instanceof EAvispa) ? ((EAvispa) character).getTarget().x : 0f, // targetX
-                (character instanceof EAvispa) ? ((EAvispa) character).getTarget().y : 0f, // targetY
+                false, // isAvispa
+                0f, // targetX
+                0f, // targetY
                 character.estaActivo(), // active
                 character.getLives() // lives
             ));
         }
 
         // Eliminar avispas inactivas
-        characters.entrySet().removeIf(entry -> entry.getValue() instanceof EAvispa && !entry.getValue().estaActivo());
 
         // Actualizar robots activos
         for (int i = activeRobots.size - 1; i >= 0; i--) {
@@ -414,7 +413,7 @@ public class GameServer {
 
                             for (int i = 0; i < eventsTriggered; i++) {
                                 Gdx.app.log("GameServer", "¡Evento de máquina de reciclaje activado! Basura total: " + maquina.getTotalCollectedTrash());
-                                spawnAvispa();
+                                spawnTreeAtAvailablePoint();
                                 character.setLives(character.getLives() + 1); // Incrementar vidas
                                 Gdx.app.log("GameServer", "Vidas de jugador " + character.getPlayerId() + " aumentadas a " + character.getLives());
                             }
@@ -442,42 +441,25 @@ public class GameServer {
         return game.networkManager.getCurrentGameState();
     }
 
-    private void spawnAvispa() {
-        // Encontrar un punto de spawn de avispa
-        List<Vector2> avispaSpawns = MapUtil.findAllSpawnPoints(map, "SpawnEntidades", "Avispa");
-        if (avispaSpawns.isEmpty()) {
-            Gdx.app.error("GameServer", "No hay puntos de spawn para Avispa.");
-            return;
-        }
-        Vector2 avispaSpawn = avispaSpawns.get(new Random().nextInt(avispaSpawns.size()));
-
-        // Encontrar un punto de spawn de árbol desocupado
-        Vector2 treeTargetSpawn = null;
+    private void spawnTreeAtAvailablePoint() {
+        Vector2 availableSpawnPoint = null;
         for (Map.Entry<Vector2, Boolean> entry : treeSpawnPointsOccupancy.entrySet()) {
             if (!entry.getValue()) { // Si no está ocupado
-                treeTargetSpawn = entry.getKey();
+                availableSpawnPoint = entry.getKey();
                 break;
             }
         }
 
-        if (treeTargetSpawn == null) {
+        if (availableSpawnPoint == null) {
             Gdx.app.log("GameServer", "Todos los puntos de spawn de árboles están ocupados.");
             return;
         }
 
-        // Marcar el punto de spawn del árbol como ocupado
-        treeSpawnPointsOccupancy.put(treeTargetSpawn, true);
+        // Marcar el punto de spawn como ocupado
+        treeSpawnPointsOccupancy.put(availableSpawnPoint, true);
 
-        // Crear la avispa
-        EAvispa avispa = new EAvispa(
-            avispaSpawn.x,
-            avispaSpawn.y,
-            game.getAssets().enemyAtlas,
-            treeTargetSpawn
-        );
-        avispa.setPlayerId(nextObjectId++); // Usar el mismo contador para IDs de objetos y actores temporales
-        characters.put(avispa.getPlayerId(), avispa);
-        Gdx.app.log("GameServer", "Avispa spawneada en " + avispaSpawn + " con objetivo " + treeTargetSpawn);
+        // Spawnea el árbol
+        spawnTree(availableSpawnPoint);
     }
 
     private void spawnTree(Vector2 position) {
@@ -487,9 +469,13 @@ public class GameServer {
         cargarObjetos.agregarObjeto(arbol);
         treesOnMap++;
         Gdx.app.log("GameServer", "Árbol spawneado en " + position + ". Total de árboles: " + treesOnMap);
+    }
 
-        // Marcar el punto de spawn como desocupado después de que el árbol aparece
-        treeSpawnPointsOccupancy.put(position, false);
+    public void freeTreeSpawnPoint(Vector2 position) {
+        if (treeSpawnPointsOccupancy.containsKey(position)) {
+            treeSpawnPointsOccupancy.put(position, false);
+            Gdx.app.log("GameServer", "Punto de spawn de árbol liberado: " + position);
+        }
     }
 
     public void spawnRobot(float x, float y, boolean facingRight, float speed, TextureRegion texture) {
@@ -530,7 +516,17 @@ public class GameServer {
     }
 
     public void removeGameObject(int id) {
-        gameObjects.remove(id);
+        Objetos removedObject = gameObjects.remove(id);
+        if (removedObject instanceof Arbol) {
+            // Si el objeto removido es un árbol, liberar su punto de spawn
+            // Necesitamos encontrar el punto de spawn asociado al árbol
+            for (Map.Entry<Vector2, Boolean> entry : treeSpawnPointsOccupancy.entrySet()) {
+                if (entry.getKey().epsilonEquals(removedObject.x, removedObject.y, 1.0f)) { // Usar epsilonEquals para comparar floats
+                    freeTreeSpawnPoint(entry.getKey());
+                    break;
+                }
+            }
+        }
         // Eliminar también de cargarObjetos.objetos
         for (int i = cargarObjetos.objetos.size - 1; i >= 0; i--) {
             if (cargarObjetos.objetos.get(i).getId() == id) {

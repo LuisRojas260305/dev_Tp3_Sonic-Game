@@ -45,7 +45,6 @@ import com.miestudio.jsonic.Objetos.Anillo;
 import com.miestudio.jsonic.Objetos.Objetos;
 import com.miestudio.jsonic.Objetos.MaquinaReciclaje;
 import com.miestudio.jsonic.Objetos.Arbol;
-import com.miestudio.jsonic.Actores.EAvispa;
 import com.miestudio.jsonic.Server.domain.ObjectState;
 
 import java.util.Iterator;
@@ -350,26 +349,6 @@ public class GameScreen implements Screen {
                 if (characterType == null) {
                     characterType = "Sonic";
                     Gdx.app.error("GameScreen", "Tipo de personaje desconocido para jugador " + playerId + ", usando Sonic por defecto.");
-                }
-
-                // Si es una avispa, crearla y actualizarla
-                if (playerState.isAvispa()) {
-                    if (character == null) {
-                        character = new EAvispa(
-                            playerState.getX(),
-                            playerState.getY(),
-                            game.getAssets().enemyAtlas,
-                            new Vector2(playerState.getTargetX(), playerState.getTargetY())
-                        );
-                        ((EAvispa) character).setPlayerId(playerId);
-                        characters.put(playerId, character);
-                    }
-                    EAvispa avispa = (EAvispa) character;
-                    avispa.setPosition(playerState.getX(), playerState.getY());
-                    avispa.setFacingRight(playerState.isFacingRight());
-                    avispa.setAnimationStateTime(playerState.getAnimationStateTime());
-                    avispa.setActivo(playerState.isActive()); // Sincronizar estado activo
-                    continue; // Pasar al siguiente playerState
                 }
 
                 // Lógica para personajes de jugador (Sonic, Tails, Knuckles)
