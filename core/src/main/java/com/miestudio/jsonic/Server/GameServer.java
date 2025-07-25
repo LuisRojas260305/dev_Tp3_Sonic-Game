@@ -67,7 +67,7 @@ public class GameServer {
         initializeCharacters();
         spawnGameObjects("Anillo", "SpawnObjetos");
         spawnGameObjects("Basura", "SpawnObjetos");
-        spawnGameObjects("Maquina", "SpawnObjetos");
+        spawnGameObjects("Maquina", "SpawnEntidades");
         spawnGameObjects("Roca", "SpawnObjetos");
         initializeTreeSpawnPoints();
     }
@@ -86,7 +86,7 @@ public class GameServer {
             return;
         }
 
-        
+
 
         MapLayer layer = map.getLayers().get(layerName);
         float tileWigth = 32;
@@ -328,7 +328,7 @@ public class GameServer {
                 activeRobots.removeIndex(i);
             }
         }
-        
+
         // Crear estados de objetos
         List<ObjectState> objectStates = new ArrayList<>();
         for (Objetos obj : gameObjects.values()) {

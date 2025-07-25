@@ -84,13 +84,13 @@ public class GameScreen implements Screen {
     private float objectStateTime = 0; /** Tiempo de estado para la animacion de los objetos. */
 
     private Array<Egman> egmans = new Array<>();
-    
+
     private GameHub gameHub;
     private Vector2 cameraPosition = new Vector2();
     private Vector2 viewportSize = new Vector2();
-    
+
     /**
-     * 
+     *
      * Constructor de la pantalla de juego.
      * @param game La instancia principal del juego.
      * @param localPlayerId El ID del jugador local (0 para el host, >0 para clientes).
@@ -117,7 +117,8 @@ public class GameScreen implements Screen {
 
         // Configurar la camara del juego
         this.camera = new OrthographicCamera();
-        camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        float zoomLevel = 0.00025f;
+        camera.setToOrtho(false, Gdx.graphics.getWidth() * zoomLevel, Gdx.graphics.getHeight() * zoomLevel);
         camera.update();
 
         // Inicializar el gestor de colisiones con el mapa y la capa de colisiones
@@ -128,7 +129,7 @@ public class GameScreen implements Screen {
         if (isHost) {
             game.networkManager.initializeGameServer(map, collisionManager, mapWidth, mapHeight);
         }
-        
+
         initGameHub();
         initEnemies();
         initParallaxBackground();
@@ -190,7 +191,7 @@ public class GameScreen implements Screen {
 
     private void initGameHub() {
         gameHub = new GameHub();
-        
+
         // Cargar texturas
         Texture bgTexture = new Texture(Gdx.files.internal("ui/Hub0.png"));
         Texture timeIcon = new Texture(Gdx.files.internal("ui/HubT.png"));
@@ -198,7 +199,7 @@ public class GameScreen implements Screen {
         Texture trashIcon = new Texture(Gdx.files.internal("ui/HubB.png"));
         Texture recordIcon = new Texture(Gdx.files.internal("ui/HubE.png"));
         Texture livesIcon = new Texture(Gdx.files.internal("ui/HubLS.png"));
-        
+
         // Crear componentes con posiciones relativas (0-1)
         // Tiempo (arriba a la izquierda)
         GameHub.HubComponent timeComp = new GameHub.HubComponent(
@@ -210,7 +211,7 @@ public class GameScreen implements Screen {
             timeIcon,
             gameHub.systemFont // Usar fuente del sistema
         );
-        
+
         // Anillos (a la derecha del tiempo)
         GameHub.HubComponent ringsComp = new GameHub.HubComponent(
             GameHub.ComponentType.RINGS,
@@ -221,7 +222,7 @@ public class GameScreen implements Screen {
             ringsIcon,
             gameHub.systemFont
         );
-        
+
         // Basura (a la derecha de anillos)
         GameHub.HubComponent trashComp = new GameHub.HubComponent(
             GameHub.ComponentType.TRASH,
@@ -232,7 +233,7 @@ public class GameScreen implements Screen {
             trashIcon,
             gameHub.systemFont
         );
-        
+
         // Récord (arriba a la derecha)
         GameHub.HubComponent recordComp = new GameHub.HubComponent(
             GameHub.ComponentType.RECORD,
@@ -243,7 +244,7 @@ public class GameScreen implements Screen {
             recordIcon,
             gameHub.systemFont
         );
-        
+
         // Vidas (a la izquierda del récord)
         GameHub.HubComponent livesComp = new GameHub.HubComponent(
             GameHub.ComponentType.LIVES,
@@ -255,19 +256,19 @@ public class GameScreen implements Screen {
             gameHub.systemFont
         );
         livesComp.valueColor = Color.GREEN;
-        
+
         // Agregar componentes al hub
         gameHub.addComponent(timeComp);
         gameHub.addComponent(ringsComp);
         gameHub.addComponent(trashComp);
         gameHub.addComponent(recordComp);
         gameHub.addComponent(livesComp);
-        
+
         // Establecer valores iniciales
         gameHub.updateRecord(1500);
         gameHub.updateLives(3);
     }
-    
+
     /**
      * Crea una instancia de personaje para un jugador dado, si aun no existe.
      * @param playerId El ID del jugador para el que se creara el personaje.
@@ -343,8 +344,8 @@ public class GameScreen implements Screen {
                     Gdx.app.error("GameScreen", "Tipo de personaje desconocido para jugador " + playerId + ", usando Sonic por defecto.");
                 }
 
-                
-                
+
+
                 // Crear el personaje si aún no existe en el mapa de personajes
                 if (!characters.containsKey(playerId)) {
                     createCharacter(playerId, characterType);
@@ -358,7 +359,7 @@ public class GameScreen implements Screen {
                     ((Tails) character).setFlying(true);
                     character.setAnimation(Personajes.AnimationType.FLY);
                 }
-                
+
                 // Lógica de actualización para jugadores remotos (clientes) y para el host
                 if (isHost || playerId != localPlayerId) {
                     // Aplicar interpolación suave para un movimiento más fluido de los personajes remotos
@@ -543,7 +544,7 @@ public class GameScreen implements Screen {
         }
         batch.end();
     }
-    
+
     private void renderRobots() {
         batch.begin();
         // Obtener la lista de robots activos del GameServer
@@ -575,7 +576,7 @@ public class GameScreen implements Screen {
 
         // 3. Obtener la instancia del personaje local para centrar la cámara
         Personajes localPlayer = characters.get(localPlayerId);
-        
+
         // 4. Actualizar la posición de la cámara
         if (localPlayer != null) {
             // Para centrar la cámara, se usa la posición predicha en clientes para suavizar el movimiento
@@ -602,12 +603,12 @@ public class GameScreen implements Screen {
             gameHub.updateCollectibleCount(GameHub.ComponentType.TRASH, localPlayer.getCollectibleCount(CollectibleType.TRASH));
             gameHub.updateLives(localPlayer.getLives()); // Actualizar vidas en el HUD
         }
-        
+
         // Actualizar el hub con la posición de la cámara
-        
-        
-        
-        
+
+
+
+
         renderParallaxBackground();
         renderRobots();
         camera.update();
@@ -619,7 +620,7 @@ public class GameScreen implements Screen {
         updateObjectsFromGameState();
         updateObjects(delta);
         renderObjects();
-        
+
         updateEnemies(delta);
         renderEnemies();
 
@@ -738,15 +739,18 @@ public class GameScreen implements Screen {
      */
     @Override
     public void resize(int width, int height) {
+        // Mantener el zoom actual al redimensionar
+        float currentZoom = camera.zoom;
+
         // Calcular la relación de aspecto del mapa
         float aspectRatio = mapWidth / mapHeight;
-        float viewportWidth = width;
-        float viewportHeight = width / aspectRatio;
+        float viewportWidth = width * currentZoom;
+        float viewportHeight = width * currentZoom / aspectRatio;
 
         // Ajustar el viewport para que el mapa se ajuste a la pantalla sin distorsión
-        if (viewportHeight > height) {
-            viewportHeight = height;
-            viewportWidth = height * aspectRatio;
+        if (viewportHeight > height * currentZoom) {
+            viewportHeight = height * currentZoom;
+            viewportWidth = height * aspectRatio * currentZoom;
         }
 
         // Actualizar la cámara con las nuevas dimensiones del viewport y centrarla
@@ -759,14 +763,14 @@ public class GameScreen implements Screen {
     private void initEnemies() {
         // Cargar animaciones
         Animation<TextureRegion> egmanWalk = new Animation<>(
-            0.1f, 
+            0.1f,
             game.getAssets().egmanAtlas.findRegions("EgE0"),
             Animation.PlayMode.LOOP
         );
 
-        
 
-        
+
+
         egmans.add(new Egman(800f, 1200f, 250f, egmanWalk, 60f));
     }
 
@@ -811,7 +815,7 @@ public class GameScreen implements Screen {
         if (isHost) {
             map.dispose();
         }
-        
+
         gameHub.dispose();
     }
 
