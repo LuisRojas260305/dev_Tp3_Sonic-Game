@@ -41,9 +41,9 @@ public class PlayerState implements Serializable {
     private final Map<CollectibleType, Integer> collectibles;
 
     private boolean flying;
-    private boolean isAvispa; // Indica si este PlayerState representa una avispa
-    private float targetX, targetY; // Posición objetivo para la avispa
-    private boolean active; // Indica si el personaje está activo (para avispas, etc.)
+    private boolean isAvispa; /** Indica si este PlayerState representa una avispa. */
+    private float targetX, targetY; /** Posición objetivo para la avispa (si es una avispa). */
+    private boolean active; /** Indica si el personaje está activo (para avispas y otros personajes temporales). */
     /**
      * Constructor para crear un nuevo PlayerState.
      *

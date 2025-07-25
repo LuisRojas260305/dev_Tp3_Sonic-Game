@@ -251,7 +251,7 @@ public class NetworkManager {
                     clientSocket.close();
                 }
             } catch (SocketTimeoutException e) {
-                // Timeout, continuar
+                // Se alcanzó el tiempo de espera, no se recibieron datos. Continuar escuchando.
             } catch (IOException e) {
                 if (!isHost || serverTcpSocket.isClosed()) {
                     break;

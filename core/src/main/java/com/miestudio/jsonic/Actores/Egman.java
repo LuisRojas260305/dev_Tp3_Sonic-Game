@@ -89,8 +89,9 @@ public class Egman {
      * @param collisionManager Gestor de colisiones
      */
     private void checkAttackCondition(CollisionManager collisionManager) {
-        // Lógica para determinar si el jugador está cerca
-        // Por ahora es solo un marcador de posición
+        // Lógica para determinar si el jugador está cerca y Egman debe atacar.
+        // Actualmente es un marcador de posición; se necesita implementar la detección de proximidad del jugador
+        // y la activación de la animación de ataque y la lógica de daño.
         isAttacking = false; // Implementar lógica real según requerimientos
     }
 

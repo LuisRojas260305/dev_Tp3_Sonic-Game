@@ -50,7 +50,7 @@ public class CargarObjetos {
      * @param y Posicion Y del anillo.
      */
     public void agregarAnillo(float x, float y) {
-        objetos.add(new Anillo(x, y, animacionAnillo));
+        agregarObjeto(new Anillo(x, y, animacionAnillo));
     }
 
     /**
@@ -119,10 +119,5 @@ public class CargarObjetos {
         return objetos;
     }
 
-    /**
-     * Libera los recursos utilizados por el gestor de objetos.
-     */
-    public void dispose() {
-        atlasObjetos.dispose();
-    }
+    
 }

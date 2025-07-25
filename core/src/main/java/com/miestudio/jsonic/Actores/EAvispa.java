@@ -24,7 +24,8 @@ public class EAvispa extends Personajes {
     }
 
     private void cargarAnimaciones(TextureAtlas atlas) {
-        // Asumiendo que AtlasEnemy tiene regiones para la avispa, por ejemplo, "AvispaFly0", "AvispaFly1", etc.
+        // Se asume que el TextureAtlas proporcionado contiene regiones de textura con el prefijo "Enemy" seguido de un índice.
+        // Por ejemplo, "Enemy0", "Enemy1", etc. Si los nombres de las regiones son diferentes, esto causará un NullPointerException.
         Array<TextureRegion> flyFrames = new Array<>();
         for (int i = 0; i < 2; i++) { // Ajusta el número de frames según tu atlas
             flyFrames.add(atlas.findRegion("Enemy" + i)); // Usar "Enemy" como prefijo
@@ -61,7 +62,7 @@ public class EAvispa extends Personajes {
 
     @Override
     public void useAbility() {
-        // La avispa no tiene habilidad
+        // Las avispas no poseen una habilidad especial activa. Este método se mantiene para cumplir con la interfaz de Personajes.
     }
 
     @Override

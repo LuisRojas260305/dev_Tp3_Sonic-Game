@@ -154,9 +154,15 @@ public abstract class Personajes extends Actor {
      * Este método es llamado por el servidor (Host) basado en los InputState recibidos.
      * @param input El estado de los botones del jugador.
      */
-    public void handleInput(InputState input, CollisionManager collisionManager, float delta) {
+    /**
+     * Maneja el movimiento horizontal del personaje basado en el input.
+     * @param input El estado de los botones del jugador.
+     * @param collisionManager El gestor de colisiones.
+     * @param delta El tiempo transcurrido desde el último fotograma.
+     * @return true si el personaje se está moviendo horizontalmente, false en caso contrario.
+     */
+    protected boolean handleHorizontalMovement(InputState input, CollisionManager collisionManager, float delta) {
         boolean isMoving = false;
-
         if (input.isRight()){
             float nextX = x + moveSpeed * delta;
             Rectangle horizontalCheck = new Rectangle(
@@ -167,7 +173,6 @@ public abstract class Personajes extends Actor {
                 x = nextX;
                 facingRight = true;
             }
-
             isMoving = true;
         }
 
@@ -181,15 +186,43 @@ public abstract class Personajes extends Actor {
                 x = nextX;
                 facingRight = false;
             }
-
             isMoving = true;
         }
+        return isMoving;
+    }
 
-
+    /**
+     * Maneja la activación de la habilidad especial del personaje.
+     * @param input El estado de los botones del jugador.
+     */
+    protected void handleAbilityInput(InputState input) {
         if (input.isAbility() && !isAbilityActive && isGrounded) {
             useAbility();
         }
+    }
 
+    /**
+     * Actualiza el estado de la animación del personaje basado en su estado actual.
+     * @param isMoving Indica si el personaje se está moviendo horizontalmente.
+     */
+    protected void updateAnimationState(boolean isMoving) {
+        if (isAbilityActive) {
+            // Mantener animación de habilidad
+        } else if (isRolling && isGrounded) {
+            setCurrentAnimation(rollAnimation);
+        } else if (isMoving && isGrounded) {
+            setCurrentAnimation(runAnimation);
+        } else if (!isGrounded) {
+            setCurrentAnimation(jumpAnimation);
+        } else {
+            setCurrentAnimation(idleAnimation);
+        }
+    }
+
+    public void handleInput(InputState input, CollisionManager collisionManager, float delta) {
+        boolean isMoving = handleHorizontalMovement(input, collisionManager, delta);
+
+        handleAbilityInput(input);
 
         // Limitar posición dentro del mapa
         x = Math.max(0, Math.min(x, collisionManager.getMapWidth() - getWidth()));
@@ -207,18 +240,7 @@ public abstract class Personajes extends Actor {
             setCurrentAnimation(jumpAnimation);
         }
 
-        // Prioridad de animaciones (habilidad tiene máxima prioridad)
-        if (isAbilityActive) {
-            // Mantener animación de habilidad
-        } else if (isRolling && isGrounded) {
-            setCurrentAnimation(rollAnimation);
-        } else if (isMoving && isGrounded) {
-            setCurrentAnimation(runAnimation);
-        } else if (!isGrounded) {
-            setCurrentAnimation(jumpAnimation);
-        } else {
-            setCurrentAnimation(idleAnimation);
-        }
+        updateAnimationState(isMoving);
     }
 
     public void setCurrentAnimation(Animation<TextureRegion> newAnimation) {
@@ -236,7 +258,7 @@ public abstract class Personajes extends Actor {
     /**
      * Establece la animación actual del personaje.
      * Reinicia el tiempo de estado de la animación si la nueva animación es diferente a la actual.
-     *  La nueva animación a establecer.
+     * @param animationType La nueva animación a establecer.
      */
     public void setAnimation(AnimationType animationType) {
         switch (animationType) {
@@ -250,9 +272,9 @@ public abstract class Personajes extends Actor {
 
     // Getters y Setters
     public float getX() { return x; }
-    public void setPlayerX(float x) { this.x = x; }
+    
     public float getY() { return y; }
-    public void setPlayerY(float y) { this.y = y; }
+    
     public float getPrevX() { return prevX; }
     public float getPrevY() { return prevY; }
     public float getMoveSpeed() { return moveSpeed; }

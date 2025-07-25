@@ -181,7 +181,7 @@ public class GameServer {
                     character = new Tails(playerId, assets.tailsAtlas);
                     break;
                 case "Knuckles":
-                    character = new Knockles(playerId, assets.knucklesAtlas);
+                    character = new Knuckles(playerId, assets.knucklesAtlas);
                     break;
                 default:
                     continue;
@@ -295,14 +295,9 @@ public class GameServer {
 
         for (Personajes character : characters.values()) {
             if (character instanceof Tails) {
-                // Asegurarse de que el personaje es realmente una instancia de Tails
-                if (character.getClass().equals(Tails.class)) {
-                    Tails tails = (Tails) character;
-                    for (Robot robot : tails.getActiveRobots()) {
-                        robot.update(delta, collisionManager);
-                    }
-                } else {
-                    Gdx.app.error("GameServer", "Error de tipo inesperado: " + character.getClass().getName() + " no puede ser casteado a Tails.");
+                Tails tails = (Tails) character;
+                for (Robot robot : tails.getActiveRobots()) {
+                    robot.update(delta, collisionManager);
                 }
             } else if (character instanceof EAvispa) {
                 EAvispa avispa = (EAvispa) character;

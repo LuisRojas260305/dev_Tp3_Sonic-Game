@@ -21,7 +21,7 @@ import com.badlogic.gdx.math.Shape2D;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.miestudio.jsonic.Actores.Egman;
-import com.miestudio.jsonic.Actores.Knockles;
+import com.miestudio.jsonic.Actores.Knuckles;
 
 
 import com.miestudio.jsonic.Actores.Personajes;
@@ -294,7 +294,7 @@ public class GameScreen implements Screen {
                 character = new Tails(playerId, assets.tailsAtlas);
                 break;
             case "Knuckles":
-                character = new Knockles(playerId, assets.knucklesAtlas);
+                character = new Knuckles(playerId, assets.knucklesAtlas);
                 break;
             default:
                 // En caso de tipo desconocido, usar Sonic y registrar un error
@@ -537,8 +537,7 @@ public class GameScreen implements Screen {
         batch.begin();
         for (Personajes character : characters.values()) {
             if (character instanceof Tails) {
-                if (character.getClass().equals(Tails.class)) {
-                    Tails tails = (Tails) character;
+                Tails tails = (Tails) character;
                     for (Robot robot : tails.getActiveRobots()) {
                         TextureRegion frame = robot.getTexture();
                         if (!robot.isFacingRight() && !frame.isFlipX()) {
@@ -548,9 +547,7 @@ public class GameScreen implements Screen {
                         }
                         batch.draw(frame, robot.getX(), robot.getY());
                     }
-                } else {
-                    Gdx.app.error("GameScreen", "Error de tipo inesperado en renderRobots: " + character.getClass().getName() + " no puede ser casteado a Tails.");
-                }
+                
             }
         }
         batch.end();
@@ -599,7 +596,7 @@ public class GameScreen implements Screen {
         }
         
         // Actualizar el hub con la posición de la cámara
-        gameHub.update(delta, cameraPosition, viewportSize);
+        
         
         
         
@@ -622,7 +619,7 @@ public class GameScreen implements Screen {
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
         synchronized (characters) {
-            gameHub.render(batch);
+            gameHub.render(batch, cameraPosition, viewportSize);
             for (Personajes character : characters.values()) {
                 // Para el jugador local en el cliente, usar la posición predicha para el renderizado
                 if (!isHost && character.getPlayerId() == localPlayerId) {
@@ -755,14 +752,14 @@ public class GameScreen implements Screen {
         // Cargar animaciones
         Animation<TextureRegion> egmanWalk = new Animation<>(
             0.1f, 
-            game.getAssets().AtlasEgman.findRegions("EgE0"),
+            game.getAssets().egmanAtlas.findRegions("EgE0"),
             Animation.PlayMode.LOOP
         );
 
         
 
         
-        egmans.add(new Egman(800, 1200, 250, egmanWalk, 60));
+        egmans.add(new Egman(800f, 1200f, 250f, egmanWalk, 60f));
     }
 
     private void updateEnemies(float delta) {

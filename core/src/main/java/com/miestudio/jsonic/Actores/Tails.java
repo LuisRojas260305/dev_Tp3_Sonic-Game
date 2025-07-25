@@ -10,7 +10,7 @@ import com.miestudio.jsonic.Server.domain.InputState;
 import com.miestudio.jsonic.Util.CollisionManager;
 
 public class Tails extends Personajes {
-    private TextureAtlas AtlasTails;
+    private TextureAtlas tailsAtlas;
     private Animation<TextureRegion> flyAnimation;
     private Animation<TextureRegion> fallAnimation;
     private Animation<TextureRegion> robotAnimation;
@@ -31,7 +31,7 @@ public class Tails extends Personajes {
     
     public Tails(int playerId, TextureAtlas atlas) {
         this.playerId = playerId;
-        this.AtlasTails = atlas;
+        this.tailsAtlas = atlas;
         cargarAnimaciones();
         currentAnimation = idleAnimation;
         setAbilityAnimation(robotAnimation);
@@ -41,49 +41,49 @@ public class Tails extends Personajes {
         // Animación idle
         Array<TextureRegion> idleFrames = new Array<>();
         for (int i = 0; i < 8; i++) {
-            idleFrames.add(AtlasTails.findRegion("TailsIdle" + i));
+            idleFrames.add(tailsAtlas.findRegion("TailsIdle" + i));
         }
         idleAnimation = new Animation<>(0.18f, idleFrames, Animation.PlayMode.LOOP);
         
         // Animación correr
         Array<TextureRegion> runFrames = new Array<>();
         for (int i = 0; i < 9; i++) {
-            runFrames.add(AtlasTails.findRegion("TailsRun" + i));
+            runFrames.add(tailsAtlas.findRegion("TailsRun" + i));
         }
         runAnimation = new Animation<>(0.08f, runFrames, Animation.PlayMode.LOOP);
         
         // Animación rodar (bolita)
         Array<TextureRegion> ballFrames = new Array<>();
         for (int i = 0; i < 2; i++){
-            ballFrames.add(AtlasTails.findRegion("TailsHit" + i));
+            ballFrames.add(tailsAtlas.findRegion("TailsHit" + i));
         }
         rollAnimation = new Animation<>(0.1f, ballFrames, Animation.PlayMode.LOOP);
         
         // Animación salto
         Array<TextureRegion> jumpFrames = new Array<>();
         for (int i = 0; i < 4; i++){
-            jumpFrames.add(AtlasTails.findRegion("TailsJump" + i));
+            jumpFrames.add(tailsAtlas.findRegion("TailsJump" + i));
         }
         jumpAnimation = new Animation<>(0.25f, jumpFrames, Animation.PlayMode.NORMAL);
         
         // Nueva animación de vuelo
         Array<TextureRegion> flyFrames = new Array<>();
         for (int i = 0; i < 6; i++) {
-            flyFrames.add(AtlasTails.findRegion("TailsFly" + i));
+            flyFrames.add(tailsAtlas.findRegion("TailsFly" + i));
         }
         flyAnimation = new Animation<>(0.1f, flyFrames, Animation.PlayMode.LOOP);
         
         // Nueva animación de caída
         Array<TextureRegion> fallFrames = new Array<>();
         for (int i = 2; i < 4; i++) {
-            fallFrames.add(AtlasTails.findRegion("TailsJump" + i));
+            fallFrames.add(tailsAtlas.findRegion("TailsJump" + i));
         }
         fallAnimation = new Animation<>(0.15f, fallFrames, Animation.PlayMode.LOOP);
         
         // Animación para el robot (usada en la habilidad)
         Array<TextureRegion> robotFrames = new Array<>();
         for (int i = 0; i < 4; i++) {
-            robotFrames.add(AtlasTails.findRegion("RobotTailsIdleRun" + i));
+            robotFrames.add(tailsAtlas.findRegion("RobotTailsIdleRun" + i));
         }
         robotAnimation = new Animation<>(0.1f, robotFrames, Animation.PlayMode.LOOP);
     }

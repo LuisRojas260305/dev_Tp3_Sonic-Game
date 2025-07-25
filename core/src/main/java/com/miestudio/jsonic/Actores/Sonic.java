@@ -61,12 +61,7 @@ public class Sonic extends Personajes {
                     if (shape instanceof Rectangle) {
                         Rectangle rect = (Rectangle) shape;
                         if (bounds.overlaps(rect)) {
-                            /*
-                            if (collisionManager.isDestructible(rect)) {
-                                collisionManager.removeCollisionShape(rect);
-                                Gdx.app.log("Sonic", "Bloque destruido!");
-                            }
-                            */
+                            
                         }
                     }
                 }

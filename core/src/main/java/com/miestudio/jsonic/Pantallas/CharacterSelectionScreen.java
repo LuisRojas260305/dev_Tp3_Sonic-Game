@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.miestudio.jsonic.JuegoSonic;
@@ -56,16 +57,29 @@ public class CharacterSelectionScreen implements Screen {
         // Estilo base para los botones
         TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
         buttonStyle.font = new BitmapFont(); // Usar una fuente por defecto.
-        buttonStyle.up = UIUtils.createColorDrawable(Color.BLUE);
-        buttonStyle.down = UIUtils.createColorDrawable(Color.DARK_GRAY);
         buttonStyle.fontColor = Color.WHITE;
+
+        // Crear drawables una sola vez
+        Drawable blueDrawable = UIUtils.createColorDrawable(Color.BLUE);
+        Drawable grayDrawable = UIUtils.createColorDrawable(Color.GRAY);
+        Drawable darkGrayDrawable = UIUtils.createColorDrawable(Color.DARK_GRAY);
+
+        // Estilo para botones habilitados
+        TextButton.TextButtonStyle enabledButtonStyle = new TextButton.TextButtonStyle(buttonStyle);
+        enabledButtonStyle.up = blueDrawable;
+        enabledButtonStyle.down = darkGrayDrawable;
+
+        // Estilo para botones deshabilitados
+        TextButton.TextButtonStyle disabledButtonStyle = new TextButton.TextButtonStyle(buttonStyle);
+        disabledButtonStyle.up = grayDrawable;
+        disabledButtonStyle.fontColor = Color.DARK_GRAY;
 
         Label titleLabel = new Label("Selecciona tu Personaje", new Label.LabelStyle(new BitmapFont(), Color.WHITE));
         table.add(titleLabel).padBottom(50).row();
 
-        sonicButton = new TextButton("Sonic", buttonStyle);
-        tailsButton = new TextButton("Tails", buttonStyle);
-        knucklesButton = new TextButton("Knuckles", buttonStyle);
+        sonicButton = new TextButton("Sonic", enabledButtonStyle);
+        tailsButton = new TextButton("Tails", enabledButtonStyle);
+        knucklesButton = new TextButton("Knuckles", enabledButtonStyle);
 
         table.add(sonicButton).width(200).height(50).padBottom(20).row();
         table.add(tailsButton).width(200).height(50).padBottom(20).row();
@@ -108,15 +122,11 @@ public class CharacterSelectionScreen implements Screen {
         if (game.isCharacterTaken(characterName)) {
             button.setText(characterName + " (Tomado)");
             button.setDisabled(true);
-            // Cambiar el color del drawable a gris
-            ((TextureRegionDrawable) button.getStyle().up).getRegion().getTexture().dispose(); // Liberar la textura anterior
             button.getStyle().up = UIUtils.createColorDrawable(Color.GRAY);
             button.getStyle().fontColor = Color.DARK_GRAY;
         } else {
             button.setText(characterName);
             button.setDisabled(false);
-            // Restaurar el color original del drawable
-            ((TextureRegionDrawable) button.getStyle().up).getRegion().getTexture().dispose(); // Liberar la textura anterior
             button.getStyle().up = UIUtils.createColorDrawable(Color.BLUE);
             button.getStyle().fontColor = Color.WHITE;
         }

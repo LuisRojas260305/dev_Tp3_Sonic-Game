@@ -65,7 +65,9 @@ public class GameHub implements Disposable {
             value = "0";
         }
         
-        public void updatePosition(Vector2 cameraPosition, Vector2 viewportSize) {
+        
+        
+        public void render(SpriteBatch batch, Vector2 cameraPosition, Vector2 viewportSize) {
             // Calcular posición absoluta basada en posición relativa y cámara
             float absX = cameraPosition.x - viewportSize.x/2 + relativePosition.x * viewportSize.x;
             float absY = cameraPosition.y - viewportSize.y/2 + relativePosition.y * viewportSize.y;
@@ -75,9 +77,7 @@ public class GameHub implements Disposable {
                 absX + 10, 
                 absY + backgroundRect.height - iconRect.height - 10
             );
-        }
-        
-        public void render(SpriteBatch batch) {
+            
             // Dibujar fondo
             batch.draw(backgroundTexture, 
                       backgroundRect.x, backgroundRect.y,
@@ -102,6 +102,10 @@ public class GameHub implements Disposable {
         }
     }
     
+    public void update(float delta) {
+        updateValues(delta);
+    }
+
     private final Array<HubComponent> components = new Array<>();
     private float elapsedTime = 0;
     public final BitmapFont systemFont;
@@ -124,18 +128,10 @@ public class GameHub implements Disposable {
         return null;
     }
     
-    public void update(float delta, Vector2 cameraPosition, Vector2 viewportSize) {
-        elapsedTime += delta;
-
-        // Actualizar posiciones de los componentes
-        for(HubComponent comp : components) {
-            comp.updatePosition(cameraPosition, viewportSize);
-        }
-
-        updateComponentValues();
-    }
     
-    private void updateComponentValues() {
+    
+    private void updateValues(float delta) {
+        elapsedTime += delta;
         for(HubComponent comp : components) {
             if(comp.type == ComponentType.TIME) {
                 comp.value = formatTime(elapsedTime);
@@ -149,9 +145,9 @@ public class GameHub implements Disposable {
         return String.format("%02d:%02d", minutes, secs);
     }
     
-    public void render(SpriteBatch batch) {
+    public void render(SpriteBatch batch, Vector2 cameraPosition, Vector2 viewportSize) {
         for(HubComponent comp : components) {
-            comp.render(batch);
+            comp.render(batch, cameraPosition, viewportSize);
         }
     }
 

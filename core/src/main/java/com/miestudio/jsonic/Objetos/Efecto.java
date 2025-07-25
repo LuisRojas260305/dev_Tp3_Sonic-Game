@@ -27,7 +27,7 @@ public class Efecto extends Objetos {
         super(x, y, animacion.getKeyFrame(0));
         this.animacion = animacion;
         this.duracion = animacion.getAnimationDuration();
-        this.hitbox = new Rectangle(x, y, 15f, 15f); // Sin hitbox
+        this.hitbox = new Rectangle(x, y, animacion.getKeyFrame(0).getRegionWidth(), animacion.getKeyFrame(0).getRegionHeight());
     }
 
     /**

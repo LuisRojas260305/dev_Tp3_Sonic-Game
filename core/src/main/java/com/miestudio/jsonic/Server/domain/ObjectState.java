@@ -9,7 +9,7 @@ public class ObjectState implements Serializable {
     private float y;
     private boolean active;
     private String type;
-    private int totalCollectedTrash; // Solo para MaquinaReciclaje
+    private int totalCollectedTrash; /** Cantidad total de basura recolectada (relevante solo para MaquinaReciclaje). */
 
     public ObjectState(int id, float x, float y, boolean active, String type, int totalCollectedTrash){
         this.id = id;

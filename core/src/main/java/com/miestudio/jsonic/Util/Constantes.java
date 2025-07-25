@@ -24,7 +24,7 @@ public class Constantes {
     /** Ruta base para los archivos de assets de backgroud MainScreen*/
     public static final String BACKGROUND_MAINSCREEN_PATH = "Background/MainScreen/";
     /** Reta base para los archivos de assets de objetos */
-    public static final String OBJECT_PATCH = "Objetos/";
+    public static final String OBJECTS_PATH = "Objetos/";
 
     /** Constante de gravedad aplicada a los personajes y objetos en el juego. */
     public static final float GRAVITY = -500f;
@@ -34,5 +34,5 @@ public class Constantes {
     /** Tamaño estandar de un tile en el mapa del juego en pixeles. */
     public static final int TILE_SIZE = 32;
 
-    public static final float OBJECT_COLLISION_OFFSET = 5f; /** Desplazamiento para la deteccion de colisiones de objetos. */
+    public static final float OBJECT_COLLISION_OFFSET = 5f; /** Desplazamiento adicional para ajustar la detección de colisiones de objetos. */
 }

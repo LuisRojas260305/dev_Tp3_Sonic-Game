@@ -21,7 +21,7 @@ public class Anillo extends Objetos {
     public Anillo(float x, float y, Animation<TextureRegion> animacion) {
         super(x, y, animacion.getKeyFrame(0));
         this.animacion = animacion;
-        this.hitbox = new Rectangle(x, y, 15f, 15f);
+        this.hitbox = new Rectangle(x, y, animacion.getKeyFrame(0).getRegionWidth(), animacion.getKeyFrame(0).getRegionHeight());
         this.tiempoEstado = 0;
     }
 

@@ -29,7 +29,7 @@ public class Robot {
         x += facingRight ? moveAmount : -moveAmount;
         distanceTraveled += moveAmount;
         
-        Rectangle bounds = new Rectangle(x, y, 15, 15);
+        Rectangle bounds = new Rectangle(x, y, texture.getRegionWidth(), texture.getRegionHeight());
         if (collisionManager.collides(bounds) || distanceTraveled >= MAX_DISTANCE) {
             active = false;
         }
