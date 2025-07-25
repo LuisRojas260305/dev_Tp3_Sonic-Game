@@ -1,16 +1,17 @@
 package com.miestudio.jsonic.Pantallas;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 
 /**
- * Sistema de hub de juego que muestra información importante al jugador.
- * Permite diseñar fácilmente con texturas y posicionar elementos libremente.
+ * Sistema de hub de juego que sigue la cámara y usa fuentes del sistema.
  */
 public class GameHub implements Disposable {
 
@@ -31,8 +32,13 @@ public class GameHub implements Disposable {
         public BitmapFont font;
         public Color labelColor = Color.WHITE;
         public Color valueColor = Color.WHITE;
+        public Vector2 relativePosition; // Posición relativa a la cámara
         
-        public HubComponent(ComponentType type, float x, float y, 
+        
+        
+        
+        public HubComponent(ComponentType type, 
+                           float relX, float relY, // Posiciones relativas (0-1)
                            float bgWidth, float bgHeight,
                            float iconSize, 
                            Texture bgTexture, Texture iconTexture, 
@@ -41,15 +47,11 @@ public class GameHub implements Disposable {
             this.backgroundTexture = bgTexture;
             this.iconTexture = iconTexture;
             this.font = font;
+            this.relativePosition = new Vector2(relX, relY);
             
-            // Configurar rectángulos
-            backgroundRect = new Rectangle(x, y, bgWidth, bgHeight);
-            iconRect = new Rectangle(
-                x + 10, 
-                y + bgHeight - iconSize - 10, 
-                iconSize, 
-                iconSize
-            );
+            // Configurar rectángulos iniciales (se actualizarán con la cámara)
+            backgroundRect = new Rectangle(0, 0, bgWidth, bgHeight);
+            iconRect = new Rectangle(0, 0, iconSize, iconSize);
             
             // Configurar etiquetas por defecto
             switch(type) {
@@ -63,8 +65,19 @@ public class GameHub implements Disposable {
             value = "0";
         }
         
+        public void updatePosition(Vector2 cameraPosition, Vector2 viewportSize) {
+            // Calcular posición absoluta basada en posición relativa y cámara
+            float absX = cameraPosition.x - viewportSize.x/2 + relativePosition.x * viewportSize.x;
+            float absY = cameraPosition.y - viewportSize.y/2 + relativePosition.y * viewportSize.y;
+            
+            backgroundRect.setPosition(absX, absY);
+            iconRect.setPosition(
+                absX + 10, 
+                absY + backgroundRect.height - iconRect.height - 10
+            );
+        }
+        
         public void render(SpriteBatch batch) {
-           
             // Dibujar fondo
             batch.draw(backgroundTexture, 
                       backgroundRect.x, backgroundRect.y,
@@ -78,49 +91,30 @@ public class GameHub implements Disposable {
             // Dibujar etiqueta (arriba del rectángulo)
             font.setColor(labelColor);
             font.draw(batch, label, 
-                     backgroundRect.x + backgroundRect.width/2, 
-                     backgroundRect.y + backgroundRect.height + 20, 
-                     0, label.length(), 
-                     backgroundRect.width, 1, true);
+                     backgroundRect.x, 
+                     backgroundRect.y + backgroundRect.height + 20);
             
             // Dibujar valor (centrado en el rectángulo)
             font.setColor(valueColor);
             font.draw(batch, value, 
-                     backgroundRect.x, 
-                     backgroundRect.y + backgroundRect.height/2 + 10, 
-                     backgroundRect.width, 1, true);
-           
-        }
-        
-        public void setPosition(float x, float y) {
-            float deltaX = x - backgroundRect.x;
-            float deltaY = y - backgroundRect.y;
-            backgroundRect.setPosition(x, y);
-            iconRect.setPosition(iconRect.x + deltaX, iconRect.y + deltaY);
-        }
-        
-        public void setSize(float width, float height) {
-            // Mantener proporciones del icono
-            float iconRatio = iconRect.width / backgroundRect.width;
-            backgroundRect.setSize(width, height);
-            iconRect.setSize(width * iconRatio, height * iconRatio);
-            iconRect.setPosition(
-                backgroundRect.x + 10, 
-                backgroundRect.y + backgroundRect.height - iconRect.height - 10
-            );
+                     backgroundRect.x + backgroundRect.width/2 - 10, 
+                     backgroundRect.y + backgroundRect.height/2 + 10);
         }
     }
     
     private final Array<HubComponent> components = new Array<>();
-    private final SpriteBatch batch;
     private float elapsedTime = 0;
     private int rings = 0;
     private int trash = 0;
     private int record = 0;
     private int lives = 3;
+    public final BitmapFont systemFont;
 
-    public GameHub(SpriteBatch batch) {
-        this.batch = batch;
+    public GameHub() {
+        // Crear fuente del sistema
+        systemFont = new BitmapFont();
+        systemFont.getData().setScale(1.2f); // Tamaño de fuente
+        systemFont.setColor(Color.WHITE);
     }
     
     public void addComponent(HubComponent component) {
@@ -134,8 +128,14 @@ public class GameHub implements Disposable {
         return null;
     }
     
-    public void update(float delta) {
+    public void update(float delta, Vector2 cameraPosition, Vector2 viewportSize) {
         elapsedTime += delta;
+        
+        // Actualizar posiciones de los componentes
+        for(HubComponent comp : components) {
+            comp.updatePosition(cameraPosition, viewportSize);
+        }
+        
         updateComponentValues();
     }
     
@@ -170,13 +170,11 @@ public class GameHub implements Disposable {
         return String.format("%02d:%02d", minutes, secs);
     }
     
-    public void render() {
+    public void render(SpriteBatch batch) {
         for(HubComponent comp : components) {
             comp.render(batch);
         }
     }
-    
-    
     
     // Métodos para actualizar valores del juego
     public void addRings(int count) { rings += count; }
@@ -188,6 +186,7 @@ public class GameHub implements Disposable {
     
     @Override
     public void dispose() {
+        systemFont.dispose();
         for(HubComponent comp : components) {
             comp.backgroundTexture.dispose();
             comp.iconTexture.dispose();

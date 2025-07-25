@@ -79,6 +79,8 @@ public class GameScreen implements Screen {
     private Array<Egman> egmans = new Array<>();
     
     private GameHub gameHub;
+    private Vector2 cameraPosition = new Vector2();
+    private Vector2 viewportSize = new Vector2();
     
     /**
      * 
@@ -180,9 +182,9 @@ public class GameScreen implements Screen {
     }
 
     private void initGameHub() {
-        gameHub = new GameHub(batch);
+        gameHub = new GameHub();
         
-        // Cargar texturas (deberías tener estas texturas en tu Assets)
+        // Cargar texturas
         Texture bgTexture = new Texture(Gdx.files.internal("ui/Hub0.png"));
         Texture timeIcon = new Texture(Gdx.files.internal("ui/HubT.png"));
         Texture ringsIcon = new Texture(Gdx.files.internal("ui/HubR.png"));
@@ -190,77 +192,60 @@ public class GameScreen implements Screen {
         Texture recordIcon = new Texture(Gdx.files.internal("ui/HubE.png"));
         Texture livesIcon = new Texture(Gdx.files.internal("ui/HubLS.png"));
         
-        BitmapFont hubFont = game.getAssets().hubFont; // Asume que tienes una fuente en Assets
-        
-        // Crear componentes con posiciones relativas
-        float margin = 20;
-        float componentWidth = 120;
-        float componentHeight = 80;
-        float spacing = 30;
-        
+        // Crear componentes con posiciones relativas (0-1)
         // Tiempo (arriba a la izquierda)
         GameHub.HubComponent timeComp = new GameHub.HubComponent(
             GameHub.ComponentType.TIME,
-            margin,
-            Gdx.graphics.getHeight() - componentHeight - margin,
-            componentWidth,
-            componentHeight,
-            40, // tamaño del icono
+            0.05f, 0.9f, // 5% desde izquierda, 90% desde abajo
+            120, 80,
+            40,
             bgTexture,
             timeIcon,
-            hubFont
+            gameHub.systemFont // Usar fuente del sistema
         );
         
         // Anillos (a la derecha del tiempo)
         GameHub.HubComponent ringsComp = new GameHub.HubComponent(
             GameHub.ComponentType.RINGS,
-            margin + componentWidth + spacing,
-            Gdx.graphics.getHeight() - componentHeight - margin,
-            componentWidth,
-            componentHeight,
+            0.20f, 0.9f, // 20% desde izquierda, 90% desde abajo
+            120, 80,
             40,
             bgTexture,
             ringsIcon,
-            hubFont
+            gameHub.systemFont
         );
         
         // Basura (a la derecha de anillos)
         GameHub.HubComponent trashComp = new GameHub.HubComponent(
             GameHub.ComponentType.TRASH,
-            margin + 2*(componentWidth + spacing),
-            Gdx.graphics.getHeight() - componentHeight - margin,
-            componentWidth,
-            componentHeight,
+            0.35f, 0.9f, // 35% desde izquierda, 90% desde abajo
+            120, 80,
             40,
             bgTexture,
             trashIcon,
-            hubFont
+            gameHub.systemFont
         );
         
         // Récord (arriba a la derecha)
         GameHub.HubComponent recordComp = new GameHub.HubComponent(
             GameHub.ComponentType.RECORD,
-            Gdx.graphics.getWidth() - componentWidth - margin,
-            Gdx.graphics.getHeight() - componentHeight - margin,
-            componentWidth,
-            componentHeight,
+            0.75f, 0.9f, // 75% desde izquierda, 90% desde abajo
+            120, 80,
             40,
             bgTexture,
             recordIcon,
-            hubFont
+            gameHub.systemFont
         );
         
         // Vidas (a la izquierda del récord)
         GameHub.HubComponent livesComp = new GameHub.HubComponent(
             GameHub.ComponentType.LIVES,
-            Gdx.graphics.getWidth() - 2*(componentWidth + spacing) - margin,
-            Gdx.graphics.getHeight() - componentHeight - margin,
-            componentWidth,
-            componentHeight,
+            0.60f, 0.9f, // 60% desde izquierda, 90% desde abajo
+            120, 80,
             40,
             bgTexture,
             livesIcon,
-            hubFont
+            gameHub.systemFont
         );
         livesComp.valueColor = Color.GREEN;
         
@@ -272,7 +257,7 @@ public class GameScreen implements Screen {
         gameHub.addComponent(livesComp);
         
         // Establecer valores iniciales
-        gameHub.setRecord(1500); // Ejemplo de récord
+        gameHub.setRecord(1500);
     }
     
     /**
@@ -545,7 +530,13 @@ public class GameScreen implements Screen {
             camera.position.set((int)cameraX, (int)cameraY, 0);
         }
 
-        gameHub.update(delta);
+        if (localPlayer != null) {
+            cameraPosition.set(camera.position.x, camera.position.y);
+            viewportSize.set(camera.viewportWidth, camera.viewportHeight);
+        }
+        
+        // Actualizar el hub con la posición de la cámara
+        gameHub.update(delta, cameraPosition, viewportSize);
         
         
         
@@ -568,7 +559,7 @@ public class GameScreen implements Screen {
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
         synchronized (characters) {
-            gameHub.render();
+            gameHub.render(batch);
             for (Personajes character : characters.values()) {
                 // Para el jugador local en el cliente, usar la posición predicha para el renderizado
                 if (!isHost && character.getPlayerId() == localPlayerId) {
