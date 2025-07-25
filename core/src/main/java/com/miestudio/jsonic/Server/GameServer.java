@@ -12,6 +12,7 @@ import com.miestudio.jsonic.Objetos.Anillo;
 import com.miestudio.jsonic.Objetos.CargarObjetos;
 import com.miestudio.jsonic.Objetos.Objetos;
 import com.miestudio.jsonic.Server.domain.InputState;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.miestudio.jsonic.Util.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -54,9 +55,10 @@ public class GameServer {
         this.mapWidth = mapWidth;
         this.mapHeight = mapHeight;
         this.characters = new ConcurrentHashMap<>();
-        this.cargarObjetos = new CargarObjetos(game.getAssets().objetosAtlas);
+        this.cargarObjetos = new CargarObjetos(game.getAssets().objetosAtlas, game.getAssets());
         initializeCharacters();
         spawnGameObjects("Anillo", "SpawnObjetos");
+        spawnGameObjects("Basura", "SpawnObjetos");
     }
 
     /**
@@ -95,6 +97,16 @@ public class GameServer {
                 anillo.setId(nextObjectId++);
                 gameObjects.put(anillo.getId(), anillo);
                 cargarObjetos.agregarAnillo(anillo);
+            } else if ("Basura".equals(objectType)) {
+                Objetos basura = new Objetos(centeredX, centeredY, new TextureRegion(game.getAssets().trashTexture)) {
+                    @Override
+                    public void actualizar(float delta) {
+                        // La basura no tiene animacion ni logica de actualizacion compleja
+                    }
+                };
+                basura.setId(nextObjectId++);
+                gameObjects.put(basura.getId(), basura);
+                cargarObjetos.agregarBasura(centeredX, centeredY);
             }
         }
         Gdx.app.log("GameServer", "Se han creado " + spawnPoints.size() + " " + objectType + "s.");
@@ -224,7 +236,8 @@ public class GameServer {
                 character.getCurrentAnimationName(),
                 character.getAnimationStateTime(),
                 characterType,
-                (character instanceof Tails) ? ((Tails) character).isFlying() : false
+                (character instanceof Tails) ? ((Tails) character).isFlying() : false,
+                character.getCollectibles()
             ));
         }
 
@@ -253,6 +266,14 @@ public class GameServer {
                     obj.estaActivo(),
                     "Anillo"
                 ));
+            } else {
+                objectStates.add(new ObjectState(
+                    obj.getId(),
+                    obj.x,
+                    obj.y,
+                    obj.estaActivo(),
+                    "Basura"
+                ));
             }
         }
 
@@ -276,8 +297,15 @@ public class GameServer {
 
             for (Objetos obj : gameObjects.values()) {
                 if (obj.estaActivo() && charHitbox.overlaps(obj.getHitbox())) {
-                    obj.setActivo(false);
-                    Gdx.app.log("GameServer", "Anillo con ID: " + obj.getId() + " desactivado por el jugador " + character.getPlayerId());
+                    if (obj instanceof Anillo) {
+                        character.addCollectible(CollectibleType.RINGS);
+                        obj.setActivo(false);
+                        Gdx.app.log("GameServer", "Anillo con ID: " + obj.getId() + " desactivado por el jugador " + character.getPlayerId());
+                    } else if (obj.getTexture().getTexture() == game.getAssets().trashTexture) {
+                        character.addCollectible(CollectibleType.TRASH);
+                        obj.setActivo(false);
+                        Gdx.app.log("GameServer", "Basura con ID: " + obj.getId() + " desactivado por el jugador " + character.getPlayerId());
+                    }
                 }
             }
         }

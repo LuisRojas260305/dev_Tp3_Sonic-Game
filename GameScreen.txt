@@ -1,0 +1,172 @@
+1. Sistema Visual Completo
+Fondo animado:
+
+Desplazamiento diagonal continuo en bucle infinito
+
+Textura en modo repeat para efecto infinito
+
+Botones de personajes:
+
+3 botones
+
+Sprites específicos para cada personaje (121x200px)
+
+Disposición horizontal escalonada (botón central más alto)
+
+2. Sistema de Flechas por Jugador
+Flechas personalizadas:
+
+3 texturas únicas (una por jugador)
+
+Asignación automática al seleccionar personaje
+
+Cada jugador tiene su propia flecha visible
+
+Comportamiento de flechas:
+
+Sin selección: Siguen el hover del jugador local
+
+Seleccionado: Se fijan sobre el personaje elegido
+
+Animación de flotación (sube/baja) independiente por jugador
+
+3. Estados de Botones
+Normal (sin interacción):
+
+Escala de grises
+
+Tamaño original
+
+Con hover/flecha encima:
+
+A color completo
+
+Escalado al 110%
+
+Seleccionado:
+
+Animación de confirmación (parpadeo blanco/amarillo/transparente)
+
+Capa de color translúcido según jugador:
+
+Azul (Jugador 0)
+
+Amarillo/Naranja (Jugador 1)
+
+Rojo (Jugador 2)
+
+Bloqueo de interacciones (no acepta clicks/hover)
+
+4. Sincronización en Red
+Paquetes implementados:
+
+PlayerHoverPacket: Actualiza posición de flechas en tiempo real
+
+CharacterSelectionPacket: Confirma selecciones
+
+CharacterTakenPacket: Notifica personajes ocupados
+
+Estados sincronizados:
+
+Posición de todas las flechas
+
+Selecciones confirmadas
+
+Personajes deshabilitados
+
+Colores por jugador (consistentes en todas las pantallas)
+
+5. Elementos Adicionales
+Asset de esquina:
+
+Posición fija en esquina superior izquierda
+
+Escala proporcional al 15% del tamaño de pantalla
+
+Mantiene relación de aspecto
+
+Animaciones:
+
+Flotación de flechas (con desfase por jugador)
+
+Transiciones suaves al cambiar estados
+
+Feedback visual al confirmar selección
+
+6. Gestión de Recursos
+Carga optimizada de texturas:
+
+1 fondo
+
+3 botones de personaje
+
+3 flechas personalizadas
+
+1 asset de esquina
+
+Liberación automática de recursos al cerrar
+
+7. Lógica de Control
+Para jugador local:
+
+Detección de hover/click
+
+Envío de actualizaciones a la red
+
+Animaciones locales
+
+Para jugadores remotos:
+
+Recepción de estados de red
+
+Actualización visual sincronizada
+
+Posicionamiento preciso de flechas
+
+8. Escalado Responsivo
+Ajuste automático de:
+
+Tamaño de botones (manteniendo relación de aspecto)
+
+Posición de flechas
+
+Asset de esquina
+
+Adaptación a diferentes resoluciones
+
+Flujo Completo de la Pantalla:
+Inicialización:
+
+Carga assets
+
+Crea 3 flechas (inicialmente ocultas)
+
+Configura botones con inclinación derecha
+
+Conexión:
+
+Muestra flechas según jugadores conectados
+
+Asigna colores únicos por playerId
+
+Selección:
+
+Jugador hace hover → flecha se mueve (solo visible localmente)
+
+Click → animación de confirmación + bloqueo
+
+Notificación a otros jugadores vía red
+
+Sincronización:
+
+Actualiza estados en todas las instancias
+
+Fija flechas sobre personajes seleccionados
+
+Aplica colores de jugador correspondientes
+
+Transición:
+
+Cuando todos seleccionan → pasa automáticamente al lobby
+
+Mantiene consistencia visual durante todo el proceso

@@ -1,6 +1,9 @@
 package com.miestudio.jsonic.Server.domain;
 
+import com.miestudio.jsonic.Util.CollectibleType;
+
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * Representa el estado de un unico jugador en un momento dado.
@@ -35,6 +38,8 @@ public class PlayerState implements Serializable {
      */
     private String characterType; /** El tipo de personaje que el jugador está usando (ej. "Sonic", "Tails"). */
 
+    private final Map<CollectibleType, Integer> collectibles;
+
     private boolean flying;
     /**
      * Constructor para crear un nuevo PlayerState.
@@ -47,7 +52,7 @@ public class PlayerState implements Serializable {
      * @param animationStateTime   El tiempo de estado de la animacion actual del jugador.
      * @param characterType        El tipo de personaje que el jugador esta usando.
      */
-    public PlayerState(int playerId, float x, float y, boolean facingRight, String currentAnimationName, float animationStateTime, String characterType, boolean flying) {
+    public PlayerState(int playerId, float x, float y, boolean facingRight, String currentAnimationName, float animationStateTime, String characterType, boolean flying, Map<CollectibleType, Integer> collectibles) {
         this.playerId = playerId;
         this.x = x;
         this.y = y;
@@ -56,6 +61,7 @@ public class PlayerState implements Serializable {
         this.animationStateTime = animationStateTime;
         this.characterType = characterType;
         this.flying = flying;
+        this.collectibles = collectibles;
     }
 
     /**
@@ -123,5 +129,9 @@ public class PlayerState implements Serializable {
      */
     public String getCharacterType() {
         return characterType;
+    }
+
+    public Map<CollectibleType, Integer> getCollectibles() {
+        return collectibles;
     }
 }

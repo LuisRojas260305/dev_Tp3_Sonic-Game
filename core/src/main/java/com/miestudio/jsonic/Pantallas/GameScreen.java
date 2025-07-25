@@ -32,7 +32,11 @@ import com.miestudio.jsonic.JuegoSonic;
 import com.miestudio.jsonic.Server.domain.GameState;
 import com.miestudio.jsonic.Server.domain.InputState;
 import com.miestudio.jsonic.Server.domain.PlayerState;
-import com.miestudio.jsonic.Util.*;
+import com.miestudio.jsonic.Util.CollisionManager;
+import com.miestudio.jsonic.Util.CollectibleType;
+import com.miestudio.jsonic.Util.Constantes;
+import com.miestudio.jsonic.Util.Assets;
+import java.util.Map;
 
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -257,7 +261,8 @@ public class GameScreen implements Screen {
         gameHub.addComponent(livesComp);
         
         // Establecer valores iniciales
-        gameHub.setRecord(1500);
+        gameHub.updateRecord(1500);
+        gameHub.updateLives(3);
     }
     
     /**
@@ -363,16 +368,21 @@ public class GameScreen implements Screen {
                     character.setAnimationStateTime(playerState.getAnimationStateTime());
 
                     // Actualizar la animación del personaje
-                    try {
-                        Personajes.AnimationType animation = Personajes.AnimationType.valueOf(
-                            playerState.getCurrentAnimationName().toUpperCase()
-                        );
-                        character.setAnimation(animation);
-                    } catch (IllegalArgumentException e) {
-                        // Si el nombre de la animación no es válido, establecer la animación de inactividad
-                        Gdx.app.error("GameScreen", "Animacion desconocida: " + playerState.getCurrentAnimationName() + ", estableciendo IDLE.");
-                        character.setAnimation(Personajes.AnimationType.IDLE);
-                    }
+                try {
+                    Personajes.AnimationType animation = Personajes.AnimationType.valueOf(
+                        playerState.getCurrentAnimationName().toUpperCase()
+                    );
+                    character.setAnimation(animation);
+                } catch (IllegalArgumentException e) {
+                    // Si el nombre de la animación no es válido, establecer la animación de inactividad
+                    Gdx.app.error("GameScreen", "Animacion desconocida: " + playerState.getCurrentAnimationName() + ", estableciendo IDLE.");
+                    character.setAnimation(Personajes.AnimationType.IDLE);
+                }
+
+                // Actualizar los coleccionables del personaje
+                for (Map.Entry<CollectibleType, Integer> entry : playerState.getCollectibles().entrySet()) {
+                    character.setCollectibleCount(entry.getKey(), entry.getValue());
+                }
                 }
                 // Lógica de reconciliación para el jugador local en el cliente
                 else if (!isHost) {
@@ -394,6 +404,10 @@ public class GameScreen implements Screen {
                         // Si el nombre de la animación no es válido, establecer la animación de inactividad
                         Gdx.app.error("GameScreen", "Animacion desconocida: " + playerState.getCurrentAnimationName() + ", estableciendo IDLE.");
                         character.setAnimation(Personajes.AnimationType.IDLE);
+                    }
+                    // Actualizar los coleccionables del personaje local
+                    for (Map.Entry<CollectibleType, Integer> entry : playerState.getCollectibles().entrySet()) {
+                        character.setCollectibleCount(entry.getKey(), entry.getValue());
                     }
                 }
             }
@@ -418,6 +432,16 @@ public class GameScreen implements Screen {
                         obj.setId(objState.getId());
                         clientObjects.put(obj.getId(), obj);
                         Gdx.app.log("GameScreen", "Nuevo anillo creado: " + obj.getId());
+                    } else if ("Basura".equals(objState.getType())) {
+                        obj = new Objetos(objState.getX(), objState.getY(), new TextureRegion(game.getAssets().trashTexture)) {
+                            @Override
+                            public void actualizar(float delta) {
+                                // La basura no tiene animacion ni logica de actualizacion compleja
+                            }
+                        };
+                        obj.setId(objState.getId());
+                        clientObjects.put(obj.getId(), obj);
+                        Gdx.app.log("GameScreen", "Nueva basura creada: " + obj.getId());
                     }
                 }
 
@@ -533,6 +557,11 @@ public class GameScreen implements Screen {
         if (localPlayer != null) {
             cameraPosition.set(camera.position.x, camera.position.y);
             viewportSize.set(camera.viewportWidth, camera.viewportHeight);
+
+            // Actualizar el HUD con los valores del jugador local
+            gameHub.updateCollectibleCount(GameHub.ComponentType.RINGS, localPlayer.getCollectibleCount(CollectibleType.RINGS));
+            gameHub.updateCollectibleCount(GameHub.ComponentType.TRASH, localPlayer.getCollectibleCount(CollectibleType.TRASH));
+            // Puedes añadir aquí la lógica para actualizar vidas, récord, etc. si se gestionan por personaje
         }
         
         // Actualizar el hub con la posición de la cámara

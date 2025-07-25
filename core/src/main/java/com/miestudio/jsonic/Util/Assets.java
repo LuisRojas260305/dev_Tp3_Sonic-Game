@@ -1,6 +1,7 @@
 package com.miestudio.jsonic.Util;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -31,6 +32,7 @@ public class Assets {
     public Animation<TextureRegion> anilloAnimation;
     
     public TextureAtlas AtlasEgman;
+    public Texture trashTexture;
     
     public BitmapFont  hubFont;
     /**
@@ -45,6 +47,7 @@ public class Assets {
             objetosAtlas = new TextureAtlas(Gdx.files.internal(Constantes.OBJECT_PATCH + "Objetos.txt"));
             AtlasEgman = new TextureAtlas(Gdx.files.internal("Personajes/AtlasEgman.txt"));
             hubFont = new BitmapFont(Gdx.files.internal("ui/default.fnt"));
+            trashTexture = new Texture(Gdx.files.internal("ui/HubB.png"));
             
             Array<TextureRegion> framesAnillo = new Array<>();
             for (int i = 0; i < 5; i++) {
@@ -66,6 +69,7 @@ public class Assets {
         if (tailsAtlas != null) tailsAtlas.dispose();
         if (knucklesAtlas != null) knucklesAtlas.dispose();
         if (objetosAtlas != null) objetosAtlas.dispose();
-        AtlasEgman.dispose();
+        if (AtlasEgman != null) AtlasEgman.dispose();
+        if (trashTexture != null) trashTexture.dispose();
     }
 }

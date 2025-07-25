@@ -104,10 +104,6 @@ public class GameHub implements Disposable {
     
     private final Array<HubComponent> components = new Array<>();
     private float elapsedTime = 0;
-    private int rings = 0;
-    private int trash = 0;
-    private int record = 0;
-    private int lives = 3;
     public final BitmapFont systemFont;
 
     public GameHub() {
@@ -130,36 +126,19 @@ public class GameHub implements Disposable {
     
     public void update(float delta, Vector2 cameraPosition, Vector2 viewportSize) {
         elapsedTime += delta;
-        
+
         // Actualizar posiciones de los componentes
         for(HubComponent comp : components) {
             comp.updatePosition(cameraPosition, viewportSize);
         }
-        
+
         updateComponentValues();
     }
     
     private void updateComponentValues() {
         for(HubComponent comp : components) {
-            switch(comp.type) {
-                case TIME:
-                    comp.value = formatTime(elapsedTime);
-                    break;
-                case RINGS:
-                    comp.value = String.valueOf(rings);
-                    break;
-                case TRASH:
-                    comp.value = String.valueOf(trash);
-                    break;
-                case RECORD:
-                    comp.value = String.valueOf(record);
-                    break;
-                case LIVES:
-                    comp.value = String.valueOf(lives);
-                    // Cambiar color si quedan pocas vidas
-                    if(lives <= 1) comp.valueColor = Color.RED;
-                    else comp.valueColor = Color.WHITE;
-                    break;
+            if(comp.type == ComponentType.TIME) {
+                comp.value = formatTime(elapsedTime);
             }
         }
     }
@@ -175,14 +154,32 @@ public class GameHub implements Disposable {
             comp.render(batch);
         }
     }
-    
-    // Métodos para actualizar valores del juego
-    public void addRings(int count) { rings += count; }
-    public void addTrash(int count) { trash += count; }
-    public void setRecord(int value) { record = value; }
-    public void setLives(int value) { lives = value; }
-    public void loseLife() { lives = Math.max(0, lives - 1); }
-    public void gainLife() { lives++; }
+
+    public void updateCollectibleCount(ComponentType type, int count) {
+        HubComponent comp = getComponent(type);
+        if (comp != null) {
+            comp.value = String.valueOf(count);
+        }
+    }
+
+    public void updateLives(int lives) {
+        HubComponent comp = getComponent(ComponentType.LIVES);
+        if (comp != null) {
+            comp.value = String.valueOf(lives);
+            if (lives <= 1) {
+                comp.valueColor = Color.RED;
+            } else {
+                comp.valueColor = Color.WHITE;
+            }
+        }
+    }
+
+    public void updateRecord(int record) {
+        HubComponent comp = getComponent(ComponentType.RECORD);
+        if (comp != null) {
+            comp.value = String.valueOf(record);
+        }
+    }
     
     @Override
     public void dispose() {

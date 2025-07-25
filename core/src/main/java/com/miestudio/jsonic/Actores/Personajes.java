@@ -10,6 +10,10 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.miestudio.jsonic.Server.domain.InputState;
 import com.miestudio.jsonic.Util.CollisionManager;
 import com.miestudio.jsonic.Util.Constantes;
+import com.miestudio.jsonic.Util.CollectibleType;
+
+import java.util.EnumMap;
+import java.util.Map;
 
 
 /**
@@ -91,6 +95,8 @@ public abstract class Personajes extends Actor {
 
     private float predictedX;
     private float predictedY;
+
+    protected final Map<CollectibleType, Integer> collectibles = new EnumMap<>(CollectibleType.class);
 
     public abstract void useAbility();
     
@@ -373,5 +379,21 @@ public abstract class Personajes extends Actor {
      */
     public float getHeight() {
         return currentAnimation.getKeyFrame(0).getRegionHeight();
+    }
+
+    public void addCollectible(CollectibleType type) {
+        collectibles.put(type, getCollectibleCount(type) + 1);
+    }
+
+    public int getCollectibleCount(CollectibleType type) {
+        return collectibles.getOrDefault(type, 0);
+    }
+
+    public void setCollectibleCount(CollectibleType type, int count) {
+        collectibles.put(type, count);
+    }
+
+    public Map<CollectibleType, Integer> getCollectibles() {
+        return collectibles;
     }
 }

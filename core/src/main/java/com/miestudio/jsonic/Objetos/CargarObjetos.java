@@ -5,6 +5,9 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.Texture;
+import com.miestudio.jsonic.Util.Assets;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 
 
@@ -15,14 +18,16 @@ public class CargarObjetos {
     public Array<Objetos> objetos; /** Lista de todos los objetos activos en el juego. */
     private TextureAtlas atlasObjetos; /** Atlas de texturas para los objetos. */
     public Animation<TextureRegion> animacionAnillo; /** Animacion especifica para los anillos. */
+    private Texture basuraTexture; /** Textura para los objetos de basura. */
 
     /**
      * Constructor de CargarObjetos.
      * @param atlasObjetos El TextureAtlas que contiene las texturas de los objetos.
      */
-    public CargarObjetos(TextureAtlas atlasObjetos) {
+    public CargarObjetos(TextureAtlas atlasObjetos, Assets assets) {
         objetos = new Array<>();
         this.atlasObjetos = atlasObjetos;
+        this.basuraTexture = assets.trashTexture;
         cargarRecursos();
     }
 
@@ -54,6 +59,20 @@ public class CargarObjetos {
      */
     public void agregarAnillo(Anillo anillo) {
         objetos.add(anillo);
+    }
+
+    /**
+     * Agrega un nuevo objeto de basura al juego en las coordenadas especificadas.
+     * @param x Posicion X de la basura.
+     * @param y Posicion Y de la basura.
+     */
+    public void agregarBasura(float x, float y) {
+        objetos.add(new Objetos(x, y, new TextureRegion(basuraTexture)) {
+            @Override
+            public void actualizar(float delta) {
+                // La basura no tiene animacion ni logica de actualizacion compleja
+            }
+        });
     }
 
     /**
