@@ -197,7 +197,7 @@ public class GameScreen implements Screen {
         GameHub.HubComponent timeComp = new GameHub.HubComponent(
             GameHub.ComponentType.TIME,
             0.05f, 0.9f, // 5% desde izquierda, 90% desde abajo
-            120, 80,
+            160, 50,
             40,
             bgTexture,
             timeIcon,
@@ -207,8 +207,8 @@ public class GameScreen implements Screen {
         // Anillos (a la derecha del tiempo)
         GameHub.HubComponent ringsComp = new GameHub.HubComponent(
             GameHub.ComponentType.RINGS,
-            0.20f, 0.9f, // 20% desde izquierda, 90% desde abajo
-            120, 80,
+            0.05f, 0.8f, // 20% desde izquierda, 90% desde abajo
+            160, 50,
             40,
             bgTexture,
             ringsIcon,
@@ -218,8 +218,8 @@ public class GameScreen implements Screen {
         // Basura (a la derecha de anillos)
         GameHub.HubComponent trashComp = new GameHub.HubComponent(
             GameHub.ComponentType.TRASH,
-            0.35f, 0.9f, // 35% desde izquierda, 90% desde abajo
-            120, 80,
+            0.05f, 0.7f, // 35% desde izquierda, 90% desde abajo
+            160, 50,
             40,
             bgTexture,
             trashIcon,
@@ -229,8 +229,8 @@ public class GameScreen implements Screen {
         // Récord (arriba a la derecha)
         GameHub.HubComponent recordComp = new GameHub.HubComponent(
             GameHub.ComponentType.RECORD,
-            0.75f, 0.9f, // 75% desde izquierda, 90% desde abajo
-            120, 80,
+            0.05f, 0.6f, // 75% desde izquierda, 90% desde abajo
+            160, 50,
             40,
             bgTexture,
             recordIcon,
@@ -240,8 +240,8 @@ public class GameScreen implements Screen {
         // Vidas (a la izquierda del récord)
         GameHub.HubComponent livesComp = new GameHub.HubComponent(
             GameHub.ComponentType.LIVES,
-            0.60f, 0.9f, // 60% desde izquierda, 90% desde abajo
-            120, 80,
+            0.05f, 0.5f, // 60% desde izquierda, 90% desde abajo
+            160, 50,
             40,
             bgTexture,
             livesIcon,

@@ -85,20 +85,20 @@ public class GameHub implements Disposable {
             
             // Dibujar icono
             batch.draw(iconTexture,
-                      iconRect.x, iconRect.y,
+                      iconRect.x + 110, iconRect.y ,
                       iconRect.width, iconRect.height);
             
             // Dibujar etiqueta (arriba del rectángulo)
             font.setColor(labelColor);
             font.draw(batch, label, 
                      backgroundRect.x, 
-                     backgroundRect.y + backgroundRect.height + 20);
+                     backgroundRect.y + backgroundRect.height - 10);
             
             // Dibujar valor (centrado en el rectángulo)
             font.setColor(valueColor);
             font.draw(batch, value, 
-                     backgroundRect.x + backgroundRect.width/2 - 10, 
-                     backgroundRect.y + backgroundRect.height/2 + 10);
+                     backgroundRect.x + backgroundRect.width/2 - 5, 
+                     backgroundRect.y + backgroundRect.height/2 );
         }
     }
     
