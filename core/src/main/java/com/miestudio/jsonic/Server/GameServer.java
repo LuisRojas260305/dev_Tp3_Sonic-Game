@@ -40,10 +40,16 @@ public class GameServer {
     private final TiledMap map; /** El mapa de tiles del juego. */
     private volatile boolean running = false; /** Indica si el bucle principal del servidor esta en ejecucion. */
     private long sequenceNumber = 0; /** Numero de secuencia para el estado del juego, utilizado para la sincronizacion. */
-    private static final int TRASH_EVENT_THRESHOLD = 5; // Cantidad de basura para activar el evento
+    private static final int TRASH_EVENT_THRESHOLD = 50; // Cantidad de basura para activar el evento
     private final List<Vector2> treeSpawnPoints = new ArrayList<>();
     private final Map<Vector2, Boolean> treeSpawnPointsOccupancy = new HashMap<>(); // true si está ocupado
     private int treesOnMap = 0;
+    private final List<Vector2> trashSpawnPoints = new ArrayList<>();
+    private final Map<Vector2, Boolean> trashSpawnPointsOccupancy = new HashMap<>();
+    private float trashSpawnTimer = 0f;
+    private static final float INITIAL_TRASH_DELAY = 90f; // 1 minuto y 30 segundos
+    private static final float TRASH_SPAWN_INTERVAL = 2f; // 2 segundos
+    private boolean initialTrashSpawned = false;
     private final Array<Robot> activeRobots = new Array<>();
 
     /**
@@ -66,10 +72,29 @@ public class GameServer {
         this.cargarObjetos = new CargarObjetos(game.getAssets().objetosAtlas, game.getAssets());
         initializeCharacters();
         spawnGameObjects("Anillo", "SpawnObjetos");
-        spawnGameObjects("Basura", "SpawnObjetos");
+        initializeTrashSpawn();
         spawnGameObjects("Maquina", "SpawnEntidades");
         spawnGameObjects("Roca", "SpawnObjetos");
         initializeTreeSpawnPoints();
+    }
+
+    private void initializeTrashSpawn() {
+        List<Vector2> allTrashSpawns = MapUtil.findAllSpawnPoints(map, "SpawnObjetos", "Basura");
+        Collections.shuffle(allTrashSpawns);
+
+        int numToSpawn = allTrashSpawns.size() / 2; // 50% de la basura
+
+        for (int i = 0; i < allTrashSpawns.size(); i++) {
+            Vector2 spawnPoint = allTrashSpawns.get(i);
+            trashSpawnPoints.add(spawnPoint);
+            if (i < numToSpawn) {
+                spawnTrash(spawnPoint);
+                trashSpawnPointsOccupancy.put(spawnPoint, true);
+            } else {
+                trashSpawnPointsOccupancy.put(spawnPoint, false);
+            }
+        }
+        Gdx.app.log("GameServer", "Basura inicial spawneada: " + numToSpawn + ". Puntos de spawn de basura inicializados: " + trashSpawnPoints.size());
     }
 
     /**
@@ -135,15 +160,7 @@ public class GameServer {
                 gameObjects.put(anillo.getId(), anillo);
                 cargarObjetos.agregarObjeto(anillo);
             } else if ("Basura".equals(objectType)) {
-                Objetos basura = new Objetos(centeredX, finalY, new TextureRegion(game.getAssets().trashTexture)) {
-                    @Override
-                    public void actualizar(float delta) {
-                        // La basura no tiene animacion ni logica de actualizacion compleja
-                    }
-                };
-                basura.setId(nextObjectId++);
-                gameObjects.put(basura.getId(), basura);
-                cargarObjetos.agregarObjeto(basura);
+                // La basura ahora se spawnea a través de initializeTrashSpawn y spawnTrash
             } else if ("Maquina".equals(objectType)) {
                 MaquinaReciclaje maquina = new MaquinaReciclaje(centeredX, finalY, game.getAssets().maquinaAtlas);
                 maquina.setId(nextObjectId++);
@@ -283,6 +300,21 @@ public class GameServer {
 
         // Actualizar objetos
         cargarObjetos.actualizar(delta);
+
+        // Lógica de aparición gradual de basura
+        trashSpawnTimer += delta;
+        if (!initialTrashSpawned) {
+            if (trashSpawnTimer >= INITIAL_TRASH_DELAY) {
+                initialTrashSpawned = true;
+                trashSpawnTimer = 0; // Reiniciar para el intervalo de 2s
+                Gdx.app.log("GameServer", "Inicio de aparición gradual de basura.");
+            }
+        } else {
+            if (trashSpawnTimer >= TRASH_SPAWN_INTERVAL) {
+                spawnRandomTrash();
+                trashSpawnTimer = 0; // Reiniciar para el próximo intervalo
+            }
+        }
 
         // Detectar colisiones
         detectCollisions();
@@ -526,6 +558,14 @@ public class GameServer {
                     break;
                 }
             }
+        } else if (removedObject != null && removedObject.getTexture().getTexture() == game.getAssets().trashTexture) {
+            // Si el objeto removido es basura, liberar su punto de spawn
+            for (Map.Entry<Vector2, Boolean> entry : trashSpawnPointsOccupancy.entrySet()) {
+                if (entry.getKey().epsilonEquals(removedObject.x, removedObject.y, 1.0f)) {
+                    freeTrashSpawnPoint(entry.getKey());
+                    break;
+                }
+            }
         }
         // Eliminar también de cargarObjetos.objetos
         for (int i = cargarObjetos.objetos.size - 1; i >= 0; i--) {
@@ -533,6 +573,67 @@ public class GameServer {
                 cargarObjetos.objetos.removeIndex(i);
                 break;
             }
+        }
+    }
+
+    private void spawnTrash(Vector2 position) {
+        float objectWidth = game.getAssets().trashTexture.getWidth();
+        float objectHeight = game.getAssets().trashTexture.getHeight();
+
+        MapLayer layer = map.getLayers().get("SpawnObjetos");
+        float tileWidth = 32;
+        float tileHeight = 32;
+
+        if (layer instanceof TiledMapTileLayer) {
+            TiledMapTileLayer tileLayer = (TiledMapTileLayer) layer;
+            tileWidth = tileLayer.getTileWidth();
+            tileHeight = tileLayer.getTileHeight();
+        }
+
+        float centeredX = position.x + (tileWidth - objectWidth) / 2;
+        float finalY;
+
+        // Basura en la base del tile
+        finalY = position.y;
+
+        // Calcular la posición Y final para que el objeto esté sobre el suelo
+        Rectangle tempRect = new Rectangle(centeredX, finalY, objectWidth, objectHeight);
+        float groundY = collisionManager.getGroundY(tempRect);
+        finalY = (groundY >= 0) ? groundY : finalY;
+
+        Objetos basura = new Objetos(centeredX, finalY, new TextureRegion(game.getAssets().trashTexture)) {
+            @Override
+            public void actualizar(float delta) {
+                // La basura no tiene animacion ni logica de actualizacion compleja
+            }
+        };
+        basura.setId(nextObjectId++);
+        gameObjects.put(basura.getId(), basura);
+        cargarObjetos.agregarObjeto(basura);
+        Gdx.app.log("GameServer", "Basura spawneada en " + position);
+    }
+
+    private void freeTrashSpawnPoint(Vector2 position) {
+        if (trashSpawnPointsOccupancy.containsKey(position)) {
+            trashSpawnPointsOccupancy.put(position, false);
+            Gdx.app.log("GameServer", "Punto de spawn de basura liberado: " + position);
+        }
+    }
+
+    private void spawnRandomTrash() {
+        List<Vector2> availableSpawns = new ArrayList<>();
+        for (Map.Entry<Vector2, Boolean> entry : trashSpawnPointsOccupancy.entrySet()) {
+            if (!entry.getValue()) {
+                availableSpawns.add(entry.getKey());
+            }
+        }
+
+        if (!availableSpawns.isEmpty()) {
+            Vector2 spawnPoint = availableSpawns.get(new Random().nextInt(availableSpawns.size()));
+            spawnTrash(spawnPoint);
+            trashSpawnPointsOccupancy.put(spawnPoint, true);
+        } else {
+            Gdx.app.log("GameServer", "No hay puntos de spawn de basura disponibles para la aparición gradual.");
         }
     }
 

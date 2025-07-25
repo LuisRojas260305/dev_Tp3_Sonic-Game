@@ -421,7 +421,14 @@ public abstract class Personajes extends Actor {
     }
 
     public void addCollectible(CollectibleType type) {
-        collectibles.put(type, getCollectibleCount(type) + 1);
+        if (type == CollectibleType.TRASH) {
+            int currentTrash = getCollectibleCount(type);
+            if (currentTrash < 50) {
+                collectibles.put(type, currentTrash + 1);
+            }
+        } else {
+            collectibles.put(type, getCollectibleCount(type) + 1);
+        }
     }
 
     public int getCollectibleCount(CollectibleType type) {
