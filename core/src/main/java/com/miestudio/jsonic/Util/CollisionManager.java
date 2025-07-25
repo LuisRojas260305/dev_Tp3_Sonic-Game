@@ -118,7 +118,7 @@ public class CollisionManager {
      * Verifica si un rectangulo dado colisiona con alguna de las formas de colision del mapa
      * o con los limites del mapa.
      *
-     * @param rect El rectangulo a verificar.
+     * @param characterRect El rectangulo a verificar.
      * @return true si hay colision, false en caso contrario.
      */
     public boolean collides(Rectangle characterRect) {

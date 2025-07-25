@@ -1,4 +1,8 @@
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+tasks.withType(Javadoc) {
+    options.encoding = 'UTF-8'
+}
+
 eclipse.project.name = appName + '-core'
 
 dependencies {
