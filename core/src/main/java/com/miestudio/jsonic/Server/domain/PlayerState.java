@@ -44,6 +44,7 @@ public class PlayerState implements Serializable {
     private boolean isAvispa; /** Indica si este PlayerState representa una avispa. */
     private float targetX, targetY; /** Posición objetivo para la avispa (si es una avispa). */
     private boolean active; /** Indica si el personaje está activo (para avispas y otros personajes temporales). */
+    private int lives; /** El número de vidas restantes del jugador. */
     /**
      * Constructor para crear un nuevo PlayerState.
      *
@@ -55,7 +56,7 @@ public class PlayerState implements Serializable {
      * @param animationStateTime   El tiempo de estado de la animacion actual del jugador.
      * @param characterType        El tipo de personaje que el jugador esta usando.
      */
-    public PlayerState(int playerId, float x, float y, boolean facingRight, String currentAnimationName, float animationStateTime, String characterType, boolean flying, Map<CollectibleType, Integer> collectibles, boolean isAvispa, float targetX, float targetY, boolean active) {
+    public PlayerState(int playerId, float x, float y, boolean facingRight, String currentAnimationName, float animationStateTime, String characterType, boolean flying, Map<CollectibleType, Integer> collectibles, boolean isAvispa, float targetX, float targetY, boolean active, int lives) {
         this.playerId = playerId;
         this.x = x;
         this.y = y;
@@ -69,6 +70,7 @@ public class PlayerState implements Serializable {
         this.targetX = targetX;
         this.targetY = targetY;
         this.active = active;
+        this.lives = lives;
     }
 
     /**
@@ -156,5 +158,9 @@ public class PlayerState implements Serializable {
 
     public boolean isActive() {
         return active;
+    }
+
+    public int getLives() {
+        return lives;
     }
 }

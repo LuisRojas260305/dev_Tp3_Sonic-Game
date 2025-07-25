@@ -15,6 +15,7 @@ import com.miestudio.jsonic.Objetos.MaquinaReciclaje;
 import com.miestudio.jsonic.Objetos.Arbol;
 import com.miestudio.jsonic.Server.domain.InputState;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.utils.Array;
 import com.miestudio.jsonic.Util.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,6 +44,7 @@ public class GameServer {
     private final List<Vector2> treeSpawnPoints = new ArrayList<>();
     private final Map<Vector2, Boolean> treeSpawnPointsOccupancy = new HashMap<>(); // true si está ocupado
     private int treesOnMap = 0;
+    private final Array<Robot> activeRobots = new Array<>();
 
     /**
      * Constructor de GameServer.
@@ -66,6 +68,7 @@ public class GameServer {
         spawnGameObjects("Anillo", "SpawnObjetos");
         spawnGameObjects("Basura", "SpawnObjetos");
         spawnGameObjects("Maquina", "SpawnObjetos");
+        spawnGameObjects("Roca", "SpawnObjetos");
         initializeTreeSpawnPoints();
     }
 
@@ -146,6 +149,16 @@ public class GameServer {
                 maquina.setId(nextObjectId++);
                 gameObjects.put(maquina.getId(), maquina);
                 cargarObjetos.agregarObjeto(maquina);
+            } else if ("Roca".equals(objectType)) {
+                Objetos roca = new Objetos(centeredX, finalY, new TextureRegion(game.getAssets().rockTexture)) {
+                    @Override
+                    public void actualizar(float delta) {
+                        // La roca no tiene animación ni lógica de actualización compleja
+                    }
+                };
+                roca.setId(nextObjectId++);
+                gameObjects.put(roca.getId(), roca);
+                cargarObjetos.agregarObjeto(roca);
             }
         }
         Gdx.app.log("GameServer", "Se han creado " + spawnPoints.size() + " " + objectType + "s.");
@@ -178,7 +191,7 @@ public class GameServer {
                     character = new Sonic(playerId, assets.sonicAtlas);
                     break;
                 case "Tails":
-                    character = new Tails(playerId, assets.tailsAtlas);
+                    character = new Tails(playerId, assets.tailsAtlas, this);
                     break;
                 case "Knuckles":
                     character = new Knuckles(playerId, assets.knucklesAtlas);
@@ -196,6 +209,7 @@ public class GameServer {
                 float groundY = collisionManager.getGroundY(new Rectangle(spawn.x, spawn.y, character.getWidth(), character.getHeight()));
                 character.setPosition(spawn.x, groundY >= 0 ? groundY : spawn.y);
                 character.setPreviousPosition(character.getX(), character.getY());
+                character.setLives(3); // Establecer vidas iniciales
             }
         }
     }
@@ -289,17 +303,13 @@ public class GameServer {
                 (character instanceof EAvispa), // isAvispa
                 (character instanceof EAvispa) ? ((EAvispa) character).getTargetPosition().x : 0f, // targetX
                 (character instanceof EAvispa) ? ((EAvispa) character).getTargetPosition().y : 0f, // targetY
-                character.estaActivo() // active
+                character.estaActivo(), // active
+                character.getLives() // lives
             ));
         }
 
         for (Personajes character : characters.values()) {
-            if (character instanceof Tails) {
-                Tails tails = (Tails) character;
-                for (Robot robot : tails.getActiveRobots()) {
-                    robot.update(delta, collisionManager);
-                }
-            } else if (character instanceof EAvispa) {
+            if (character instanceof EAvispa) {
                 EAvispa avispa = (EAvispa) character;
                 avispa.update(delta, collisionManager);
                 if (!avispa.estaActivo()) {
@@ -307,6 +317,15 @@ public class GameServer {
                     spawnTree(avispa.getTargetPosition());
                     characters.remove(avispa.getPlayerId()); // Eliminar avispa del mapa de personajes
                 }
+            }
+        }
+
+        // Actualizar robots activos
+        for (int i = activeRobots.size - 1; i >= 0; i--) {
+            Robot robot = activeRobots.get(i);
+            robot.update(delta, collisionManager);
+            if (!robot.isActive()) {
+                activeRobots.removeIndex(i);
             }
         }
         
@@ -348,6 +367,15 @@ public class GameServer {
                     obj.estaActivo(),
                     "Arbol",
                     0 // Los árboles no tienen totalCollectedTrash
+                ));
+            } else if (obj.getTexture().getTexture() == game.getAssets().rockTexture) {
+                objectStates.add(new ObjectState(
+                    obj.getId(),
+                    obj.x,
+                    obj.y,
+                    obj.estaActivo(),
+                    "Roca",
+                    0 // Las rocas no tienen totalCollectedTrash
                 ));
             }
         }
@@ -396,10 +424,18 @@ public class GameServer {
                             for (int i = 0; i < eventsTriggered; i++) {
                                 Gdx.app.log("GameServer", "¡Evento de máquina de reciclaje activado! Basura total: " + maquina.getTotalCollectedTrash());
                                 spawnAvispa();
+                                character.setLives(character.getLives() + 1); // Incrementar vidas
+                                Gdx.app.log("GameServer", "Vidas de jugador " + character.getPlayerId() + " aumentadas a " + character.getLives());
                             }
                             // Reiniciar el contador de la máquina para el próximo ciclo del evento
                             maquina.addTrash(- (eventsTriggered * TRASH_EVENT_THRESHOLD)); // Restar la basura que activó el evento
                             maquina.addTrash(remainingTrash); // Añadir el remanente
+                        }
+                    } else if (obj.getTexture().getTexture() == game.getAssets().rockTexture) {
+                        // Lógica para la interacción con la roca (ej. Knuckles la destruye)
+                        if (character instanceof Knuckles && ((Knuckles) character).isAbilityActive()) {
+                            obj.setActivo(false);
+                            Gdx.app.log("GameServer", "Roca con ID: " + obj.getId() + " destruida por Knuckles.");
                         }
                     }
                 }
@@ -463,5 +499,62 @@ public class GameServer {
 
         // Marcar el punto de spawn como desocupado después de que el árbol aparece
         treeSpawnPointsOccupancy.put(position, false);
+    }
+
+    public void spawnRobot(float x, float y, boolean facingRight, float speed, TextureRegion texture) {
+        // Encontrar la máquina de reciclaje más cercana para el robot
+        MaquinaReciclaje nearestMachine = getRecyclingMachine();
+        if (nearestMachine == null) {
+            Gdx.app.error("GameServer", "No se encontró una máquina de reciclaje para el robot.");
+            return;
+        }
+
+        Robot robot = new Robot(x, y, facingRight, speed, texture, this, null, nearestMachine);
+        activeRobots.add(robot);
+        Gdx.app.log("GameServer", "Robot spawneado en (" + x + ", " + y + ")");
+    }
+
+    public Objetos getNearestTrash(Vector2 position) {
+        Objetos nearestTrash = null;
+        float minDist = Float.MAX_VALUE;
+        for (Objetos obj : gameObjects.values()) {
+            if (obj.estaActivo() && obj.getTexture().getTexture() == game.getAssets().trashTexture) {
+                float dist = Vector2.dst(position.x, position.y, obj.x, obj.y);
+                if (dist < minDist) {
+                    minDist = dist;
+                    nearestTrash = obj;
+                }
+            }
+        }
+        return nearestTrash;
+    }
+
+    public MaquinaReciclaje getRecyclingMachine() {
+        for (Objetos obj : gameObjects.values()) {
+            if (obj instanceof MaquinaReciclaje) {
+                return (MaquinaReciclaje) obj;
+            }
+        }
+        return null;
+    }
+
+    public void removeGameObject(int id) {
+        gameObjects.remove(id);
+        // Eliminar también de cargarObjetos.objetos
+        for (int i = cargarObjetos.objetos.size - 1; i >= 0; i--) {
+            if (cargarObjetos.objetos.get(i).getId() == id) {
+                cargarObjetos.objetos.removeIndex(i);
+                break;
+            }
+        }
+    }
+
+    public void addTrashToMachine(MaquinaReciclaje machine, int amount) {
+        machine.addTrash(amount);
+        Gdx.app.log("GameServer", "Robot entregó " + amount + " de basura a la máquina. Total: " + machine.getTotalCollectedTrash());
+    }
+
+    public Array<Robot> getActiveRobots() {
+        return activeRobots;
     }
 }

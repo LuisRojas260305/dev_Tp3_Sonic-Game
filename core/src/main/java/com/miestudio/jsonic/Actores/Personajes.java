@@ -97,6 +97,10 @@ public abstract class Personajes extends Actor {
     private float predictedY;
 
     public boolean activo = true;
+    protected int lives = 3; /** Contador de vidas para habilidades. */
+
+    public int getLives() { return lives; }
+    public void setLives(int lives) { this.lives = lives; }
 
     protected final Map<CollectibleType, Integer> collectibles = new EnumMap<>(CollectibleType.class);
 
@@ -196,8 +200,9 @@ public abstract class Personajes extends Actor {
      * @param input El estado de los botones del jugador.
      */
     protected void handleAbilityInput(InputState input) {
-        if (input.isAbility() && !isAbilityActive && isGrounded) {
+        if (input.isAbility() && !isAbilityActive && isGrounded && lives > 0) {
             useAbility();
+            lives--; // Decrementar vidas al usar la habilidad
         }
     }
 

@@ -1,34 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="50" height="20" tilewidth="32" tileheight="32" infinite="0" nextlayerid="7" nextobjectid="1">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="150" height="20" tilewidth="32" tileheight="32" infinite="0" nextlayerid="7" nextobjectid="1">
  <tileset firstgid="1" source="../Tilesets/TileSet.tsx"/>
- <layer id="4" name="SpawnEntidades" width="50" height="20">
+ <layer id="6" name="Fondo" width="150" height="20">
   <data encoding="base64" compression="zlib">
-   eJztziEKACAQBEB/YlaT/v9xlgti0iTCDCwbDo5NCQAA4H/j9YALObIq0T26bvd28IO/TeNqAV4=
+   eJzt0qENADAIAEFE2X/l2goEpI7cJb/BRwAAAAAAAAAAwH6nCH5lI3h1nvEVU54BNrkMAgDJ
   </data>
  </layer>
- <layer id="5" name="SpawnObjetos" width="50" height="20">
+ <layer id="1" name="Capa de patrones 1" width="150" height="20">
   <data encoding="base64" compression="zlib">
-   eJztz8kJACAMRFE7sQSX/ovzYkDEXYIg/8Ecs4wxAAAAAH7hOxHuItq/7vaoxYWb5dzO/ZGTHjan1SPMSuQ52aHRA28kZLYMzQ==
+   eJzt2d0OwiAMhmFi5u7/ko0HJKRpRztxK+N9ku/IsR8oMLUUAAAAAACe7dWkZ2+itdcij8ccPPVQybr4tt2aRM5VvTvJSKv/p/M+az1mK3obbW2RrDrYi6+951yR+7nKLPU/Un1OuX7IMdH65syak7F/2z20+qUms9TzVaw5HBnnWede++xyT6r78uhrYS2Rd7N/7qfWd487WXNPfs7cGcvqz1HviFnW/4z3tJqjWrpzXvd+k9HeKzEnz5p2dIy2R1nZnJHXxRrkeEfrBQCy8+6XhETS+8+LkDP5AMbdB68=
   </data>
  </layer>
- <layer id="6" name="SpanwEgman" width="50" height="20">
+ <layer id="3" name="SpawnEntidades" width="150" height="20" visible="0">
   <data encoding="base64" compression="zlib">
-   eJztwTEBAAAAwqD1T20MH6AAAACAtwEPoAAB
+   eJztzqENACAQBEGqIQEU9F8c5hWaPCGZMWtOXCkAAAAAAAAAAACQZ70+wNdatEdHdB67mnMHgMs2oooBCA==
   </data>
  </layer>
- <layer id="3" name="Colisiones" width="50" height="20">
+ <layer id="4" name="SpawnObjetos" width="150" height="20" visible="0">
   <data encoding="base64" compression="zlib">
-   eJzt0kEJAAAIBEHj2D+hFeReIjOwDbYKAADY6CC4LHn6Yl8MAm4J2Q==
+   eJztmEsOwyAMRHOTrrpO7n+6ripZlo3HfAIk8yRUBWwwYQA3x0EIIYQQQkieU5QW31Ihe5FZN2ut/7+XKKX+PL1cQVlRX2/Sf+1c5dpZPrpePl9OX1Yfray0dpb+n4i3/z09SDvto/vtccf1INPfG86RkUTvrmYf7bD39Jy1juUeOQ2bmvGeoNMnzGE0lo7uuJMyOeRKOZi+u57KrPdujZeJJbofvNxrRD6AxK3zYS/XmaH9Gg1EPq3tPUDH1m2RjTcWEkdJL63jtJLZe4jtCF2N9m8BeWeofWST1WX0XWYU3hkf2ZVsVyO7F+6KJWsjn0foBZn/rDtwRfS+KbV7NjNZaR2pq/7s9m0zOtNKOTkKeo9l84HINpOvRXHUEOXZaDyWjrL/ldA2JA9BcndEV181H623jxGLrJf2NXV6DK8t66vnYsVRAzLHUr0Vt7f2qH9p3VDfvw4QXRFCyC78ABLTUH4=
   </data>
  </layer>
- <layer id="1" name="Capa1" width="50" height="20">
+ <layer id="5" name="Egman" width="150" height="20" visible="0">
   <data encoding="base64" compression="zlib">
-   eJztw4EJAAAIA6AR9P/L/bEUTAAAAPhoSm7JA+k0AV8=
+   eJzt1UkOgCAMAEAepP7/eZ5NxEQCUuzMFQJdaCgFiGifHQBdtPSxR+/fnnG3/+s3GCGGGWo5tub+h95n6HsvajXeyFms7Tka7ySGledye1iL8F9wlbH+GXMGAAAAAAAAyOgEMWUEkw==
   </data>
  </layer>
- <layer id="2" name="Decoracion" width="50" height="20">
+ <layer id="2" name="Colisiones" width="150" height="20" visible="0">
   <data encoding="base64" compression="zlib">
-   eJztzUEKwCAMRNHs2tpK9f6X7RQSkKCL7rr4DwZB48QMAAAAAPDV5uehnEpXdr+7lZbmYjYri94wdpnvmv2N3e+OS6mLt9yP/3gA4QcA6w==
+   eJzt2OsKhCAQhmHvpT97/1e4LIswyDceKk3zfWBgg8asHRspBAAAAAAA3u1jouQwofJVpOdjDTX1EKV1kea2jGVzvLwz442g6v/tau/VnqNy1LtFjaGOj1CXr+bjzb91vJ52rSv12+s/ufza6832fG0Pja7U5Cz1PIq3hlv+51XXnr333vPfra7w5+35lZ79tGUeo5TW3pk9C8q853nXHvHpuopmnNNucrX05LoufZNR+0qsqeadljtH9airkV4Xe2j9NkzvArCau/slQfwC6OELV3o0qQ==
   </data>
  </layer>
 </map>

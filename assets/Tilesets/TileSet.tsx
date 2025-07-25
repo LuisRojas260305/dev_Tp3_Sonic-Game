@@ -7,6 +7,24 @@
    <property name="To" value="Arbol"/>
   </properties>
  </tile>
+ <tile id="34">
+  <properties>
+   <property name="Colision" type="bool" value="true"/>
+   <property name="Plataforma" type="bool" value="true"/>
+  </properties>
+ </tile>
+ <tile id="36">
+  <properties>
+   <property name="Spawn" type="bool" value="true"/>
+   <property name="To" value="Montaña"/>
+  </properties>
+ </tile>
+ <tile id="37">
+  <properties>
+   <property name="Spawn" type="bool" value="true"/>
+   <property name="To" value="Robot"/>
+  </properties>
+ </tile>
  <tile id="39">
   <properties>
    <property name="Colision" type="bool" value="true"/>
@@ -30,8 +48,23 @@
    <property name="To" value="Knuckles"/>
   </properties>
  </tile>
+ <tile id="43">
+  <properties>
+   <property name="Fin" type="bool" value="true"/>
+   <property name="Spawn" type="bool" value="true"/>
+   <property name="To" value="Egman"/>
+  </properties>
+ </tile>
+ <tile id="44">
+  <properties>
+   <property name="Recorrido" type="bool" value="true"/>
+   <property name="Spawn" type="bool" value="true"/>
+   <property name="To" value="Egman"/>
+  </properties>
+ </tile>
  <tile id="45">
   <properties>
+   <property name="Inicio" type="bool" value="true"/>
    <property name="Spawn" type="bool" value="true"/>
    <property name="To" value="Egman"/>
   </properties>

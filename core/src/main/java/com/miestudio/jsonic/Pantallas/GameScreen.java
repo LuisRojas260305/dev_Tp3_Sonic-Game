@@ -291,7 +291,7 @@ public class GameScreen implements Screen {
                 character = new Sonic(playerId, assets.sonicAtlas);
                 break;
             case "Tails":
-                character = new Tails(playerId, assets.tailsAtlas);
+                character = new Tails(playerId, assets.tailsAtlas, game.networkManager.getGameServer());
                 break;
             case "Knuckles":
                 character = new Knuckles(playerId, assets.knucklesAtlas);
@@ -386,6 +386,7 @@ public class GameScreen implements Screen {
                 for (Map.Entry<CollectibleType, Integer> entry : playerState.getCollectibles().entrySet()) {
                     character.setCollectibleCount(entry.getKey(), entry.getValue());
                 }
+                character.setLives(playerState.getLives()); // Sincronizar vidas
                 } else if (playerState.isAvispa()) {
                     // Si es una avispa, actualizar su estado
                     if (!characters.containsKey(playerId)) {
@@ -473,6 +474,16 @@ public class GameScreen implements Screen {
                         obj.setId(objState.getId());
                         clientObjects.put(obj.getId(), obj);
                         Gdx.app.log("GameScreen", "Nuevo Arbol creado: " + obj.getId());
+                    } else if ("Roca".equals(objState.getType())) {
+                        obj = new Objetos(objState.getX(), objState.getY(), new TextureRegion(game.getAssets().rockTexture)) {
+                            @Override
+                            public void actualizar(float delta) {
+                                // La roca no tiene animación ni lógica de actualización compleja
+                            }
+                        };
+                        obj.setId(objState.getId());
+                        clientObjects.put(obj.getId(), obj);
+                        Gdx.app.log("GameScreen", "Nueva Roca creada: " + obj.getId());
                     }
                 }
 
@@ -535,19 +546,16 @@ public class GameScreen implements Screen {
     
     private void renderRobots() {
         batch.begin();
-        for (Personajes character : characters.values()) {
-            if (character instanceof Tails) {
-                Tails tails = (Tails) character;
-                    for (Robot robot : tails.getActiveRobots()) {
-                        TextureRegion frame = robot.getTexture();
-                        if (!robot.isFacingRight() && !frame.isFlipX()) {
-                            frame.flip(true, false);
-                        } else if (robot.isFacingRight() && frame.isFlipX()) {
-                            frame.flip(true, false);
-                        }
-                        batch.draw(frame, robot.getX(), robot.getY());
-                    }
-                
+        // Obtener la lista de robots activos del GameServer
+        if (game.networkManager.getGameServer() != null) {
+            for (Robot robot : game.networkManager.getGameServer().getActiveRobots()) {
+                TextureRegion frame = robot.getTexture();
+                if (!robot.isFacingRight() && !frame.isFlipX()) {
+                    frame.flip(true, false);
+                } else if (robot.isFacingRight() && frame.isFlipX()) {
+                    frame.flip(true, false);
+                }
+                batch.draw(frame, robot.getX(), robot.getY());
             }
         }
         batch.end();
@@ -592,7 +600,7 @@ public class GameScreen implements Screen {
             // Actualizar el HUD con los valores del jugador local
             gameHub.updateCollectibleCount(GameHub.ComponentType.RINGS, localPlayer.getCollectibleCount(CollectibleType.RINGS));
             gameHub.updateCollectibleCount(GameHub.ComponentType.TRASH, localPlayer.getCollectibleCount(CollectibleType.TRASH));
-            // Puedes añadir aquí la lógica para actualizar vidas, récord, etc. si se gestionan por personaje
+            gameHub.updateLives(localPlayer.getLives()); // Actualizar vidas en el HUD
         }
         
         // Actualizar el hub con la posición de la cámara

@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 import com.miestudio.jsonic.Server.domain.InputState;
 import com.miestudio.jsonic.Util.CollisionManager;
+import com.miestudio.jsonic.Server.GameServer;
 
 public class Tails extends Personajes {
     private TextureAtlas tailsAtlas;
@@ -29,13 +30,16 @@ public class Tails extends Personajes {
     private float abilityActiveTimer = 0f;
     private static final float ABILITY_DURATION = 0.5f; // 0.5 segundos dura la animación de crear robot
     
-    public Tails(int playerId, TextureAtlas atlas) {
+    public Tails(int playerId, TextureAtlas atlas, GameServer gameServer) {
         this.playerId = playerId;
         this.tailsAtlas = atlas;
+        this.gameServer = gameServer;
         cargarAnimaciones();
         currentAnimation = idleAnimation;
         setAbilityAnimation(robotAnimation);
     }
+
+    private GameServer gameServer; // Añadir esta línea
     
     private void cargarAnimaciones() {
         // Animación idle
@@ -134,6 +138,9 @@ public class Tails extends Personajes {
         // Si está en el aire y no volando, mostrar animación de caída
         if (!isGrounded && !isFlying && !isAbilityActive) {
             setCurrentAnimation(fallAnimation);
+        } else if (isGrounded && isFlying) {
+            // Si aterriza mientras vuela, detener el vuelo
+            stopFlying();
         }
     }
 
@@ -215,17 +222,10 @@ public class Tails extends Personajes {
             stateTime = 0f;
             abilityActiveTimer = ABILITY_DURATION;
             
-            // Crear nuevo robot independiente
-            TextureRegion robotTexture = robotAnimation.getKeyFrame(0);
-            Robot newRobot = new Robot(
-                this.x + (facingRight ? 30 : -30), // Aparece al lado de Tails
-                this.y,
-                this.facingRight,
-                this.moveSpeed * 1.5f,
-                robotTexture
-            );
-            
-            activeRobots.add(newRobot);
+            // Notificar al GameServer para que spawnee un robot
+            if (gameServer != null) {
+                gameServer.spawnRobot(this.x, this.y, this.facingRight, this.moveSpeed * 1.5f, robotAnimation.getKeyFrame(0));
+            }
             robotCooldown = ROBOT_COOLDOWN_TIME;
         }
     }
@@ -240,6 +240,7 @@ public class Tails extends Personajes {
     public void stopFlying() {
         if (isFlying) {
             isFlying = false;
+            flyTime = 0f; // Reiniciar el tiempo de vuelo al detenerse
         }
     }
     

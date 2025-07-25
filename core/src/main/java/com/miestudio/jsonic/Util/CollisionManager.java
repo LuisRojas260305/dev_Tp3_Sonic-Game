@@ -3,6 +3,7 @@ package com.miestudio.jsonic.Util;
 import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.objects.*;
+import com.badlogic.gdx.maps.MapProperties;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
@@ -14,6 +15,17 @@ import com.badlogic.gdx.utils.Array;
  * y la determinacion de si un personaje esta en el suelo.
  */
 public class CollisionManager {
+
+    public static class CollisionShape {
+        public Shape2D shape;
+        public boolean isPlatform;
+
+        public CollisionShape(Shape2D shape, boolean isPlatform) {
+            this.shape = shape;
+            this.isPlatform = isPlatform;
+        }
+    }
+
     private static final float FEET_SENSOR_Y_OFFSET_GROUNDED = -10f;
     /**
      * Desplazamiento Y para el sensor de pies al verificar si esta en el suelo.
@@ -31,7 +43,7 @@ public class CollisionManager {
      * Altura del sensor de pies al obtener la altura del suelo.
      */
 
-    private Array<Shape2D> collisionShapes;
+    private Array<CollisionShape> collisionShapes;
     /**
      * Coleccion de formas 2D que representan las areas de colision.
      */
@@ -58,7 +70,7 @@ public class CollisionManager {
         if (layer != null) {
             for (MapObject object : layer.getObjects()) {
                 if (object instanceof RectangleMapObject) {
-                    collisionShapes.add(((RectangleMapObject) object).getRectangle());
+                    collisionShapes.add(new CollisionShape(((RectangleMapObject) object).getRectangle(), false)); // Por defecto no es plataforma
                 }
             }
         }
@@ -83,16 +95,11 @@ public class CollisionManager {
 
                 if (cell == null) continue;
 
-                Object collisionProp = cell.getTile().getProperties().get("Colision");
-                boolean colision = false;
+                MapProperties props = cell.getTile().getProperties();
+                boolean isCollision = props.get("Colision", false, Boolean.class);
+                boolean isPlatform = props.get("Plataforma", false, Boolean.class);
 
-                if (collisionProp instanceof Boolean) {
-                    colision = (Boolean) collisionProp;
-                } else if (collisionProp instanceof String) {
-                    colision = Boolean.parseBoolean((String) collisionProp);
-                }
-
-                if (colision) {
+                if (isCollision) {
 
                     Rectangle tileRect = new Rectangle(
                         x * layer.getTileWidth(),
@@ -101,7 +108,7 @@ public class CollisionManager {
                         layer.getTileHeight()
                     );
 
-                    collisionShapes.add(tileRect);
+                    collisionShapes.add(new CollisionShape(tileRect, isPlatform));
                 }
             }
         }
@@ -114,18 +121,30 @@ public class CollisionManager {
      * @param rect El rectangulo a verificar.
      * @return true si hay colision, false en caso contrario.
      */
-    public boolean collides(Rectangle rect) {
+    public boolean collides(Rectangle characterRect) {
         // Verificar bordes del mapa
-        if (rect.x < 0 || rect.y < 0 ||
-            rect.x + rect.width > mapWidth ||
-            rect.y + rect.height > mapHeight) {
+        if (characterRect.x < 0 || characterRect.y < 0 ||
+            characterRect.x + characterRect.width > mapWidth ||
+            characterRect.y + characterRect.height > mapHeight) {
             return true;
         }
 
         // Verificar colisiones con objetos
-        for (Shape2D shape : collisionShapes) {
-            if (shape instanceof Rectangle) {
-                if (rect.overlaps((Rectangle) shape)) return true;
+        for (CollisionShape collisionShape : collisionShapes) {
+            if (collisionShape.shape instanceof Rectangle) {
+                Rectangle collisionRect = (Rectangle) collisionShape.shape;
+                if (characterRect.overlaps(collisionRect)) {
+                    if (collisionShape.isPlatform) {
+                        // Si es una plataforma, solo colisiona si el personaje está cayendo sobre ella
+                        // (la parte inferior del personaje está por encima de la parte superior de la plataforma)
+                        // o si ya está encima (para evitar que la atraviese al caer)
+                        if (characterRect.y >= collisionRect.y + collisionRect.height - 5) { // Pequeño umbral
+                            return true; // Colisión desde arriba o ya encima
+                        }
+                    } else {
+                        return true; // Colisión con un bloque sólido
+                    }
+                }
             }
         }
         return false;
@@ -168,14 +187,23 @@ public class CollisionManager {
         float maxGroundY = -1; // Valor inicial
 
         // Verificar colisiones con objetos
-        for (Shape2D shape : collisionShapes) {
-            if (shape instanceof Rectangle) {
-                Rectangle rect = (Rectangle) shape;
-                if (feetSensor.overlaps(rect)) {
-                    // La parte superior del rectángulo de colisión
-                    float top = rect.y + rect.height;
-                    if (top > maxGroundY) {
-                        maxGroundY = top;
+        for (CollisionShape collisionShape : collisionShapes) {
+            if (collisionShape.shape instanceof Rectangle) {
+                Rectangle collisionRect = (Rectangle) collisionShape.shape;
+                if (feetSensor.overlaps(collisionRect)) {
+                    // Si es una plataforma, solo consideramos el suelo si el personaje está por encima de ella
+                    if (collisionShape.isPlatform) {
+                        if (characterRect.y >= collisionRect.y + collisionRect.height - 5) { // Pequeño umbral
+                            float top = collisionRect.y + collisionRect.height;
+                            if (top > maxGroundY) {
+                                maxGroundY = top;
+                            }
+                        }
+                    } else { // Es un bloque sólido
+                        float top = collisionRect.y + collisionRect.height;
+                        if (top > maxGroundY) {
+                            maxGroundY = top;
+                        }
                     }
                 }
             }
@@ -213,7 +241,11 @@ public class CollisionManager {
      * @return Un Array de Shape2D que representa las formas de colision.
      */
     public Array<Shape2D> getCollisionShapes() {
-        return collisionShapes;
+        Array<Shape2D> shapes = new Array<>();
+        for (CollisionShape cs : collisionShapes) {
+            shapes.add(cs.shape);
+        }
+        return shapes;
     }
 
 }

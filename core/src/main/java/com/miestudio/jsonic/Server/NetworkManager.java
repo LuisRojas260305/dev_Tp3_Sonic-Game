@@ -551,6 +551,10 @@ public class NetworkManager {
         return selectedCharacterType;
     }
 
+    public GameServer getGameServer() {
+        return gameServer;
+    }
+
     /**
      * Clase interna que representa la conexion de un cliente individual en el lado del host.
      * Maneja la comunicacion TCP con ese cliente.
