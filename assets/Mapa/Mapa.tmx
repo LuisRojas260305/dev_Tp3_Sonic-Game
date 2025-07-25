@@ -3,12 +3,12 @@
  <tileset firstgid="1" source="../Tilesets/TileSet.tsx"/>
  <layer id="4" name="SpawnEntidades" width="50" height="20">
   <data encoding="base64" compression="zlib">
-   eJztziEBAAAIwDDqAP374QkAZnN3jwAAAOBbrq7VfTXCmwEFpwB/
+   eJztziEKACAQBEB/YlaT/v9xlgti0iTCDCwbDo5NCQAA4H/j9YALObIq0T26bvd28IO/TeNqAV4=
   </data>
  </layer>
  <layer id="5" name="SpawnObjetos" width="50" height="20">
   <data encoding="base64" compression="zlib">
-   eJztzzEKACAMA0B/pP9/nZPgolBFhHIHGUuaUgAAgCzaIkO9yOtfoztOzHeR/p2MO/ijA4bkC+4=
+   eJztz8kJACAMRFE7sQSX/ovzYkDEXYIg/8Ecs4wxAAAAAH7hOxHuItq/7vaoxYWb5dzO/ZGTHjan1SPMSuQ52aHRA28kZLYMzQ==
   </data>
  </layer>
  <layer id="6" name="SpanwEgman" width="50" height="20">
@@ -18,7 +18,7 @@
  </layer>
  <layer id="3" name="Colisiones" width="50" height="20">
   <data encoding="base64" compression="zlib">
-   eJztwwENAAAMAiDjvH/C91DYSAAAAFh0JVs8R4cH0Q==
+   eJzt0kEJAAAIBEHj2D+hFeReIjOwDbYKAADY6CC4LHn6Yl8MAm4J2Q==
   </data>
  </layer>
  <layer id="1" name="Capa1" width="50" height="20">

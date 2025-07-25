@@ -11,6 +11,8 @@ import com.miestudio.jsonic.JuegoSonic;
 import com.miestudio.jsonic.Objetos.Anillo;
 import com.miestudio.jsonic.Objetos.CargarObjetos;
 import com.miestudio.jsonic.Objetos.Objetos;
+import com.miestudio.jsonic.Objetos.MaquinaReciclaje;
+import com.miestudio.jsonic.Objetos.Arbol;
 import com.miestudio.jsonic.Server.domain.InputState;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.miestudio.jsonic.Util.*;
@@ -37,6 +39,10 @@ public class GameServer {
     private final TiledMap map; /** El mapa de tiles del juego. */
     private volatile boolean running = false; /** Indica si el bucle principal del servidor esta en ejecucion. */
     private long sequenceNumber = 0; /** Numero de secuencia para el estado del juego, utilizado para la sincronizacion. */
+    private static final int TRASH_EVENT_THRESHOLD = 5; // Cantidad de basura para activar el evento
+    private final List<Vector2> treeSpawnPoints = new ArrayList<>();
+    private final Map<Vector2, Boolean> treeSpawnPointsOccupancy = new HashMap<>(); // true si está ocupado
+    private int treesOnMap = 0;
 
     /**
      * Constructor de GameServer.
@@ -59,6 +65,8 @@ public class GameServer {
         initializeCharacters();
         spawnGameObjects("Anillo", "SpawnObjetos");
         spawnGameObjects("Basura", "SpawnObjetos");
+        spawnGameObjects("Maquina", "SpawnObjetos");
+        initializeTreeSpawnPoints();
     }
 
     /**
@@ -88,17 +96,43 @@ public class GameServer {
         }
 
         for (Vector2 spawnPoint : spawnPoints) {
-
-            float centeredX = spawnPoint.x + (tileWigth - 15f) / 2;
-            float centeredY = spawnPoint.y + (tileHeight - 15f) / 2;
+            float objectWidth = 0;
+            float objectHeight = 0;
 
             if ("Anillo".equals(objectType)) {
-                Anillo anillo = new Anillo(centeredX, centeredY, cargarObjetos.animacionAnillo);
+                objectWidth = 15f; // Tamaño fijo para anillos
+                objectHeight = 15f;
+            } else if ("Basura".equals(objectType)) {
+                objectWidth = game.getAssets().trashTexture.getWidth();
+                objectHeight = game.getAssets().trashTexture.getHeight();
+            } else if ("Maquina".equals(objectType)) {
+                objectWidth = 64f; // 2x2 tiles (32x32 por tile)
+                objectHeight = 64f;
+            }
+
+            float centeredX = spawnPoint.x + (tileWigth - objectWidth) / 2;
+            float finalY;
+
+            if ("Anillo".equals(objectType)) {
+                // Anillos centrados verticalmente en el tile
+                finalY = spawnPoint.y + (tileHeight - objectHeight) / 2;
+            } else {
+                // Basura y MaquinaReciclaje en la base del tile
+                finalY = spawnPoint.y;
+            }
+
+            // Calcular la posición Y final para que el objeto esté sobre el suelo
+            Rectangle tempRect = new Rectangle(centeredX, finalY, objectWidth, objectHeight);
+            float groundY = collisionManager.getGroundY(tempRect);
+            finalY = (groundY >= 0) ? groundY : finalY;
+
+            if ("Anillo".equals(objectType)) {
+                Anillo anillo = new Anillo(centeredX, finalY, cargarObjetos.animacionAnillo);
                 anillo.setId(nextObjectId++);
                 gameObjects.put(anillo.getId(), anillo);
-                cargarObjetos.agregarAnillo(anillo);
+                cargarObjetos.agregarObjeto(anillo);
             } else if ("Basura".equals(objectType)) {
-                Objetos basura = new Objetos(centeredX, centeredY, new TextureRegion(game.getAssets().trashTexture)) {
+                Objetos basura = new Objetos(centeredX, finalY, new TextureRegion(game.getAssets().trashTexture)) {
                     @Override
                     public void actualizar(float delta) {
                         // La basura no tiene animacion ni logica de actualizacion compleja
@@ -106,10 +140,24 @@ public class GameServer {
                 };
                 basura.setId(nextObjectId++);
                 gameObjects.put(basura.getId(), basura);
-                cargarObjetos.agregarBasura(centeredX, centeredY);
+                cargarObjetos.agregarObjeto(basura);
+            } else if ("Maquina".equals(objectType)) {
+                MaquinaReciclaje maquina = new MaquinaReciclaje(centeredX, finalY, game.getAssets().maquinaAtlas);
+                maquina.setId(nextObjectId++);
+                gameObjects.put(maquina.getId(), maquina);
+                cargarObjetos.agregarObjeto(maquina);
             }
         }
         Gdx.app.log("GameServer", "Se han creado " + spawnPoints.size() + " " + objectType + "s.");
+    }
+
+    private void initializeTreeSpawnPoints() {
+        List<Vector2> spawns = MapUtil.findAllSpawnPoints(map, "SpawnObjetos", "Arbol");
+        for (Vector2 spawn : spawns) {
+            treeSpawnPoints.add(spawn);
+            treeSpawnPointsOccupancy.put(spawn, false); // Inicialmente desocupado
+        }
+        Gdx.app.log("GameServer", "Puntos de spawn de árboles inicializados: " + treeSpawnPoints.size());
     }
 
     /**
@@ -237,7 +285,11 @@ public class GameServer {
                 character.getAnimationStateTime(),
                 characterType,
                 (character instanceof Tails) ? ((Tails) character).isFlying() : false,
-                character.getCollectibles()
+                character.getCollectibles(),
+                (character instanceof EAvispa), // isAvispa
+                (character instanceof EAvispa) ? ((EAvispa) character).getTargetPosition().x : 0f, // targetX
+                (character instanceof EAvispa) ? ((EAvispa) character).getTargetPosition().y : 0f, // targetY
+                character.estaActivo() // active
             ));
         }
 
@@ -252,6 +304,14 @@ public class GameServer {
                 } else {
                     Gdx.app.error("GameServer", "Error de tipo inesperado: " + character.getClass().getName() + " no puede ser casteado a Tails.");
                 }
+            } else if (character instanceof EAvispa) {
+                EAvispa avispa = (EAvispa) character;
+                avispa.update(delta, collisionManager);
+                if (!avispa.estaActivo()) {
+                    // Avispa se autodestruyó, spawnear árbol
+                    spawnTree(avispa.getTargetPosition());
+                    characters.remove(avispa.getPlayerId()); // Eliminar avispa del mapa de personajes
+                }
             }
         }
         
@@ -264,15 +324,35 @@ public class GameServer {
                     obj.x,
                     obj.y,
                     obj.estaActivo(),
-                    "Anillo"
+                    "Anillo",
+                    0 // Anillos no tienen totalCollectedTrash
                 ));
-            } else {
+            } else if (obj.getTexture().getTexture() == game.getAssets().trashTexture) {
                 objectStates.add(new ObjectState(
                     obj.getId(),
                     obj.x,
                     obj.y,
                     obj.estaActivo(),
-                    "Basura"
+                    "Basura",
+                    0 // Basura no tiene totalCollectedTrash
+                ));
+            } else if (obj instanceof MaquinaReciclaje) {
+                objectStates.add(new ObjectState(
+                    obj.getId(),
+                    obj.x,
+                    obj.y,
+                    obj.estaActivo(),
+                    "MaquinaReciclaje",
+                    ((MaquinaReciclaje) obj).getTotalCollectedTrash()
+                ));
+            } else if (obj instanceof Arbol) {
+                objectStates.add(new ObjectState(
+                    obj.getId(),
+                    obj.x,
+                    obj.y,
+                    obj.estaActivo(),
+                    "Arbol",
+                    0 // Los árboles no tienen totalCollectedTrash
                 ));
             }
         }
@@ -305,6 +385,27 @@ public class GameServer {
                         character.addCollectible(CollectibleType.TRASH);
                         obj.setActivo(false);
                         Gdx.app.log("GameServer", "Basura con ID: " + obj.getId() + " desactivado por el jugador " + character.getPlayerId());
+                    } else if (obj instanceof MaquinaReciclaje) {
+                        MaquinaReciclaje maquina = (MaquinaReciclaje) obj;
+                        int playerTrash = character.getCollectibleCount(CollectibleType.TRASH);
+
+                        if (playerTrash > 0) {
+                            maquina.addTrash(playerTrash);
+                            character.setCollectibleCount(CollectibleType.TRASH, 0);
+                            Gdx.app.log("GameServer", "Jugador " + character.getPlayerId() + " depositó " + playerTrash + " de basura en la máquina.");
+
+                            // Lógica del evento de la máquina
+                            int eventsTriggered = maquina.getTotalCollectedTrash() / TRASH_EVENT_THRESHOLD;
+                            int remainingTrash = maquina.getTotalCollectedTrash() % TRASH_EVENT_THRESHOLD;
+
+                            for (int i = 0; i < eventsTriggered; i++) {
+                                Gdx.app.log("GameServer", "¡Evento de máquina de reciclaje activado! Basura total: " + maquina.getTotalCollectedTrash());
+                                spawnAvispa();
+                            }
+                            // Reiniciar el contador de la máquina para el próximo ciclo del evento
+                            maquina.addTrash(- (eventsTriggered * TRASH_EVENT_THRESHOLD)); // Restar la basura que activó el evento
+                            maquina.addTrash(remainingTrash); // Añadir el remanente
+                        }
                     }
                 }
             }
@@ -317,5 +418,55 @@ public class GameServer {
      */
     public GameState getCurrentGameState() {
         return game.networkManager.getCurrentGameState();
+    }
+
+    private void spawnAvispa() {
+        // Encontrar un punto de spawn de avispa
+        List<Vector2> avispaSpawns = MapUtil.findAllSpawnPoints(map, "SpawnEntidades", "Avispa");
+        if (avispaSpawns.isEmpty()) {
+            Gdx.app.error("GameServer", "No hay puntos de spawn para Avispa.");
+            return;
+        }
+        Vector2 avispaSpawn = avispaSpawns.get(new Random().nextInt(avispaSpawns.size()));
+
+        // Encontrar un punto de spawn de árbol desocupado
+        Vector2 treeTargetSpawn = null;
+        for (Map.Entry<Vector2, Boolean> entry : treeSpawnPointsOccupancy.entrySet()) {
+            if (!entry.getValue()) { // Si no está ocupado
+                treeTargetSpawn = entry.getKey();
+                break;
+            }
+        }
+
+        if (treeTargetSpawn == null) {
+            Gdx.app.log("GameServer", "Todos los puntos de spawn de árboles están ocupados.");
+            return;
+        }
+
+        // Marcar el punto de spawn del árbol como ocupado
+        treeSpawnPointsOccupancy.put(treeTargetSpawn, true);
+
+        // Crear la avispa
+        EAvispa avispa = new EAvispa(
+            avispaSpawn.x,
+            avispaSpawn.y,
+            game.getAssets().enemyAtlas,
+            treeTargetSpawn
+        );
+        avispa.setPlayerId(nextObjectId++); // Usar el mismo contador para IDs de objetos y actores temporales
+        characters.put(avispa.getPlayerId(), avispa);
+        Gdx.app.log("GameServer", "Avispa spawneada en " + avispaSpawn + " con objetivo " + treeTargetSpawn);
+    }
+
+    private void spawnTree(Vector2 position) {
+        Arbol arbol = new Arbol(position.x, position.y, new TextureRegion(game.getAssets().treeTexture));
+        arbol.setId(nextObjectId++);
+        gameObjects.put(arbol.getId(), arbol);
+        cargarObjetos.agregarObjeto(arbol);
+        treesOnMap++;
+        Gdx.app.log("GameServer", "Árbol spawneado en " + position + ". Total de árboles: " + treesOnMap);
+
+        // Marcar el punto de spawn como desocupado después de que el árbol aparece
+        treeSpawnPointsOccupancy.put(position, false);
     }
 }

@@ -41,6 +41,9 @@ public class PlayerState implements Serializable {
     private final Map<CollectibleType, Integer> collectibles;
 
     private boolean flying;
+    private boolean isAvispa; // Indica si este PlayerState representa una avispa
+    private float targetX, targetY; // Posición objetivo para la avispa
+    private boolean active; // Indica si el personaje está activo (para avispas, etc.)
     /**
      * Constructor para crear un nuevo PlayerState.
      *
@@ -52,7 +55,7 @@ public class PlayerState implements Serializable {
      * @param animationStateTime   El tiempo de estado de la animacion actual del jugador.
      * @param characterType        El tipo de personaje que el jugador esta usando.
      */
-    public PlayerState(int playerId, float x, float y, boolean facingRight, String currentAnimationName, float animationStateTime, String characterType, boolean flying, Map<CollectibleType, Integer> collectibles) {
+    public PlayerState(int playerId, float x, float y, boolean facingRight, String currentAnimationName, float animationStateTime, String characterType, boolean flying, Map<CollectibleType, Integer> collectibles, boolean isAvispa, float targetX, float targetY, boolean active) {
         this.playerId = playerId;
         this.x = x;
         this.y = y;
@@ -62,6 +65,10 @@ public class PlayerState implements Serializable {
         this.characterType = characterType;
         this.flying = flying;
         this.collectibles = collectibles;
+        this.isAvispa = isAvispa;
+        this.targetX = targetX;
+        this.targetY = targetY;
+        this.active = active;
     }
 
     /**
@@ -133,5 +140,21 @@ public class PlayerState implements Serializable {
 
     public Map<CollectibleType, Integer> getCollectibles() {
         return collectibles;
+    }
+
+    public boolean isAvispa() {
+        return isAvispa;
+    }
+
+    public float getTargetX() {
+        return targetX;
+    }
+
+    public float getTargetY() {
+        return targetY;
+    }
+
+    public boolean isActive() {
+        return active;
     }
 }

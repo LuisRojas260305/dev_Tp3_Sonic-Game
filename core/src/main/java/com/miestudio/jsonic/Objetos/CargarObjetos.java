@@ -58,7 +58,7 @@ public class CargarObjetos {
      * @param anillo El objeto Anillo a agregar.
      */
     public void agregarAnillo(Anillo anillo) {
-        objetos.add(anillo);
+        agregarObjeto(anillo);
     }
 
     /**
@@ -67,12 +67,20 @@ public class CargarObjetos {
      * @param y Posicion Y de la basura.
      */
     public void agregarBasura(float x, float y) {
-        objetos.add(new Objetos(x, y, new TextureRegion(basuraTexture)) {
+        agregarObjeto(new Objetos(x, y, new TextureRegion(basuraTexture)) {
             @Override
             public void actualizar(float delta) {
                 // La basura no tiene animacion ni logica de actualizacion compleja
             }
         });
+    }
+
+    /**
+     * Agrega un objeto generico a la lista de objetos del juego.
+     * @param obj El objeto a agregar.
+     */
+    public void agregarObjeto(Objetos obj) {
+        objetos.add(obj);
     }
 
     /**

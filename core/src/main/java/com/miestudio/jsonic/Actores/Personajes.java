@@ -37,9 +37,9 @@ public abstract class Personajes extends Actor {
         ROLL,
         /** Animación de habilidad especial. */
         ABILITY,
-        
+
         FLY,  // Nueva animación
-        
+
         FALL
     }
 
@@ -84,22 +84,24 @@ public abstract class Personajes extends Actor {
 
     /** Indica si la habilidad especial está activa. */
     protected boolean isAbilityActive = false;
-    
+
     /** Indica si el personaje está volando (específico para Tails). */
     protected boolean isFlying = false;
-    
+
     /** ID del jugador asociado a este personaje. */
-    protected int playerId;
+    public int playerId;
     /** Velocidad de movimiento horizontal del personaje. */
     protected float moveSpeed = 300f;
 
     private float predictedX;
     private float predictedY;
 
+    public boolean activo = true;
+
     protected final Map<CollectibleType, Integer> collectibles = new EnumMap<>(CollectibleType.class);
 
     public abstract void useAbility();
-    
+
     /**
      * Libera los recursos asociados al personaje.
      * Las subclases deben implementar este método si tienen recursos propios que liberar.
@@ -182,13 +184,13 @@ public abstract class Personajes extends Actor {
 
             isMoving = true;
         }
-        
+
 
         if (input.isAbility() && !isAbilityActive && isGrounded) {
             useAbility();
         }
 
-        
+
         // Limitar posición dentro del mapa
         x = Math.max(0, Math.min(x, collisionManager.getMapWidth() - getWidth()));
         y = Math.max(0, Math.min(y, collisionManager.getMapHeight() - getHeight()));
@@ -223,7 +225,7 @@ public abstract class Personajes extends Actor {
         if (currentAnimation != newAnimation) {
             currentAnimation = newAnimation;
             stateTime = 0f;
-            Gdx.app.log("ANIMATION", "Cambiando a animación: " + 
+            Gdx.app.log("ANIMATION", "Cambiando a animación: " +
                 (newAnimation == idleAnimation ? "idle" :
                  newAnimation == runAnimation ? "run" :
                  newAnimation == jumpAnimation ? "jump" :
@@ -234,7 +236,7 @@ public abstract class Personajes extends Actor {
     /**
      * Establece la animación actual del personaje.
      * Reinicia el tiempo de estado de la animación si la nueva animación es diferente a la actual.
-     * @param newAnimation La nueva animación a establecer.
+     *  La nueva animación a establecer.
      */
     public void setAnimation(AnimationType animationType) {
         switch (animationType) {
@@ -268,7 +270,7 @@ public abstract class Personajes extends Actor {
     public Animation<TextureRegion> getRunAnimation() { return runAnimation; }
     public Animation<TextureRegion> getJumpAnimation() { return jumpAnimation; }
     public Animation<TextureRegion> getRollAnimation() { return rollAnimation; }
-    
+
     public boolean isAbilityActive() {
         return isAbilityActive;
     }
@@ -276,7 +278,7 @@ public abstract class Personajes extends Actor {
     public void setAbilityActive(boolean abilityActive) {
         this.isAbilityActive = abilityActive;
     }
-    
+
     public boolean isFlying() {
         return isFlying;
     }
@@ -284,9 +286,17 @@ public abstract class Personajes extends Actor {
     public void setFlying(boolean flying) {
         isFlying = flying;
     }
-    
+
     public void setAbilityAnimation(Animation<TextureRegion> animation) {
         this.abilityAnimation = animation;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
+    }
+
+    public boolean estaActivo() {
+        return this.activo;
     }
 
     /**

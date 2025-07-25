@@ -1,0 +1,19 @@
+[GameServer] Avispa spawneada en (736.0,96.0) con objetivo (1056.0,64.0)
+[GameServer] ┬íEvento de m├íquina de reciclaje activado! Basura total: 45
+[GameServer] Todos los puntos de spawn de ├írboles est├ín ocupados.
+java.lang.NullPointerException: Cannot invoke "com.badlogic.gdx.graphics.g2d.TextureRegion.getRegionWidth()" because the return value of "com.badlogic.gdx.graphics.g2d.Animation.getKeyFrame(float)" is null
+[GameServer] ┬íEvento de m├íquina de reciclaje activado! Basura total: 45
+[GameServer] Todos los puntos de spawn de ├írboles est├ín ocupados.
+[GameServer] ┬íEvento de m├íquina de reciclaje activado! Basura total: 45
+[GameServer] Todos los puntos de spawn de ├írboles est├ín ocupados.
+        at com.miestudio.jsonic.Actores.Personajes.getWidth(Personajes.java:383)
+[GameServer] ┬íEvento de m├íquina de reciclaje activado! Basura total: 45
+        at com.miestudio.jsonic.Actores.Personajes.updatePhysics(Personajes.java:136)
+        at com.miestudio.jsonic.Actores.Personajes.update(Personajes.java:118)
+[GameServer] Todos los puntos de spawn de ├írboles est├ín ocupados.
+        at com.miestudio.jsonic.Actores.EAvispa.update(EAvispa.java:37)
+[GameServer] ┬íEvento de m├íquina de reciclaje activado! Basura total: 45
+        at com.miestudio.jsonic.Server.GameServer.updateGameState(GameServer.java:309)
+[GameServer] Todos los puntos de spawn de ├írboles est├ín ocupados.
+        at com.miestudio.jsonic.Server.GameServer.serverGameLoop(GameServer.java:235)
+        at java.base/java.lang.Thread.run(Thread.java:840)

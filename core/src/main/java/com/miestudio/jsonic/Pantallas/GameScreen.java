@@ -43,6 +43,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.miestudio.jsonic.Objetos.Anillo;
 import com.miestudio.jsonic.Objetos.Objetos;
+import com.miestudio.jsonic.Objetos.MaquinaReciclaje;
+import com.miestudio.jsonic.Objetos.Arbol;
+import com.miestudio.jsonic.Actores.EAvispa;
 import com.miestudio.jsonic.Server.domain.ObjectState;
 
 import java.util.Iterator;
@@ -383,6 +386,24 @@ public class GameScreen implements Screen {
                 for (Map.Entry<CollectibleType, Integer> entry : playerState.getCollectibles().entrySet()) {
                     character.setCollectibleCount(entry.getKey(), entry.getValue());
                 }
+                } else if (playerState.isAvispa()) {
+                    // Si es una avispa, actualizar su estado
+                    if (!characters.containsKey(playerId)) {
+                        // Crear la avispa si no existe
+                        EAvispa avispa = new EAvispa(
+                            playerState.getX(),
+                            playerState.getY(),
+                            game.getAssets().enemyAtlas,
+                            new Vector2(playerState.getTargetX(), playerState.getTargetY())
+                        );
+                        avispa.setPlayerId(playerId);
+                        characters.put(playerId, avispa);
+                    }
+                    EAvispa avispa = (EAvispa) characters.get(playerId);
+                    avispa.setPosition(playerState.getX(), playerState.getY());
+                    avispa.setFacingRight(playerState.isFacingRight());
+                    avispa.setAnimationStateTime(playerState.getAnimationStateTime());
+                    avispa.setActivo(playerState.isActive()); // Sincronizar estado activo
                 }
                 // Lógica de reconciliación para el jugador local en el cliente
                 else if (!isHost) {
@@ -442,6 +463,16 @@ public class GameScreen implements Screen {
                         obj.setId(objState.getId());
                         clientObjects.put(obj.getId(), obj);
                         Gdx.app.log("GameScreen", "Nueva basura creada: " + obj.getId());
+                    } else if ("MaquinaReciclaje".equals(objState.getType())) {
+                        obj = new MaquinaReciclaje(objState.getX(), objState.getY(), game.getAssets().maquinaAtlas);
+                        obj.setId(objState.getId());
+                        clientObjects.put(obj.getId(), obj);
+                        Gdx.app.log("GameScreen", "Nueva MaquinaReciclaje creada: " + obj.getId());
+                    } else if ("Arbol".equals(objState.getType())) {
+                        obj = new Arbol(objState.getX(), objState.getY(), new TextureRegion(game.getAssets().treeTexture));
+                        obj.setId(objState.getId());
+                        clientObjects.put(obj.getId(), obj);
+                        Gdx.app.log("GameScreen", "Nuevo Arbol creado: " + obj.getId());
                     }
                 }
 
@@ -449,6 +480,9 @@ public class GameScreen implements Screen {
                     obj.x = objState.getX();
                     obj.y = objState.getY();
                     obj.setActivo(objState.isActive());
+                    if (obj instanceof MaquinaReciclaje) {
+                        ((MaquinaReciclaje) obj).setTotalCollectedTrash(objState.getTotalCollectedTrash());
+                    }
                 }
             }
 
@@ -492,7 +526,7 @@ public class GameScreen implements Screen {
         synchronized (clientObjects) {
             for (Objetos obj : clientObjects.values()) {
                 if (obj.estaActivo()) {
-                    batch.draw(obj.getTexture(), obj.x, obj.y, 15f, 15f);
+                    batch.draw(obj.getTexture(), obj.x, obj.y, obj.getWidth(), obj.getHeight());
                 }
             }
         }

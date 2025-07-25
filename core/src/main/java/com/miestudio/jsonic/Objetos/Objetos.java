@@ -16,7 +16,7 @@ public abstract class Objetos {
         this.x = x;
         this.y = y;
         this.textura = textura;
-        this.hitbox = new Rectangle(x, y, 0.5f, 0.5f);
+        this.hitbox = new Rectangle(x, y, textura.getRegionWidth(), textura.getRegionHeight());
     }
 
     public abstract void actualizar(float delta);
@@ -51,4 +51,11 @@ public abstract class Objetos {
         return id;
     }
 
+    public float getWidth() {
+        return textura.getRegionWidth();
+    }
+
+    public float getHeight() {
+        return textura.getRegionHeight();
+    }
 }

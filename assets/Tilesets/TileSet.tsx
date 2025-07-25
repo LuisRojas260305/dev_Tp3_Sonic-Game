@@ -51,13 +51,13 @@
  <tile id="48">
   <properties>
    <property name="Spawn" type="bool" value="true"/>
-   <property name="To" value=""/>
+   <property name="To" value="Maquina"/>
   </properties>
  </tile>
  <tile id="49">
   <properties>
    <property name="Spawn" type="bool" value="true"/>
-   <property name="To" value="Enemigos"/>
+   <property name="To" value="Avispa"/>
   </properties>
  </tile>
 </tileset>

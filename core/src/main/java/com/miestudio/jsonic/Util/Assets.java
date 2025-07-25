@@ -33,6 +33,9 @@ public class Assets {
     
     public TextureAtlas AtlasEgman;
     public Texture trashTexture;
+    public TextureAtlas maquinaAtlas;
+    public TextureAtlas enemyAtlas;
+    public Texture treeTexture;
     
     public BitmapFont  hubFont;
     /**
@@ -48,6 +51,9 @@ public class Assets {
             AtlasEgman = new TextureAtlas(Gdx.files.internal("Personajes/AtlasEgman.txt"));
             hubFont = new BitmapFont(Gdx.files.internal("ui/default.fnt"));
             trashTexture = new Texture(Gdx.files.internal("ui/HubB.png"));
+            maquinaAtlas = new TextureAtlas(Gdx.files.internal(Constantes.OBJECT_PATCH + "AtlasMaquina.txt"));
+            enemyAtlas = new TextureAtlas(Gdx.files.internal(Constantes.PERSONAJES_PATH + "AtlasEnemy.atlas"));
+            treeTexture = new Texture(Gdx.files.internal(Constantes.OBJECT_PATCH + "Arbol.png"));
             
             Array<TextureRegion> framesAnillo = new Array<>();
             for (int i = 0; i < 5; i++) {
@@ -71,5 +77,8 @@ public class Assets {
         if (objetosAtlas != null) objetosAtlas.dispose();
         if (AtlasEgman != null) AtlasEgman.dispose();
         if (trashTexture != null) trashTexture.dispose();
+        if (maquinaAtlas != null) maquinaAtlas.dispose();
+        if (enemyAtlas != null) enemyAtlas.dispose();
+        if (treeTexture != null) treeTexture.dispose();
     }
 }
