@@ -1,3 +1,280 @@
+# Sonic Game
+
+| **Nombre** | Cedula |
+|------------|--------|
+|**Luis Rojas**| 30931891 |
+|** Abdel Licones **| 31445619 |
+|** Rayc Yanez ** | 28215618 |
+|** Felix Figuera ** | 28500894 |
+|** Mchalaxk Franco ** | 30365867 |
+
+# Capito II UML
+
+## Clases
+
+``` mermaid
+  classDiagram
+    direction LR
+
+    %% -- Actores --
+    class Personajes {
+        <<abstract>>
+        #int playerId
+        #float x
+        #float y
+        #float velocityY
+        #boolean isGrounded
+        #boolean isFlying
+        #Animation currentAnimation
+        #int lives
+        #Map collectibles
+        +void update(float delta, CollisionManager collisionManager)
+        +void handleInput(InputState input, CollisionManager collisionManager, float delta)
+        +abstract void useAbility()
+        +abstract void dispose()
+        +void setAnimation(AnimationType animationType)
+        +float getX()
+        +float getY()
+        +boolean isFacingRight()
+        +int getLives()
+        +void addCollectible(CollectibleType type)
+    }
+
+    class Sonic {
+        -boolean isSpinning
+        -float spinPower
+        +void useAbility()
+        +void update(float delta, CollisionManager collisionManager)
+    }
+
+    class Tails {
+        -boolean isFlying
+        -float flyTime
+        -Array~Robot~ activeRobots
+        +void useAbility()
+        +void update(float delta, CollisionManager collisionManager)
+        +void startFlying()
+        +void stopFlying()
+    }
+
+    class Knuckles {
+        -boolean isPunching
+        -float punchPower
+        +void useAbility()
+        +void update(float delta, CollisionManager collisionManager)
+    }
+
+    class Robot {
+        -float x
+        -float y
+        -boolean facingRight
+        -float speed
+        -TextureRegion texture
+        +void update(float delta, CollisionManager collisionManager)
+        +boolean isActive()
+    }
+
+    %% -- Objetos --
+    class Objetos {
+        <<abstract>>
+        #int id
+        #float x
+        #float y
+        #TextureRegion textura
+        #boolean activo
+        +void actualizar(float delta)
+        +void renderizar(SpriteBatch batch)
+        +Rectangle getHitbox()
+        +boolean estaActivo()
+        +void setActivo(boolean activo)
+    }
+
+    class Anillo {
+        +void actualizar(float delta)
+    }
+
+    class MaquinaReciclaje {
+        -int totalCollectedTrash
+        +void actualizar(float delta)
+        +void addTrash(int amount)
+    }
+
+    class Arbol {
+        +void actualizar(float delta)
+    }
+
+    class CargarObjetos {
+        -Array~Objetos~ objetos
+        +void agregarObjeto(Objetos obj)
+        +void actualizar(float delta)
+        +void renderizar(SpriteBatch batch)
+        +Array~Objetos~ getObjetos()
+    }
+
+    %% -- Pantallas --
+    class GameScreen {
+        -JuegoSonic game
+        -int localPlayerId
+        -OrthographicCamera camera
+        -ConcurrentHashMap~int, Personajes~ characters
+        -CollisionManager collisionManager
+        -GameHub gameHub
+        +void render(float delta)
+        +void updateFromGameState()
+        +void processInput(float delta)
+    }
+
+    class MainScreen {
+        +void setupUI()
+    }
+
+    class CharacterSelectionScreen {
+        +void updateButtonState(TextButton button, String characterName)
+    }
+
+    class LobbyScreen {
+    }
+
+    class HelpScreen {
+    }
+
+    %% -- Server --
+    class NetworkManager {
+        -JuegoSonic game
+        -boolean isHost
+        -int localPlayerId
+        -GameServer gameServer
+        +void startHost()
+        +void connectAsClient(String ip, int port)
+        +void sendCharacterSelection(String characterType)
+        +void broadcastUdpGameState()
+        +GameState getCurrentGameState()
+    }
+
+    class GameServer {
+        -JuegoSonic game
+        -ConcurrentHashMap~int, Personajes~ characters
+        -CargarObjetos cargarObjetos
+        -CollisionManager collisionManager
+        +void start()
+        +void stop()
+        +void updateGameState(float delta)
+        +void spawnTree(Vector2 position)
+        +void spawnTrash(Vector2 position)
+    }
+
+    class NetworkHelper {
+        +String getIpLocal()
+    }
+
+    %% -- Server.domain --
+    class InputState {
+        -boolean up
+        -boolean down
+        -boolean left
+        -boolean right
+        -boolean ability
+        -int playerId
+        +boolean isUp()
+        +void setUp(boolean up)
+        +boolean isDown()
+        +void setDown(boolean down)
+        +boolean isLeft()
+        +void setLeft(boolean left)
+        +boolean isRight()
+        +void setRight(boolean right)
+        +boolean isAbility()
+        +void setAbility(boolean ability)
+    }
+
+    class PlayerState {
+        -int playerId
+        -float x
+        -float y
+        -boolean facingRight
+        -String currentAnimationName
+        -float animationStateTime
+        -String characterType
+        -Map~CollectibleType, Integer~ collectibles
+        -int lives
+        +int getPlayerId()
+        +float getX()
+        +float getY()
+        +boolean isFacingRight()
+        +String getCurrentAnimationName()
+    }
+
+    class GameState {
+        -long sequenceNumber
+        -ArrayList~PlayerState~ players
+        -List~ObjectState~ objects
+        -float gameTimeRemaining
+        -GameStatus gameStatus
+        +long getSequenceNumber()
+        +ArrayList~PlayerState~ getPlayers()
+        +List~ObjectState~ getObjects()
+    }
+
+    class ObjectState {
+        -int id
+        -float x
+        -float y
+        -boolean active
+        -String type
+        -int totalCollectedTrash
+        +int getId()
+        +float getX()
+        +float getY()
+        +boolean isActive()
+        +String getType()
+    }
+
+    %% -- Util --
+    class CollisionManager {
+        -Array~CollisionShape~ collisionShapes
+        -float mapWidth
+        -float mapHeight
+        +boolean collides(Rectangle characterRect)
+        +boolean isOnGround(Rectangle characterRect)
+        +float getGroundY(Rectangle characterRect)
+    }
+
+    %% -- Relaciones --
+    Personajes <|-- Sonic
+    Personajes <|-- Tails
+    Personajes <|-- Knuckles
+
+    Objetos <|-- Anillo
+    Objetos <|-- MaquinaReciclaje
+    Objetos <|-- Arbol
+
+    CargarObjetos "1" *-- "*" Objetos : contiene
+    
+    Tails "1" *-- "*" Robot : activeRobots
+    
+    GameServer "1" *-- "1" CollisionManager
+    GameServer "1" *-- "1" CargarObjetos
+    GameServer "1" *-- "*" Personajes : characters
+    
+    NetworkManager "1" *-- "0..1" GameServer : gameServer
+    
+    GameScreen "1" *-- "1" JuegoSonic : game
+    GameScreen "1" *-- "1" CollisionManager : collisionManager
+    GameScreen "1" *-- "*" Personajes : characters
+    GameScreen "1" *-- "1" GameHub : gameHub
+    
+    GameState "1" *-- "*" PlayerState : players
+    GameState "1" *-- "*" ObjectState : objects
+    
+    GameServer ..> GameState : crea
+    NetworkManager ..> GameState : transmite
+    GameScreen ..> GameState : recibe
+    
+    CollisionManager "1" *-- "*" CollisionShape : collisionShapes
+    
+    JuegoSonic "1" *-- "1" NetworkManager : networkManager
+```
+
 ### 1. Tails
 | **Clase** | Tails |
 |-----------|-------|
