@@ -8,7 +8,222 @@
 |**Felix Figuera** | 28500894 |
 |**Mchalaxk Franco** | 30365867 |
 
+# Capitolo I - Introduccion y analisis
+
+## ANALISIS
+
+### Planteamiento del Sistema:
+Sonic Project es un entusiasmado juego multijugador que se sumerge en el animado universo de Sonic the Hedgehog, con foco en programación a objetos y modelado UML. La narrativa se basa en la feroz batalla de Sonic y sus amigos, Tails y Knuckles, contra el malvado Dr. Robotnik, quien ha dejado su marca tóxica en la Green Hill Zone. Los jugadores se deben unir para limpiar la zona, reciclar residuos y recuperar el medio ambiente, todo mientras superan toda clase de obstáculos y entes hostiles.
+Funcionalidades Principales:
+
+1- Módulo Jugar
+- Multijugador: 3 jugadores pueden jugar a Sonic, Tails y Knuckles, cada uno con sus propias habilidades:
+- Sonic: Corre rápidamente para recoger trastos y puede hacer un "Tornado de Limpieza"
+- Tails: Aprovecha su habilidad para volar para transportar materiales reciclados y puede hacer un "Dron Reciclador".
+- Knuckles: Aprovecha su musculación para destruir desechos nocivos con sus horribles puños.
+- Contaminación progresiva: Si no se actúa a tiempo, la zona se degrada, afectando a la fauna y flora.
+- Combate contra Robotnik: Al final de cada nivel, Robotnik salta en su Eggmobile con el fin de sabotear el progreso de los jugadores.
+
+2- Módulo Estadísticas:
+
+- Ranking individual: Tiene una tabla de clasificación que refleja las contribuciones de cada uno de los jugadores:
+- Puntos por limpiar áreas, reciclar materiales y derrotar enemigos.
+
+Competencia sana: Fomenta la colaboración y el rendimiento individual.
+
+3-Módulo Ayuda y Acerca De:
+- Ayuda: Explica las reglas del juego, controles y objetivos de una manera clara.
+- Acerca De: Ofrece detalles sobre el lenguaje de programación, las librerías empleadas, los desarrolladores y la versión del juego.
+Requisitos Adicionales:
+- Desarrollo en NetBeans con documentación Javadoc.
+- Entrega ordenada que contenga el código fuente y un informe.
+- Trabajo en equipo con penalización por faltas durante la corrección.
+
 # Capito II UML
+
+## Casos de uso
+
+## 1.-Casos de uso externo
+
+### Caso de Uso 1: Iniciar Partida
+
+| Campo              | Descripción |
+|--------------------|-------------|
+| **Caso de Uso**    | Iniciar Partida |
+| **Actores**        | Jugador (Principal), Sistema (Secundario, al usar gameManager) |
+| **Propósito**      | Permite a los jugadores iniciar una nueva partida. |
+| **Precondiciones** | 1. El jugador se encuentra en el menú del juego. |
+| **Flujo Principal** | 1. Un jugador selecciona la opción de Iniciar Partida, esta elección es enviada a gameManager para que llame a iniciarPartida().<br>2. gameManager hace un cambio en pantallaActual para que muestre la pantalla del juego.<br>3. gameManager inicializa el EstadisticasManager y que este anote las estadísticas obtenidas durante la partida.<br>4. En el caso de que la partida sea Multijugador, gameManager llama a multijugadorManager para preparar la sala.<br>5. El juego muestra en pantalla el nivel. |
+| **Flujo Alternativo** | **Falla al empezar partida:**<br>1. Ocurre un error durante el inicio de la partida.<br>2. El sistema notificará al jugador de la ocurrencia del error y lo regresará al menú principal. |
+
+---
+
+### Caso de Uso 2: Cambiar Nivel
+
+| Campo              | Descripción |
+|--------------------|-------------|
+| **Caso de Uso**    | Cambiar Nivel |
+| **Actores**        | Sistema (Principal), Jugador (Secundario) |
+| **Propósito**      | El sistema realizará las gestiones correspondientes para hacer el cambio de nivel al siguiente, haciendo las cargas de texturas y recursos. |
+| **Precondiciones** | 1. Ya hay un juego iniciado.<br>2. Hay más niveles disponibles para jugar. |
+| **Flujo Principal** | 1. El sistema va a detectar si el jugador ha logrado cumplir las condiciones de victoria para pasar de nivel.<br>2. En caso de que sea verificado como cierto, gameManager llama a cambiarNivel(), del cual lograría realizar la carga del siguiente nivel.<br>3. gameManager haría actualización de la pantallaActual y que muestre el nuevo nivel.<br>4. El jugador podrá continuar su sesión de juego en el nuevo nivel. |
+| **Flujo Alternativo** | **Error de carga o no existen más niveles:**<br>1. gameManager detecta la existencia de un error o la finalización de los niveles jugables.<br>2. gameManager muestra la "Finalización del Juego". |
+
+---
+
+### Caso de Uso 3: Finalización del Juego
+
+| Campo              | Descripción |
+|--------------------|-------------|
+| **Caso de Uso**    | Finalización del Juego |
+| **Actores**        | Jugador y Sistema |
+| **Propósito**      | El juego llega a su conclusión por diferentes opciones (error de carga, falta de niveles, o decisión del usuario). Muestra resultados y regresa al menú principal. |
+| **Precondiciones** | 1. El juego está en proceso o en medio de Cambiar Nivel. |
+| **Flujo Principal** | **Game Over o Partida Ganada:**<br>1. El sistema detecta el cumplimiento de alguna condición de victoria o derrota.<br>2. gameManager es llamado para ejecutar finalizarJuego().<br>3. gameManager, mediante EstadisticasManager, recibe las estadísticas del jugador.<br>4. gameManager cambia a la pantalla de resultados.<br>5. En sesión multijugador, se cierra la sala.<br>6. El sistema regresa al jugador al menú principal.<br><br>**Salida del juego por el jugador:**<br>1. El jugador selecciona "Salir del Nivel".<br>2. gameManager recibe la entrada y llama a finalizarJuego().<br>3. gameManager recibe las estadísticas del jugador.<br>4. gameManager muestra pantalla de resultados.<br>5. En sesión multijugador, se cierra la sala.<br>6. El sistema regresa al menú principal. |
+| **Flujo Alternativo** | Sin flujos alternativos. |
+
+## 2.-Casos de uso interno
+
+### Caso de Uso 1: Movimiento del Personaje
+
+| Campo              | Descripción |
+|--------------------|-------------|
+| **Caso de Uso**    | Movimiento del Personaje |
+| **Actores**        | Jugador |
+| **Propósito**      | Proporcionar al jugador la habilidad de mover a su personaje dentro de los niveles. |
+| **Precondiciones** | 1. El personaje se encuentra dentro de un nivel.<br>2. Se tiene un control o teclado para realizar los movimientos. |
+| **Flujo Principal** | 1. El jugador moverá a su personaje con las teclas direccionales.<br>2. Se tomará como entrada la dirección con HandleInput.<br>3. Se calcula la nueva posición del personaje.<br>4. Se comprueba si el personaje choca con algún objeto o parte del escenario.<br>5. Si no ocurren colisiones, se actualiza en pantalla la posición del personaje.<br>6. Mientras el personaje esté en movimiento, su animación cambia a la de correr. |
+| **Flujo Alternativo** | **Si se suelta la tecla de movimiento:**<br>1. Se detecta que ya no hay entrada de movimiento.<br>2. Se define que el personaje está quieto.<br>3. La animación se actualiza a estado sin movimiento.<br><br>**Si el personaje colisiona con el escenario:**<br>1. Se detecta colisión con el escenario.<br>2. El personaje no actualiza su posición. |
+
+---
+
+### Caso de Uso 2: Salto del Personaje
+
+| Campo              | Descripción |
+|--------------------|-------------|
+| **Caso de Uso**    | Salto del Personaje |
+| **Actores**        | Jugador |
+| **Propósito**      | Proporcionar al jugador la habilidad de hacer saltar a su personaje dentro de los niveles. |
+| **Precondiciones** | 1. El personaje se encuentra dentro de un nivel.<br>2. El personaje se encuentra en el suelo.<br>3. Se tiene un control o teclado para realizar los movimientos. |
+| **Flujo Principal** | 1. El jugador presiona la tecla para "Saltar".<br>2. Se verifica con HandleInput si se está en el suelo.<br>3. Se aplica "JumpForce" y se actualiza que el personaje no está en el suelo.<br>4. Se actualiza la animación a estado de salto.<br>5. Se aplica gravedad con updatePhysics para hacer caer al personaje. |
+| **Flujo Alternativo** | **Si el personaje no se encuentra en el suelo:**<br>1. Se detecta entrada de salto.<br>2. Se verifica que el personaje ya está en el aire.<br>3. No se realizan los pasos para saltar. |
+
+---
+
+### Caso de Uso 3: Recolección de Objetos
+
+| Campo              | Descripción |
+|--------------------|-------------|
+| **Caso de Uso**    | Recolección de Objetos |
+| **Actores**        | Jugador |
+| **Propósito**      | Añadir al contador y estadísticas del personaje el objeto con el que colisione. |
+| **Precondiciones** | 1. El personaje y el objeto están dentro de un nivel.<br>2. Existe CollisionManager para determinar colisiones con objetos. |
+| **Flujo Principal** | 1. El personaje está en movimiento.<br>2. CollisionManager detecta colisión con un objeto.<br>3. Se llama a addCollectible para incrementar objetos recolectados.<br>4. Si es tipo "TRASH" y cantidad < 50, aumenta el contador. |
+| **Flujo Alternativo** | **Si se lleva el máximo de TRASH (50):**<br>1. El sistema indica contador en 50.<br>2. El objeto TRASH no se añade. |
+
+---
+
+### Caso de Uso 4: Habilidad Especial (Sonic y Knuckles)
+
+| Campo              | Descripción |
+|--------------------|-------------|
+| **Caso de Uso**    | Habilidad Especial de los Personajes (Sonic y Knuckles) |
+| **Actores**        | Jugador |
+| **Propósito**      | Permitir al jugador activar la habilidad especial del personaje. |
+| **Precondiciones** | 1. Personaje dentro de nivel.<br>2. Personaje en suelo.<br>3. Habilidad disponible.<br>4. Personaje tiene vidas necesarias.<br>5. Control/teclado disponible. |
+| **Flujo Principal** | 1. Jugador presiona tecla de habilidad.<br>2. Sistema detecta entrada con handleInput/handleAbilityInput.<br>3. Se llama a useAbility y resta lives.<br>4. isAbilityActive cambia a true.<br>5. Animación cambia a estado de habilidad.<br>6. Al terminar duración, isAbilityActive cambia a false. |
+| **Flujo Alternativo** | **Sin vidas necesarias:**<br>1. lives = 0, no se activa habilidad.<br><br>**Habilidad ya activa:**<br>1. isAbilityActive = true, entrada ignorada.<br><br>**Personaje no en suelo:**<br>1. isGrounded = false, entrada ignorada. |
+
+---
+
+### Caso de Uso 5: Habilidad de Volar (Tails)
+
+| Campo              | Descripción |
+|--------------------|-------------|
+| **Caso de Uso**    | Habilidad de Volar (Tails) |
+| **Actores**        | Jugador |
+| **Propósito**      | Permitir al jugador hacer que Tails vuele con tiempo limitado. |
+| **Precondiciones** | 1. Tails dentro de nivel.<br>2. Tails no en suelo.<br>3. Tails no volando.<br>4. MAX_TIME_FLY no excedido. |
+| **Flujo Principal** | 1. Jugador mantiene tecla arriba en aire.<br>2. Sistema llama a startFlying().<br>3. isFlying = true, animación a volar, velocidad vertical = flySpeed.<br>4. Tails sube mientras se mantenga tecla y tiempo < máximo.<br>5. Al soltar tecla o exceder tiempo, se llama stopFlying(). |
+| **Flujo Alternativo** | **Tails en suelo:**<br>1. isGrounded = true, realiza salto común con JumpForce.<br><br>**Tails ya volando:**<br>1. isFlying = true, no inicia vuelo.<br><br>**Choca con suelo volando:**<br>1. CollisionManager detecta colisión, isGrounded = true.<br>2. Se llama stopFlying().<br><br>**Excede tiempo máximo:**<br>1. flyTime alcanza MAX_FLY_TIME.<br>2. Se llama stopFlying(). |
+
+---
+
+### Caso de Uso 6: Habilidad Especial de Tails (Invocación de Robot)
+
+| Campo              | Descripción |
+|--------------------|-------------|
+| **Caso de Uso**    | Habilidad Especial de Tails (Invocación de Robot) |
+| **Actores**        | Jugador |
+| **Propósito**      | Permitir al jugador invocar robot que brinde ayuda. |
+| **Precondiciones** | 1. Tails dentro de nivel.<br>2. isAbilityActive = False.<br>3. Robot listo (no en cooldown).<br>4. Existe gameServer. |
+| **Flujo Principal** | 1. Jugador presiona tecla de habilidad.<br>2. Sistema llama a useAbility().<br>3. isAbilityActive = true.<br>4. Animación cambia a estado con robot.<br>5. gameServer crea robot en posición de Tails.<br>6. Al terminar timer, isAbilityActive = false y animación vuelve a normal. |
+| **Flujo Alternativo** | **Habilidad ya activa:**<br>1. isAbilityActive = true, entrada ignorada.<br><br>**En cooldown:**<br>1. cooldown no terminado, entrada ignorada. |
+
+---
+
+### Caso de Uso 7: Robot de Tails - Recolección de Basura
+
+| Campo              | Descripción |
+|--------------------|-------------|
+| **Caso de Uso**    | Robot de Tails – Recolección de Basura |
+| **Actores**        | Sistema |
+| **Propósito**      | Robot recolecta basura automáticamente sin intervención jugador. |
+| **Precondiciones** | 1. Robot dentro de nivel.<br>2. Existen objetos TRASH.<br>3. Se usa gameServer y CollisionManager. |
+| **Flujo Principal** | 1. Sistema hace update() del robot.<br>2. En estado "moverse a basura": calcula dirección y posición.<br>3. Si choca con basura: estado a "recolectando" y reinicia timer.<br>4. En "recolectando": incrementa timer y busca basura cercana.<br>5. Si capacidad máxima: estado a "Moviéndose a máquina reciclaje". |
+| **Flujo Alternativo** | **No hay basura inicialmente:**<br>1. Usa targetTrash(), si no encuentra, estado a "Autodestrucción".<br><br>**Excede tiempo recolección:**<br>1. Si basura > 0: mueve a máquina cercana.<br>2. Si basura = 0: estado a "Autodestrucción".<br><br>**Basura desaparece:**<br>1. Busca otra basura cercana.<br>2. Si no encuentra: mueve a máquina. |
+
+---
+
+### Caso de Uso 8: Robot de Tails - Depositar Basura
+
+| Campo              | Descripción |
+|--------------------|-------------|
+| **Caso de Uso**    | Robot de Tails – Depositar Basura |
+| **Actores**        | Sistema |
+| **Propósito**      | Robot deposita basura recolectada en máquina reciclaje. |
+| **Precondiciones** | 1. Robot dentro de nivel.<br>2. Contador basura > 0.<br>3. Se usa gameServer y CollisionManager. |
+| **Flujo Principal** | 1. Sistema hace update() del robot.<br>2. En estado "Moviéndose a máquina": calcula dirección.<br>3. Si choca con máquina: estado a "Entregando basura".<br>4. En "Entregando": añade basura a máquina, contador = 0, autodestrucción. |
+| **Flujo Alternativo** | **No hay máquina reciclaje:**<br>1. Estado a "Autodestrucción". |
+
+---
+
+### Caso de Uso 9: Robot de Tails - Autodestrucción
+
+| Campo              | Descripción |
+|--------------------|-------------|
+| **Caso de Uso**    | Robot de Tails – Autodestrucción |
+| **Actores**        | Sistema |
+| **Propósito**      | Robot se autodestruye al completar trabajo. |
+| **Precondiciones** | 1. Robot dentro de nivel.<br>2. Trabajo completado (no más basura/máquinas, tiempo acabado).<br>3. Se usa gameServer y CollisionManager. |
+| **Flujo Principal** | 1. Sistema hace update() del robot.<br>2. Si cumple condiciones: llama a selfDestruct().<br>3. active = false.<br>4. Se elimina de lista robots activos de Tails. |
+| **Flujo Alternativo** | Sin flujos alternativos. |
+
+---
+
+### Caso de Uso 10: Eggman - Movimiento
+
+| Campo              | Descripción |
+|--------------------|-------------|
+| **Caso de Uso**    | Eggman – Movimiento |
+| **Actores**        | Sistema |
+| **Propósito**      | Eggman se mueve horizontalmente entre puntos definidos. |
+| **Precondiciones** | 1. Eggman dentro de nivel.<br>2. startX y endX definidos con valores distintos.<br>3. Se usa gameServer y CollisionManager. |
+| **Flujo Principal** | 1. Sistema hace update() de Eggman.<br>2. Calcula nueva posición x con velocidad y delta tiempo.<br>3. Verifica si llegó a endX.<br>4. Si alcanza endX: invierte dirección hacia startX.<br>5. Reproduce animación de caminar. |
+| **Flujo Alternativo** | Sin flujos alternativos. |
+
+---
+
+### Caso de Uso 11: Eggman - Ataque
+
+| Campo              | Descripción |
+|--------------------|-------------|
+| **Caso de Uso**    | Eggman – Ataque |
+| **Actores**        | Sistema |
+| **Propósito**      | Eggman determina si puede atacar a jugador. |
+| **Precondiciones** | 1. Eggman y al menos un jugador en nivel.<br>2. Método para detectar jugador cercano.<br>3. Se usa gameServer y CollisionManager. |
+| **Flujo Principal** | 1. Sistema hace update() de Eggman.<br>2. Revisa checkAttackCondition().<br>3. Con CollisionManager determina condiciones de ataque.<br>4. Si se cumplen: isAttacking = true, sino false. |
+| **Flujo Alternativo** | **No hay jugadores cerca o no cumple condiciones:**<br>1. isAttacking = false. |
 
 ## Clases
 
