@@ -3,10 +3,10 @@
 | **Nombre** | Cedula |
 |------------|--------|
 |**Luis Rojas**| 30931891 |
-|** Abdel Licones **| 31445619 |
-|** Rayc Yanez ** | 28215618 |
-|** Felix Figuera ** | 28500894 |
-|** Mchalaxk Franco ** | 30365867 |
+|**Abdel Licones**| 31445619 |
+|**Rayc Yanez** | 28215618 |
+|**Felix Figuera** | 28500894 |
+|**Mchalaxk Franco** | 30365867 |
 
 # Capito II UML
 
